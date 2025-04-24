@@ -9,5 +9,4 @@ public class PopiManagerServerApplication {
     public static void main(String[] args) {
         SpringApplication.run(PopiManagerServerApplication.class, args);
     }
-
 }

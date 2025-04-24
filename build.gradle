@@ -54,6 +54,18 @@ spotless {
     }
 }
 
+tasks.register('updateGitHooks', Copy) {
+    from './scripts/pre-commit'
+    into './.git/hooks'
+}
+
+tasks.register('makeGitHooksExecutable', Exec) {
+    commandLine 'chmod', '+x', './.git/hooks/pre-commit'
+    dependsOn updateGitHooks
+}
+
+compileJava.dependsOn makeGitHooksExecutable
+
 tasks.named('test') {
     useJUnitPlatform()
 }

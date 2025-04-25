@@ -3,11 +3,13 @@ package com.lgcns.global.error;
 import com.lgcns.global.common.response.GlobalResponse;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.error.exception.ErrorCode;
+import com.lgcns.global.error.exception.GlobalErrorCode;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,5 +48,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 GlobalResponse.fail(HttpStatus.BAD_REQUEST.value(), errorResponse);
 
         return ResponseEntity.status(status).body(response);
+    }
+
+    /** 지원하지 않은 HTTP method 호출 할 경우 발생 */
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
+            HttpRequestMethodNotSupportedException e,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+        final ErrorCode errorCode = GlobalErrorCode.METHOD_NOT_ALLOWED;
+        final ErrorResponse errorResponse =
+                ErrorResponse.of(e.getClass().getSimpleName(), errorCode.getMessage());
+        final GlobalResponse response =
+                GlobalResponse.fail(errorCode.getHttpStatus().value(), errorResponse);
+
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 }

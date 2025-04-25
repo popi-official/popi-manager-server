@@ -15,8 +15,6 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class SwaggerConfig {
 
-    // private final SpringEnvironmentHelper springEnvironmentHelper;
-
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
@@ -25,24 +23,9 @@ public class SwaggerConfig {
                                 .title("PoPI Manager Server API")
                                 .description("PoPI Manager Server API 명세서입니다.")
                                 .version("v0.0.1"))
-                // .servers(getSwaggerServers())
                 .components(authSetting())
                 .addSecurityItem(securityRequirement());
     }
-
-    /*
-    private List<Server> getSwaggerServers() {
-        return List.of(new Server().url(getServerUrlByProfile()));
-    }
-
-    private String getServerUrlByProfile() {
-        return switch (springEnvironmentHelper.getCurrentProfile()) {
-            case "prod" -> UrlConstants.PROD_SERVER_URL;
-            case "dev" -> UrlConstants.DEV_SERVER_URL;
-            default -> UrlConstants.LOCAL_SERVER_URL;
-        };
-    }
-    */
 
     private Components authSetting() {
         return new Components()

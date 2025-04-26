@@ -12,13 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ManagerServiceImpl implements ManagerService {
     private final ManagerRepository managerRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public void createManager(ManagerCreateRequest request) {
         // 사용자 이름 중복 체크
         if (managerRepository.existsByUsername(request.username())) {

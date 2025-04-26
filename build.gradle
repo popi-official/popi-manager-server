@@ -77,7 +77,7 @@ jacoco {
 }
 
 jacocoTestReport {
-    dependsOn jacocoTestCoverageVerification
+    dependsOn test
     reports {
         html.required = true
         csv.required = true

@@ -106,6 +106,19 @@ jacocoTestReport {
     }
 }
 
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            limit {
+                // 커버리지 10% 넘으면 통과
+                minimum = 0.10
+            }
+        }
+    }
+    ignoreFailures = true
+}
+
 tasks.register('updateGitHooks', Copy) {
     from './scripts/pre-commit'
     into './.git/hooks'

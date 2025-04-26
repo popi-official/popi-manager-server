@@ -3,6 +3,8 @@ plugins {
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.diffplug.spotless' version '6.20.0'
+    id "org.sonarqube" version "6.0.1.5171"
+    id "jacoco"
 }
 
 group = 'com.lgcns'
@@ -64,6 +66,68 @@ spotless {
     }
 }
 
+sonar {
+    properties {
+        property "sonar.projectKey", "chic2chic_popi-manager-server"
+        property "sonar.organization", "chic2chic"
+        property "sonar.host.url", "https://sonarcloud.io"
+
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+        property 'sonar.language', 'java'
+        property 'sonar.sourceEncoding', 'UTF-8'
+        property 'sonar.exclusions', '**/resources/**, **/*Application*.java, **/*Controller*.java, **/*Config.java' +
+                '**/*Request.java, **/*Dto.java, **/*Response.java, **/*Exception.java, **/support/**, **/config/**'
+        property 'sonar.test.inclusions', '**/*Test.java'
+        property 'sonar.java.coveragePlugin', 'jacoco'
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required = true
+        csv.required = true
+        xml.required = true
+    }
+
+    def Qdomains = []
+    for (qPattern in '**/QA'..'**/QZ') {
+        Qdomains.add(qPattern + '*')
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, excludes: [
+                            "**/*Application*",
+                            "**/*Config*",
+                            "**/*Dto*",
+                            "**/*Request*",
+                            "**/*Response*",
+                            "**/*Interceptor*",
+                            "**/*Exception*"
+                    ] + Qdomains)
+                })
+        )
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+    violationRules {
+        rule {
+            limit {
+                // 커버리지 10% 넘으면 통과
+                minimum = 0.10
+            }
+        }
+    }
+}
+
 tasks.register('updateGitHooks', Copy) {
     from './scripts/pre-commit'
     into './.git/hooks'
@@ -78,4 +142,5 @@ compileJava.dependsOn makeGitHooksExecutable
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy(tasks.named('jacocoTestReport'), tasks.named('jacocoTestCoverageVerification'))
 }

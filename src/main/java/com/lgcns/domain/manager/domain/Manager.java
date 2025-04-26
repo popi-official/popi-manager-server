@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -21,17 +20,9 @@ public class Manager extends BaseTimeEntity {
 
     private String password;
 
-    @Builder(access = AccessLevel.PRIVATE)
+    @Builder
     private Manager(String username, String password) {
         this.username = username;
         this.password = password;
-    }
-
-    public static Manager createManager(
-            String username, String password, PasswordEncoder passwordEncoder) {
-        return Manager.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .build();
     }
 }

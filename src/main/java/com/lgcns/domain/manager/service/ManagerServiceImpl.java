@@ -18,7 +18,6 @@ public class ManagerServiceImpl implements ManagerService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional(readOnly = true)
     public void createManager(ManagerCreateRequest request) {
         // 사용자 이름 중복 체크
         if (managerRepository.existsByUsername(request.username())) {
@@ -28,9 +27,11 @@ public class ManagerServiceImpl implements ManagerService {
         // 비밇번호 인코딩
         String encodedPassword = passwordEncoder.encode(request.password());
 
-        // Manager 엔티티 저장
+        // Manager 엔티티 생성 - 빌더 패턴. 정팩은 삭제함
         Manager manager =
-                Manager.createManager(request.username(), encodedPassword, passwordEncoder);
-        Manager savedManager = managerRepository.save(manager);
+                Manager.builder().username(request.username()).password(encodedPassword).build();
+
+        // 엔티티 저장
+        managerRepository.save(manager);
     }
 }

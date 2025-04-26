@@ -107,7 +107,7 @@ jacocoTestReport {
 }
 
 jacocoTestCoverageVerification {
-    dependsOn test
+    dependsOn jacocoTestReport
     violationRules {
         rule {
             limit {
@@ -116,7 +116,6 @@ jacocoTestCoverageVerification {
             }
         }
     }
-    ignoreFailures = true
 }
 
 tasks.register('updateGitHooks', Copy) {
@@ -133,5 +132,5 @@ compileJava.dependsOn makeGitHooksExecutable
 
 tasks.named('test') {
     useJUnitPlatform()
-    finalizedBy(tasks.named('jacocoTestReport'))
+    finalizedBy(tasks.named('jacocoTestReport'), tasks.named('jacocoTestCoverageVerification'))
 }

@@ -1,8 +1,7 @@
 package com.lgcns.domain.manager.service;
 
-import com.lgcns.domain.manager.dto.ManagerCreateRequest;
-import com.lgcns.domain.manager.dto.ManagerCreateResponse;
+import com.lgcns.domain.manager.dto.Request.ManagerCreateRequest;
 
 public interface ManagerService {
-    ManagerCreateResponse createManager(ManagerCreateRequest request);
+    void createManager(ManagerCreateRequest request);
 }

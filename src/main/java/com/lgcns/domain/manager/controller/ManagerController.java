@@ -1,7 +1,6 @@
 package com.lgcns.domain.manager.controller;
 
-import com.lgcns.domain.manager.dto.ManagerCreateRequest;
-import com.lgcns.domain.manager.dto.ManagerCreateResponse;
+import com.lgcns.domain.manager.dto.Request.ManagerCreateRequest;
 import com.lgcns.domain.manager.service.ManagerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,9 +22,8 @@ public class ManagerController {
 
     @PostMapping("/signup")
     @Operation(summary = "운영자 회원가입", description = "운영자가 직접 가입하지 않음")
-    public ResponseEntity<ManagerCreateResponse> managerCreate(
-            @RequestBody @Valid ManagerCreateRequest request) {
-        ManagerCreateResponse response = managerService.createManager(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<Void> managerCreate(@RequestBody @Valid ManagerCreateRequest request) {
+        managerService.createManager(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

@@ -34,8 +34,4 @@ public class Manager extends BaseTimeEntity {
                 .password(passwordEncoder.encode(password))
                 .build();
     }
-
-    public boolean checkPassword(String rawPassword, PasswordEncoder passwordEncoder) {
-        return passwordEncoder.matches(rawPassword, this.password);
-    }
 }

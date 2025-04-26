@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class ManagerRepositoryImpl implements ManagerRepositoryCustom{
-    private final JPAQueryFac
+public class ManagerRepositoryImpl implements ManagerRepositoryCustom {
+    private final JPAQueryFactory jpaQueryFactory;
 }

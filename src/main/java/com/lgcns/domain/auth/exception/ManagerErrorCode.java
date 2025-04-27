@@ -1,4 +1,4 @@
-package com.lgcns.domain.manager.exception;
+package com.lgcns.domain.auth.exception;
 
 import com.lgcns.global.error.exception.ErrorCode;
 import lombok.AllArgsConstructor;

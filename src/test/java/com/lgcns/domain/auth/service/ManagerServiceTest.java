@@ -1,13 +1,13 @@
-package com.lgcns.domain.manager.service;
+package com.lgcns.domain.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.lgcns.IntegrationTest;
-import com.lgcns.domain.manager.domain.Manager;
-import com.lgcns.domain.manager.dto.Request.ManagerCreateRequest;
-import com.lgcns.domain.manager.exception.ManagerErrorCode;
-import com.lgcns.domain.manager.repository.ManagerRepository;
+import com.lgcns.domain.auth.domain.Manager;
+import com.lgcns.domain.auth.dto.Request.ManagerCreateRequest;
+import com.lgcns.domain.auth.exception.ManagerErrorCode;
+import com.lgcns.domain.auth.repository.ManagerRepository;
 import com.lgcns.global.error.exception.CustomException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

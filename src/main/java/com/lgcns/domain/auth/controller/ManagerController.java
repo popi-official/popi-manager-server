@@ -1,7 +1,7 @@
-package com.lgcns.domain.manager.controller;
+package com.lgcns.domain.auth.controller;
 
-import com.lgcns.domain.manager.dto.Request.ManagerCreateRequest;
-import com.lgcns.domain.manager.service.ManagerService;
+import com.lgcns.domain.auth.dto.Request.ManagerCreateRequest;
+import com.lgcns.domain.auth.service.ManagerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

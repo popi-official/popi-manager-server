@@ -1,4 +1,4 @@
-package com.lgcns.domain.manager.domain;
+package com.lgcns.domain.auth.domain;
 
 import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;

@@ -27,6 +27,6 @@ public class Manager extends BaseTimeEntity {
     }
 
     public static Manager createManager(String username, String password) {
-        return new Manager(username, password);
+        return Manager.builder().username(username).password(password).build();
     }
 }

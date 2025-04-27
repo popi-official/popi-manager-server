@@ -50,7 +50,6 @@ class ManagerServiceTest extends IntegrationTest {
             String username = "existingmanager";
             String password = "password123";
 
-            // 기존 사용자 생
             Manager existingManager = createManager(username, "existingpassword");
             managerRepository.save(existingManager);
 
@@ -62,9 +61,10 @@ class ManagerServiceTest extends IntegrationTest {
                     .hasFieldOrPropertyWithValue("errorCode", ManagerErrorCode.DUPLICATE_USERNAME);
         }
 
-        // 헬퍼
-        private Manager createManager(String username, String password) {
-            return Manager.builder().username(username).password(password).build();
+        private Manager createManager(String username, String plainPassword) {
+            String encodedPassword = passwordEncoder.encode(plainPassword);
+
+            return Manager.createManager(username, encodedPassword);
         }
     }
 }

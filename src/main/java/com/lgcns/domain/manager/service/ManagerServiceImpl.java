@@ -19,19 +19,15 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public void createManager(ManagerCreateRequest request) {
-        // 사용자 이름 중복 체크
+
         if (managerRepository.existsByUsername(request.username())) {
             throw new CustomException(ManagerErrorCode.DUPLICATE_USERNAME);
         }
 
-        // 비밇번호 인코딩
         String encodedPassword = passwordEncoder.encode(request.password());
 
-        // Manager 엔티티 생성 - 빌더 패턴. 정팩은 삭제함
-        Manager manager =
-                Manager.builder().username(request.username()).password(encodedPassword).build();
+        Manager manager = Manager.createManager(request.username(), encodedPassword);
 
-        // 엔티티 저장
         managerRepository.save(manager);
     }
 }

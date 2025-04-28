@@ -27,28 +27,27 @@ public class Item extends BaseTimeEntity {
 
     private int minQty;
 
-    private String displayStand;
+    private String location;
 
     @Builder(access = AccessLevel.PRIVATE)
-    public Item(
-            String name, String price, String imageUrl, int qty, int minQty, String displayStand) {
+    public Item(String name, String price, String imageUrl, int qty, int minQty, String location) {
         this.name = name;
         this.price = price;
         this.imageUrl = imageUrl;
         this.qty = qty;
         this.minQty = minQty;
-        this.displayStand = displayStand;
+        this.location = location;
     }
 
     public static Item createItem(
-            String name, String price, String imageUrl, int qty, int minQty, String displayStand) {
+            String name, String price, String imageUrl, int qty, int minQty, String location) {
         return Item.builder()
                 .name(name)
                 .price(price)
                 .imageUrl(imageUrl)
                 .qty(qty)
                 .minQty(minQty)
-                .displayStand(displayStand)
+                .location(location)
                 .build();
     }
 }

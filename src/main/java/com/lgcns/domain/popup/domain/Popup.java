@@ -1,9 +1,12 @@
 package com.lgcns.domain.popup.domain;
 
+import com.lgcns.domain.survey.domain.Survey;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,7 +36,13 @@ public class Popup {
     private LocalTime runOpenTime;
     private LocalTime runCloseTime;
 
+    private int totalCapacity;
+    private int timeCapacity;
+
     @Embedded private PopupAddress address;
+
+    @OneToMany(mappedBy = "popup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Survey> surveyList = new ArrayList<>();
 
     @Builder
     private Popup(
@@ -45,6 +54,8 @@ public class Popup {
             LocalDateTime reservationCloseDateTime,
             LocalTime runOpenTime,
             LocalTime runCloseTime,
+            int totalCapacity,
+            int timeCapacity,
             PopupAddress address) {
 
         this.name = name;
@@ -55,6 +66,8 @@ public class Popup {
         this.reservationCloseDateTime = reservationCloseDateTime;
         this.runOpenTime = runOpenTime;
         this.runCloseTime = runCloseTime;
+        this.totalCapacity = totalCapacity;
+        this.timeCapacity = timeCapacity;
         this.address = address;
     }
 
@@ -67,6 +80,8 @@ public class Popup {
             LocalDateTime reservationCloseDateTime,
             LocalTime runOpenTime,
             LocalTime runCloseTime,
+            int totalCapacity,
+            int timeCapacity,
             String roadAddress,
             String detailAddress,
             Double latitude,
@@ -84,6 +99,8 @@ public class Popup {
                 .reservationCloseDateTime(reservationCloseDateTime)
                 .runOpenTime(runOpenTime)
                 .runCloseTime(runCloseTime)
+                .totalCapacity(totalCapacity)
+                .timeCapacity(timeCapacity)
                 .address(address)
                 .build();
     }

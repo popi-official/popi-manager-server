@@ -1,6 +1,6 @@
 package com.lgcns.domain.auth.controller;
 
-import com.lgcns.domain.auth.dto.Request.ManagerCreateRequest;
+import com.lgcns.domain.auth.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.auth.service.ManagerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

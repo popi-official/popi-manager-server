@@ -1,7 +1,7 @@
 package com.lgcns.domain.auth.service;
 
 import com.lgcns.domain.auth.domain.Manager;
-import com.lgcns.domain.auth.dto.Request.ManagerCreateRequest;
+import com.lgcns.domain.auth.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.auth.exception.ManagerErrorCode;
 import com.lgcns.domain.auth.repository.ManagerRepository;
 import com.lgcns.global.error.exception.CustomException;

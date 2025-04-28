@@ -1,4 +1,4 @@
-package com.lgcns.domain.auth.dto.Request;
+package com.lgcns.domain.auth.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

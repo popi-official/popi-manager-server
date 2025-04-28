@@ -58,10 +58,10 @@ dependencies {
 
     // AWS S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
-    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.782'
-    implementation 'software.amazon.awssdk:s3:2.31.30'
-    implementation 'software.amazon.awssdk:s3control:2.31.30'
-    implementation 'software.amazon.awssdk:s3outposts:2.31:30'
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.767'
+    implementation 'software.amazon.awssdk:s3:2.27.3'
+    implementation 'software.amazon.awssdk:s3control:2.27.3'
+    implementation 'software.amazon.awssdk:s3outposts:2.27.3'
 }
 
 spotless {

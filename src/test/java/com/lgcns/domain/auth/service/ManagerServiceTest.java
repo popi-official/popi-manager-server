@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.auth.domain.Manager;
+import com.lgcns.domain.auth.domain.Role;
 import com.lgcns.domain.auth.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.auth.exception.ManagerErrorCode;
 import com.lgcns.domain.auth.repository.ManagerRepository;
@@ -64,7 +65,7 @@ class ManagerServiceTest extends IntegrationTest {
         private Manager createManager(String username, String plainPassword) {
             String encodedPassword = passwordEncoder.encode(plainPassword);
 
-            return Manager.createManager(username, encodedPassword);
+            return Manager.createManager(username, encodedPassword, Role.USER);
         }
     }
 }

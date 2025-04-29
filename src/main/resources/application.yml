@@ -5,6 +5,7 @@ spring:
       local: "local, dev, datasource"
     include:
       - redis
+      - s3
 
 spring-doc:
   default-consumes-media-type: application/json
@@ -15,11 +16,3 @@ spring-doc:
     disable-swagger-default-url: true
     path: /swagger-ui
     doc-expansion: none
-
-cloud:
-  aws:
-    bucket: ${S3_BUCKET:popitestbucket}
-    stack.auto: false
-    region: ${S3_REGION:ap-northeast-2}
-    accessKey: ${S3_ACCESS_KEY}
-    secretKey: ${S3_SECRET_KEY}

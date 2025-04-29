@@ -1,8 +1,7 @@
 spring:
-  profiles:
-    active: test
-  flyway:
-    enabled: false
+  config:
+    activate:
+      on-profile: "redis"
   data:
     redis:
       host: ${REDIS_HOST:localhost}

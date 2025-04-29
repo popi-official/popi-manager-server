@@ -1,11 +1,12 @@
-package com.lgcns.infra.s3;
+package com.lgcns.domain.image.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.lgcns.infra.s3.dto.response.PreSignedUrlResponse;
+import com.lgcns.domain.image.dto.response.PreSignedUrlResponse;
+import com.lgcns.infra.s3.S3Properties;
 import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class S3Service {
+public class ImageService {
 
     private final S3Properties s3Properties;
     private final AmazonS3 amazonS3;

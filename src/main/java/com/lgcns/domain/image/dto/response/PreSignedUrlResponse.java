@@ -1,4 +1,4 @@
-package com.lgcns.infra.s3.dto.response;
+package com.lgcns.domain.image.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

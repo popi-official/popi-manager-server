@@ -1,4 +1,4 @@
-package com.lgcns.infra.s3.dto.request;
+package com.lgcns.domain.image.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

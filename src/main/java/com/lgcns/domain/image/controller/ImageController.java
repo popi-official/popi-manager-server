@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "7. S3 API", description = "AWS S3 관련 API 입니다.")
+@Tag(name = "7. Image API", description = "이미지 관련 API 입니다.")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/s3")
+@RequestMapping("/images")
 public class ImageController {
 
     private final ImageService imageService;

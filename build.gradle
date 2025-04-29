@@ -94,8 +94,8 @@ def jacocoExcludePatterns = [
 
 sonar {
     properties {
-        property "sonar.projectKey", "chic2chic_popi-manager-server"
-        property "sonar.organization", "chic2chic"
+        property "sonar.projectKey", "popi-official_popi-manager-server"
+        property "sonar.organization", "popi-official"
         property "sonar.host.url", "https://sonarcloud.io"
 
         property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"

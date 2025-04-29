@@ -77,6 +77,11 @@ spotless {
     }
 }
 
+def QDomains = []
+for (qPattern in '*.QA'..'*.QZ') { // qPattern = '*.QA', '*.QB', ... '*.QZ'
+    QDomains.add(qPattern + '*')
+}
+
 def jacocoExcludePatterns = [
         // 측정 안하고 싶은 패턴
         "**/*Application*",
@@ -119,15 +124,10 @@ jacocoTestReport {
         xml.required = true
     }
 
-    def Qdomains = []
-    for (qPattern in '**/QA'..'**/QZ') {
-        Qdomains.add(qPattern + '*')
-    }
-
     afterEvaluate {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
-                    fileTree(dir: it, excludes: jacocoExcludePatterns + Qdomains)
+                    fileTree(dir: it, excludes: jacocoExcludePatterns + QDomains)
                 })
         )
     }
@@ -149,6 +149,8 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.80
             }
+
+            excludes = jacocoExcludePatterns + QDomains
         }
     }
 }

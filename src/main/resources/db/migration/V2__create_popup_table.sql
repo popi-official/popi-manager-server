@@ -1,0 +1,21 @@
+CREATE TABLE popup (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    manager_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    popup_start_date DATE,
+    popup_end_date DATE,
+    reservation_open_date_time DATETIME,
+    reservation_close_date_time DATETIME,
+    run_open_time TIME,
+    run_close_time TIME,
+    total_capacity INT NOT NULL,
+    time_capacity INT NOT NULL,
+    road_address VARCHAR(255),
+    detail_address VARCHAR(255),
+    latitude DOUBLE,
+    longitude DOUBLE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME,
+    CONSTRAINT fk_popup_manager FOREIGN KEY (manager_id) REFERENCES manager(manager_id)
+);

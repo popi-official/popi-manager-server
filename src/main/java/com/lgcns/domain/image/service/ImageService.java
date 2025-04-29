@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.lgcns.domain.image.dto.request.ImageRequest;
 import com.lgcns.domain.image.dto.response.PreSignedUrlResponse;
 import com.lgcns.infra.s3.S3Properties;
 import java.net.URL;
@@ -24,12 +25,13 @@ public class ImageService {
      * presigned url 발급
      *
      * @param prefix 버킷 디렉토리 이름
-     * @param fileName 클라이언트가 전달한 파일명 파라미터
+     * @param request 클라이언트가 전달한 파일 정보(파일 이름 + 확장자) 파라미터
      * @return presigned url
      */
-    public PreSignedUrlResponse createPreSignedUrl(String prefix, String fileName) {
+    public PreSignedUrlResponse createPreSignedUrl(String prefix, ImageRequest request) {
+        String fileName = null;
         if (!prefix.isEmpty()) {
-            fileName = createPath(prefix, fileName);
+            fileName = createPath(prefix, request.fileName() + "." + request.extension());
         }
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest =

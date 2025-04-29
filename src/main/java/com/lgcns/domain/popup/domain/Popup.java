@@ -1,6 +1,8 @@
 package com.lgcns.domain.popup.domain;
 
+import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.survey.domain.Survey;
+import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,11 +17,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Popup {
+public class Popup extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private Manager manager;
 
     @Column(nullable = false)
     private String name;
@@ -46,6 +52,7 @@ public class Popup {
 
     @Builder
     private Popup(
+            Manager manager,
             String name,
             String imageUrl,
             LocalDate popupStartDate,
@@ -58,6 +65,7 @@ public class Popup {
             int timeCapacity,
             PopupAddress address) {
 
+        this.manager = manager;
         this.name = name;
         this.imageUrl = imageUrl;
         this.popupStartDate = popupStartDate;
@@ -72,6 +80,7 @@ public class Popup {
     }
 
     public static Popup createPopup(
+            Manager manager,
             String name,
             String imageUrl,
             LocalDate popupStartDate,
@@ -91,6 +100,7 @@ public class Popup {
                 PopupAddress.createPopupAddress(roadAddress, detailAddress, latitude, longitude);
 
         return Popup.builder()
+                .manager(manager)
                 .name(name)
                 .imageUrl(imageUrl)
                 .popupStartDate(popupStartDate)

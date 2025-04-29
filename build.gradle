@@ -77,6 +77,21 @@ spotless {
     }
 }
 
+def jacocoExcludePatterns = [
+        // 측정 안하고 싶은 패턴
+        "**/*Application*",
+        "**/*Config*",
+        "**/*Exception*",
+        "**/*Request*",
+        "**/*Response*",
+        "**/*Dto*",
+        "**/*Filter*",
+        "**/*Error*/**",
+        "**/resources/**",
+        "**/exception/**",
+        "**/config/**"
+]
+
 sonar {
     properties {
         property "sonar.projectKey", "chic2chic_popi-manager-server"
@@ -86,8 +101,7 @@ sonar {
         property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
         property 'sonar.language', 'java'
         property 'sonar.sourceEncoding', 'UTF-8'
-        property 'sonar.exclusions', '**/resources/**, **/*Application*.java, **/*Controller*.java, **/*Config.java' +
-                '**/*Request.java, **/*Dto.java, **/*Response.java, **/*Exception.java, **/support/**, **/config/**'
+        property 'sonar.exclusions', jacocoExcludePatterns.join(',')
         property 'sonar.test.inclusions', '**/*Test.java'
         property 'sonar.java.coveragePlugin', 'jacoco'
     }
@@ -113,27 +127,27 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
-                    fileTree(dir: it, excludes: [
-                            "**/*Application*",
-                            "**/*Config*",
-                            "**/*Dto*",
-                            "**/*Request*",
-                            "**/*Response*",
-                            "**/*Interceptor*",
-                            "**/*Exception*"
-                    ] + Qdomains)
+                    fileTree(dir: it, excludes: jacocoExcludePatterns + Qdomains)
                 })
         )
     }
 }
 
 jacocoTestCoverageVerification {
-    dependsOn jacocoTestReport
+
     violationRules {
         rule {
+            // rule 활성화
+            enabled = true
+
+            // 클래스 단위로 룰 체크
+            element = 'CLASS'
+
+            // 라인 커버리지를 최소 80% 만족
             limit {
-                // 커버리지 10% 넘으면 통과
-                minimum = 0.10
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
             }
         }
     }

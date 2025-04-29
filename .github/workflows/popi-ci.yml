@@ -33,4 +33,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_SERVER_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
         run: ./gradlew clean build sonar --info

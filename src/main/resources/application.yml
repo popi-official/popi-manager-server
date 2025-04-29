@@ -18,10 +18,8 @@ spring-doc:
 
 cloud:
   aws:
-    s3:
-      bucket: ${S3_BUCKET:popitestbucket}
+    bucket: ${S3_BUCKET:popitestbucket}
     stack.auto: false
-    region.static: ${S3_REGION:ap-northeast-2}
-    credentials:
-      accessKey: ${S3_ACCESS_KEY}
-      secretKey: ${S3_SECRET_KEY}
+    region: ${S3_REGION:ap-northeast-2}
+    accessKey: ${S3_ACCESS_KEY}
+    secretKey: ${S3_SECRET_KEY}

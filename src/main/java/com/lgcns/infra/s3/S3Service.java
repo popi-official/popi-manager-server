@@ -10,16 +10,13 @@ import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class S3Service {
 
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
-
+    private final S3Properties s3Properties;
     private final AmazonS3 amazonS3;
 
     /**
@@ -35,7 +32,7 @@ public class S3Service {
         }
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                getGeneratePreSignedUrlRequest(bucket, fileName);
+                getGeneratePreSignedUrlRequest(s3Properties.bucket(), fileName);
         URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
 
         return PreSignedUrlResponse.from(url.toString());

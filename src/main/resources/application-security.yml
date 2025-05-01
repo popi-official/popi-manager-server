@@ -1,6 +1,6 @@
 jwt:
-  access-token-secret: ${JWT_SECRET}
-  refresh-token-secret: ${JWT_REFRESH_SECRET}
-  access-token-expiration-time: ${JWT_EXPIRATION_TIME:7200}
-  refresh-token-expiration-time: ${JWT_REFRESH_EXPIRATION_TIME:172800}
-  issuer: ${JWT_ISSUER:popi-manager}
+  access-token-secret: ${JWT_ACCESS_TOKEN_SECRET}
+  refresh-token-secret: ${JWT_REFRESH_TOKEN_SECRET}
+  access-token-expiration-time: ${JWT_ACCESS_TOKEN_EXPIRATION_TIME:7200}
+  refresh-token-expiration-time: ${JWT_REFRESH_TOKEN_EXPIRATION_TIME:172800}
+  issuer: ${JWT_ISSUER}

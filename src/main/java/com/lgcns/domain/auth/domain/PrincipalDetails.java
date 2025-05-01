@@ -1,6 +1,8 @@
 package com.lgcns.domain.auth.domain;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,8 +14,12 @@ public class PrincipalDetails implements UserDetails {
     private Manager manager;
     private Map<String, Object> attributes;
 
-    public PrincipalDetails(Manager manager) {
+    private PrincipalDetails(Manager manager) {
         this.manager = manager;
+    }
+
+    public static PrincipalDetails from(Manager manager) {
+        return new PrincipalDetails(manager);
     }
 
     public Long getId() {

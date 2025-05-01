@@ -3,9 +3,17 @@ package com.lgcns.global.config.security;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import com.lgcns.domain.auth.service.AuthService;
+import com.lgcns.global.security.AuthenticationFilter;
+import com.lgcns.global.security.LoginFailureHandler;
+import com.lgcns.global.security.LoginSuccessHandler;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -13,6 +21,8 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,8 +31,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
+
+    private final Validator validator;
+    private final AuthService authService;
+    private final LoginSuccessHandler loginSuccessHandler;
+    private final LoginFailureHandler loginFailureHandler;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http.csrf(AbstractHttpConfigurer::disable)
                 .headers(
                         header ->
@@ -33,16 +50,24 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(
                         authorize ->
                                 authorize
-                                        .requestMatchers("/auth/signup")
-                                        .permitAll()
-                                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
-                                        .permitAll()
-                                        .requestMatchers("/h2-console/**")
+                                        .requestMatchers(
+                                                "/auth/signup",
+                                                "/auth/login",
+                                                "/swagger-ui/**",
+                                                "/v3/api-docs/**",
+                                                "/h2-console/**")
                                         .permitAll()
                                         .anyRequest()
-                                        .authenticated());
+                                        .authenticated())
+                .addFilterBefore(
+                        authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -61,7 +86,20 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(authService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+
+        return new ProviderManager(authenticationProvider);
+    }
+
+    @Bean
+    public AbstractAuthenticationProcessingFilter authenticationFilter() {
+        AbstractAuthenticationProcessingFilter loginFilter = new AuthenticationFilter(validator);
+        loginFilter.setAuthenticationManager(authenticationManager());
+        loginFilter.setAuthenticationSuccessHandler(loginSuccessHandler);
+        loginFilter.setAuthenticationFailureHandler(loginFailureHandler);
+        return loginFilter;
     }
 }

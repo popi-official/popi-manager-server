@@ -32,9 +32,8 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
             throws IOException, ServletException {
 
         log.error("로그인 실패: {}", exception.getMessage(), exception);
-        // 1. 사용할 에러 코드 정의
-        final ErrorCode errorCode =
-                AuthErrorCode.AUTHENTICATION_FAILED; // 로그인 실패에 해당하는 ErrorCode 사용
+
+        final ErrorCode errorCode = AuthErrorCode.AUTHENTICATION_FAILED;
 
         final ErrorResponse errorResponse =
                 ErrorResponse.of(errorCode.getErrorName(), errorCode.getMessage());

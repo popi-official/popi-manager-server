@@ -1,6 +1,6 @@
 package com.lgcns.global.util;
 
-import com.lgcns.domain.auth.domain.Manager;
+import com.lgcns.domain.auth.domain.Role;
 import com.lgcns.infra.jwt.JwtProperties;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,21 +12,21 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    private static final String TOKEN_ROLE_NAME = "role";
+    private static final String TOKEN_ROLE_NAME = "ROLE_";
     private final JwtProperties jwtProperties;
 
-    public String generateAccessToken(Manager manager) {
+    public String generateAccessToken(String username, Role role) {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.accessTokenExpirationMilliTime());
-        return buildAccessToken(manager, issuedAt, expiredAt);
+        return buildAccessToken(username, role, issuedAt, expiredAt);
     }
 
-    public String generateRefreshToken(Manager manager) {
+    public String generateRefreshToken(String username) {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.refreshTokenExpirationMilliTime());
-        return buildRefreshToken(manager, issuedAt, expiredAt);
+        return buildRefreshToken(username, issuedAt, expiredAt);
     }
 
     public long getRefreshTokenExpirationTime() {
@@ -41,21 +41,21 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(jwtProperties.refreshTokenSecret().getBytes());
     }
 
-    private String buildAccessToken(Manager manager, Date issuedAt, Date expiredAt) {
+    private String buildAccessToken(String username, Role role, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setIssuer(jwtProperties.issuer())
-                .setSubject(manager.getUsername())
-                .claim(TOKEN_ROLE_NAME, manager.getRole().name())
+                .setSubject(username)
+                .claim(TOKEN_ROLE_NAME, role)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiredAt)
                 .signWith(getAccessTokenKey())
                 .compact();
     }
 
-    private String buildRefreshToken(Manager manager, Date issuedAt, Date expiredAt) {
+    private String buildRefreshToken(String username, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setIssuer(jwtProperties.issuer())
-                .setSubject(manager.getUsername())
+                .setSubject(username)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiredAt)
                 .signWith(getRefreshTokenKey())

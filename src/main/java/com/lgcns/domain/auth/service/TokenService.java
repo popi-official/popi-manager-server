@@ -1,7 +1,7 @@
 package com.lgcns.domain.auth.service;
 
-import com.lgcns.domain.auth.domain.Manager;
 import com.lgcns.domain.auth.domain.RefreshToken;
+import com.lgcns.domain.auth.domain.Role;
 import com.lgcns.domain.auth.repository.RefreshTokenRepository;
 import com.lgcns.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +14,16 @@ public class TokenService {
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public String createAccessToken(Manager manager) {
-        return jwtUtil.generateAccessToken(manager);
+    public String createAccessToken(String username, Role role) {
+        return jwtUtil.generateAccessToken(username, role);
     }
 
-    public String createRefreshToken(Manager manager) {
-        String token = jwtUtil.generateRefreshToken(manager);
+    public String createRefreshToken(String username, Long managerId) {
+        String token = jwtUtil.generateRefreshToken(username);
 
         RefreshToken refreshToken =
                 RefreshToken.builder()
-                        .managerId(manager.getId())
+                        .managerId(managerId)
                         .token(token)
                         .ttl(jwtUtil.getRefreshTokenExpirationTime())
                         .build();

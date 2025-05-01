@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    private static final String LOGIN_REQUEST_URL = "/api/v1/login";
+    private static final String LOGIN_REQUEST_URL = "/auth/login";
     private static final String LOGIN_REQUEST_HTTP_METHOD = "POST";
     private static final String LOGIN_REQUEST_CONTENT_TYPE = "application/json";
     private static final AntPathRequestMatcher DEFAULT_LOGIN_PATH_REQUEST_MATCHER =

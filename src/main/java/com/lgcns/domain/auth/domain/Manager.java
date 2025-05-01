@@ -16,6 +16,7 @@ public class Manager extends BaseTimeEntity {
     @Column(name = "manager_id")
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String username;
 
     private String password;

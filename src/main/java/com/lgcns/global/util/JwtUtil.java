@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
     private final JwtProperties jwtProperties;
 
-    public String generateAccessToken(String username, ManagerRole managerRole) {
+    public String generateAccessToken(String username, ManagerRole role) {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.accessTokenExpirationMilliTime());
-        return buildAccessToken(username, managerRole, issuedAt, expiredAt);
+        return buildAccessToken(username, role, issuedAt, expiredAt);
     }
 
     public String generateRefreshToken(String username) {
@@ -41,11 +41,11 @@ public class JwtUtil {
     }
 
     private String buildAccessToken(
-            String username, ManagerRole managerRole, Date issuedAt, Date expiredAt) {
+            String username, ManagerRole role, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setIssuer(jwtProperties.issuer())
                 .setSubject(username)
-                .claim("authorities", managerRole.getRole())
+                .claim("authorities", role.getRoleName())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiredAt)
                 .signWith(getAccessTokenKey())

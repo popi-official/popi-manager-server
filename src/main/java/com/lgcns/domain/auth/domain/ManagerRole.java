@@ -10,5 +10,5 @@ public enum ManagerRole {
     USER("ROLE_USER"),
     ;
 
-    private final String role;
+    private final String roleName;
 }

@@ -27,12 +27,12 @@ public class PrincipalDetails implements UserDetails {
     }
 
     public ManagerRole getManagerRole() {
-        return manager.getManagerRole();
+        return manager.getRole();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(manager.getManagerRole().getRole()));
+        return List.of(new SimpleGrantedAuthority(manager.getRole().getRoleName()));
     }
 
     @Override

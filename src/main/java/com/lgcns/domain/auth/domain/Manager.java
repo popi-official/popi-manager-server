@@ -22,13 +22,13 @@ public class Manager extends BaseTimeEntity {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private ManagerRole managerRole;
+    private ManagerRole role;
 
     @Builder(access = AccessLevel.PRIVATE)
     private Manager(String username, String password) {
         this.username = username;
         this.password = password;
-        this.managerRole = ManagerRole.USER;
+        this.role = ManagerRole.USER;
     }
 
     public static Manager createManager(String username, String password) {

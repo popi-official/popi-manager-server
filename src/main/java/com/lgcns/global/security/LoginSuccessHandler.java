@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgcns.domain.auth.domain.PrincipalDetails;
 import com.lgcns.domain.auth.dto.response.LoginResponse;
 import com.lgcns.domain.auth.service.TokenService;
+import com.lgcns.global.common.response.GlobalResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -23,7 +24,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(
             HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
-        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(RESPONSE_CONTENT_TYPE);
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
@@ -37,6 +37,9 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         LoginResponse loginResponse = LoginResponse.of(accessToken, refreshToken);
 
-        objectMapper.writeValue(response.getWriter(), loginResponse);
+        GlobalResponse<LoginResponse> globalResponse =
+                GlobalResponse.success(HttpServletResponse.SC_OK, loginResponse);
+
+        objectMapper.writeValue(response.getWriter(), globalResponse);
     }
 }

@@ -1,6 +1,6 @@
-package com.lgcns.domain.auth.repository;
+package com.lgcns.domain.manager.repository;
 
-import com.lgcns.domain.auth.domain.Manager;
+import com.lgcns.domain.manager.domain.Manager;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

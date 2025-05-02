@@ -1,8 +1,8 @@
 package com.lgcns.domain.auth.service;
 
-import com.lgcns.domain.auth.domain.ManagerRole;
 import com.lgcns.domain.auth.domain.RefreshToken;
 import com.lgcns.domain.auth.repository.RefreshTokenRepository;
+import com.lgcns.domain.manager.domain.ManagerRole;
 import com.lgcns.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

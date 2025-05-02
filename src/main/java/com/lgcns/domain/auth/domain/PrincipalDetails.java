@@ -1,5 +1,7 @@
 package com.lgcns.domain.auth.domain;
 
+import com.lgcns.domain.manager.domain.Manager;
+import com.lgcns.domain.manager.domain.ManagerRole;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

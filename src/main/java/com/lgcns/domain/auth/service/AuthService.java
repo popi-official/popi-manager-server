@@ -1,9 +1,9 @@
 package com.lgcns.domain.auth.service;
 
-import com.lgcns.domain.auth.domain.Manager;
 import com.lgcns.domain.auth.domain.PrincipalDetails;
-import com.lgcns.domain.auth.exception.ManagerErrorCode;
-import com.lgcns.domain.auth.repository.ManagerRepository;
+import com.lgcns.domain.manager.domain.Manager;
+import com.lgcns.domain.manager.exception.ManagerErrorCode;
+import com.lgcns.domain.manager.repository.ManagerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetailsService;

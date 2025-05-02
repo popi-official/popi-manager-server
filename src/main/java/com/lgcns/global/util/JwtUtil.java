@@ -1,6 +1,6 @@
 package com.lgcns.global.util;
 
-import com.lgcns.domain.auth.domain.ManagerRole;
+import com.lgcns.domain.manager.domain.ManagerRole;
 import com.lgcns.infra.jwt.JwtProperties;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

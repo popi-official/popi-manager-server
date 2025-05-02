@@ -1,4 +1,4 @@
-package com.lgcns.domain.auth.domain;
+package com.lgcns.domain.manager.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

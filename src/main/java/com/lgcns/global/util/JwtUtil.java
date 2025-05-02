@@ -1,6 +1,6 @@
 package com.lgcns.global.util;
 
-import com.lgcns.domain.auth.domain.Role;
+import com.lgcns.domain.auth.domain.ManagerRole;
 import com.lgcns.infra.jwt.JwtProperties;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,14 +12,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    private static final String TOKEN_ROLE_NAME = "ROLE_";
     private final JwtProperties jwtProperties;
 
-    public String generateAccessToken(String username, Role role) {
+    public String generateAccessToken(String username, ManagerRole managerRole) {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.accessTokenExpirationMilliTime());
-        return buildAccessToken(username, role, issuedAt, expiredAt);
+        return buildAccessToken(username, managerRole, issuedAt, expiredAt);
     }
 
     public String generateRefreshToken(String username) {
@@ -41,11 +40,12 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(jwtProperties.refreshTokenSecret().getBytes());
     }
 
-    private String buildAccessToken(String username, Role role, Date issuedAt, Date expiredAt) {
+    private String buildAccessToken(
+            String username, ManagerRole managerRole, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setIssuer(jwtProperties.issuer())
                 .setSubject(username)
-                .claim(TOKEN_ROLE_NAME, role)
+                .claim("authorities", managerRole.getRole())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiredAt)
                 .signWith(getAccessTokenKey())

@@ -1,7 +1,7 @@
 package com.lgcns.domain.auth.domain;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,14 +26,13 @@ public class PrincipalDetails implements UserDetails {
         return manager.getId();
     }
 
-    public Role getRole() {
-        return manager.getRole();
+    public ManagerRole getManagerRole() {
+        return manager.getManagerRole();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + manager.getRole().name()));
+        return List.of(new SimpleGrantedAuthority(manager.getManagerRole().getRole()));
     }
 
     @Override

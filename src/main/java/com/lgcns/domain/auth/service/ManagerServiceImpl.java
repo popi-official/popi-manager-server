@@ -1,7 +1,6 @@
 package com.lgcns.domain.auth.service;
 
 import com.lgcns.domain.auth.domain.Manager;
-import com.lgcns.domain.auth.domain.Role;
 import com.lgcns.domain.auth.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.auth.exception.ManagerErrorCode;
 import com.lgcns.domain.auth.repository.ManagerRepository;
@@ -27,7 +26,7 @@ public class ManagerServiceImpl implements ManagerService {
 
         String encodedPassword = passwordEncoder.encode(request.password());
 
-        Manager manager = Manager.createManager(request.username(), encodedPassword, Role.USER);
+        Manager manager = Manager.createManager(request.username(), encodedPassword);
 
         managerRepository.save(manager);
     }

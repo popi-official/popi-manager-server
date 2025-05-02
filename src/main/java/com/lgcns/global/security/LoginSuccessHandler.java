@@ -30,7 +30,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         String accessToken =
                 tokenService.createAccessToken(
-                        principalDetails.getUsername(), principalDetails.getRole());
+                        principalDetails.getUsername(), principalDetails.getManagerRole());
         String refreshToken =
                 tokenService.createRefreshToken(
                         principalDetails.getUsername(), principalDetails.getId());

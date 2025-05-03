@@ -1,7 +1,6 @@
 package com.lgcns.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lgcns.domain.auth.domain.PrincipalDetails;
 import com.lgcns.domain.auth.dto.response.LoginResponse;
 import com.lgcns.domain.auth.service.TokenService;
 import com.lgcns.global.common.response.GlobalResponse;

@@ -1,6 +1,5 @@
 package com.lgcns.global.security;
 
-import com.lgcns.domain.auth.domain.PrincipalDetails;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.exception.ManagerErrorCode;
 import com.lgcns.domain.manager.repository.ManagerRepository;

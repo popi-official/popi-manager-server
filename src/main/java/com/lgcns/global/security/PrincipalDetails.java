@@ -1,16 +1,16 @@
-package com.lgcns.domain.auth.domain;
+package com.lgcns.global.security;
 
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.domain.ManagerRole;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class PrincipalDetails implements UserDetails {
 
     private Manager manager;

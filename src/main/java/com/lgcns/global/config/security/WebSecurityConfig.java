@@ -3,8 +3,8 @@ package com.lgcns.global.config.security;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.security.config.Customizer.withDefaults;
 
-import com.lgcns.domain.auth.service.AuthService;
 import com.lgcns.global.security.AuthenticationFilter;
+import com.lgcns.global.security.CustomUserDetailsService;
 import com.lgcns.global.security.LoginFailureHandler;
 import com.lgcns.global.security.LoginSuccessHandler;
 import jakarta.validation.Validator;
@@ -33,7 +33,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class WebSecurityConfig {
 
     private final Validator validator;
-    private final AuthService authService;
+    private final CustomUserDetailsService customUserDetailsService;
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
 
@@ -87,7 +87,7 @@ public class WebSecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(authService);
+        authenticationProvider.setUserDetailsService(customUserDetailsService);
         authenticationProvider.setPasswordEncoder(passwordEncoder());
 
         return new ProviderManager(authenticationProvider);

@@ -1,4 +1,4 @@
-package com.lgcns.domain.auth.service;
+package com.lgcns.global.security;
 
 import com.lgcns.domain.auth.domain.PrincipalDetails;
 import com.lgcns.domain.manager.domain.Manager;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
     private final ManagerRepository managerRepository;
 
     @Override

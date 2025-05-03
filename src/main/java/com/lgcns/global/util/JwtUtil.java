@@ -105,7 +105,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setIssuer(jwtProperties.issuer())
                 .setSubject(managerId.toString())
-                .claim("authorities", role.getRole())
+                .claim(TOKEN_ROLE_NAME, role.name())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiredAt)
                 .signWith(getAccessTokenKey())

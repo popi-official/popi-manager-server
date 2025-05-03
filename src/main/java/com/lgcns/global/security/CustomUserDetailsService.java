@@ -24,6 +24,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                                         new BadCredentialsException(
                                                 ManagerErrorCode.MANAGER_NOT_FOUND.getMessage()));
 
-        return PrincipalDetails.from(manager);
+        return new PrincipalDetails(manager.getId(), manager.getRole(), manager.getPassword());
     }
 }

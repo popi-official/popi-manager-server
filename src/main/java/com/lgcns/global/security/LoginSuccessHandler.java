@@ -3,6 +3,7 @@ package com.lgcns.global.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgcns.domain.auth.dto.response.LoginResponse;
 import com.lgcns.domain.auth.service.TokenService;
+import com.lgcns.domain.manager.domain.ManagerRole;
 import com.lgcns.global.common.response.GlobalResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,10 +28,13 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-        String accessToken =
-                tokenService.createAccessToken(
-                        principalDetails.getId(), principalDetails.getManagerRole());
-        String refreshToken = tokenService.createRefreshToken(principalDetails.getId());
+        Long managerId = Long.parseLong(principalDetails.getUsername());
+        ManagerRole managerRole =
+                ManagerRole.valueOf(
+                        principalDetails.getAuthorities().iterator().next().getAuthority());
+
+        String accessToken = tokenService.createAccessToken(managerId, managerRole);
+        String refreshToken = tokenService.createRefreshToken(managerId);
 
         LoginResponse loginResponse = LoginResponse.of(accessToken, refreshToken);
 

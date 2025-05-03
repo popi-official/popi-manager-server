@@ -21,11 +21,28 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
     private final JwtProperties jwtProperties;
 
+    public AccessTokenDto generateAccessTokenDto(Long managerId, ManagerRole managerRole) {
+        Date issuedAt = new Date();
+        Date expiredAt =
+                new Date(issuedAt.getTime() + jwtProperties.accessTokenExpirationMilliTime());
+        String tokenValue = buildAccessToken(managerId, managerRole, issuedAt, expiredAt);
+        return new AccessTokenDto(managerId, managerRole, tokenValue);
+    }
+
     public String generateAccessToken(Long managerId, ManagerRole role) {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.accessTokenExpirationMilliTime());
         return buildAccessToken(managerId, role, issuedAt, expiredAt);
+    }
+
+    public RefreshTokenDto generateRefreshTokenDto(Long memberId) {
+        Date issuedAt = new Date();
+        Date expiredAt =
+                new Date(issuedAt.getTime() + jwtProperties.refreshTokenExpirationMilliTime());
+        String refreshTokenValue = buildRefreshToken(memberId, issuedAt, expiredAt);
+        return RefreshTokenDto.of(
+                memberId, refreshTokenValue, jwtProperties.refreshTokenExpirationTime());
     }
 
     public String generateRefreshToken(Long managerId) {

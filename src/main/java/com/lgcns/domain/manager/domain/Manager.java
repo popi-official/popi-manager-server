@@ -16,17 +16,26 @@ public class Manager extends BaseTimeEntity {
     @Column(name = "manager_id")
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String username;
 
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    private ManagerRole role;
+
     @Builder(access = AccessLevel.PRIVATE)
-    private Manager(String username, String password) {
+    private Manager(String username, String password, ManagerRole role) {
         this.username = username;
         this.password = password;
+        this.role = role;
     }
 
     public static Manager createManager(String username, String password) {
-        return Manager.builder().username(username).password(password).build();
+        return Manager.builder()
+                .username(username)
+                .password(password)
+                .role(ManagerRole.USER)
+                .build();
     }
 }

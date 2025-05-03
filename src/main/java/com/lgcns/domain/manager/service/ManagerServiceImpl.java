@@ -1,7 +1,7 @@
 package com.lgcns.domain.manager.service;
 
 import com.lgcns.domain.manager.domain.Manager;
-import com.lgcns.domain.manager.dto.Request.ManagerCreateRequest;
+import com.lgcns.domain.manager.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.manager.exception.ManagerErrorCode;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.global.error.exception.CustomException;

@@ -2,9 +2,11 @@ spring:
   profiles:
     group:
       test: "test"
-      local: "local, dev, datasource"
+      local: "local, datasource"
+      dev: "dev, datasource"
     include:
       - redis
+      - security
 
 spring-doc:
   default-consumes-media-type: application/json

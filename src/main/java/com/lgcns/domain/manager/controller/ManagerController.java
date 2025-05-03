@@ -1,6 +1,6 @@
 package com.lgcns.domain.manager.controller;
 
-import com.lgcns.domain.manager.dto.Request.ManagerCreateRequest;
+import com.lgcns.domain.manager.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.manager.service.ManagerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,14 +14,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/managers")
 @RequiredArgsConstructor
-@Tag(name = "1. 인증 API", description = "인증 관련 API 입니다.")
+@Tag(name = "1-2. 운영자 API", description = "운영자 관련 API입니다.")
 public class ManagerController {
+
     private final ManagerService managerService;
 
-    @PostMapping("/signup")
-    @Operation(summary = "운영자 회원가입", description = "운영자가 직접 가입하지 않음")
+    @PostMapping
+    @Operation(summary = "운영자 계정 생성", description = "운영자가 직접 요청하지 않고, 개발자가 생성 후 전달하는 내부용 API입니다.")
     public ResponseEntity<Void> managerCreate(@RequestBody @Valid ManagerCreateRequest request) {
         managerService.createManager(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();

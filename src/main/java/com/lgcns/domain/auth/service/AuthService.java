@@ -23,7 +23,7 @@ public class AuthService implements UserDetailsService {
                         .orElseThrow(
                                 () ->
                                         new BadCredentialsException(
-                                                ManagerErrorCode.USER_NOT_FOUND.getMessage()));
+                                                ManagerErrorCode.MANAGER_NOT_FOUND.getMessage()));
 
         return PrincipalDetails.from(manager);
     }

@@ -14,18 +14,18 @@ import org.springframework.stereotype.Component;
 public class JwtUtil {
     private final JwtProperties jwtProperties;
 
-    public String generateAccessToken(String username, ManagerRole role) {
+    public String generateAccessToken(Long managerId, ManagerRole role) {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.accessTokenExpirationMilliTime());
-        return buildAccessToken(username, role, issuedAt, expiredAt);
+        return buildAccessToken(managerId, role, issuedAt, expiredAt);
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(Long managerId) {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.refreshTokenExpirationMilliTime());
-        return buildRefreshToken(username, issuedAt, expiredAt);
+        return buildRefreshToken(managerId, issuedAt, expiredAt);
     }
 
     public long getRefreshTokenExpirationTime() {
@@ -41,10 +41,10 @@ public class JwtUtil {
     }
 
     private String buildAccessToken(
-            String username, ManagerRole role, Date issuedAt, Date expiredAt) {
+            Long managerId, ManagerRole role, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setIssuer(jwtProperties.issuer())
-                .setSubject(username)
+                .setSubject(managerId.toString())
                 .claim("authorities", role.getRoleName())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiredAt)
@@ -52,10 +52,10 @@ public class JwtUtil {
                 .compact();
     }
 
-    private String buildRefreshToken(String username, Date issuedAt, Date expiredAt) {
+    private String buildRefreshToken(Long managerId, Date issuedAt, Date expiredAt) {
         return Jwts.builder()
                 .setIssuer(jwtProperties.issuer())
-                .setSubject(username)
+                .setSubject(managerId.toString())
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiredAt)
                 .signWith(getRefreshTokenKey())

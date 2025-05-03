@@ -14,12 +14,12 @@ public class TokenService {
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public String createAccessToken(String username, ManagerRole managerRole) {
-        return jwtUtil.generateAccessToken(username, managerRole);
+    public String createAccessToken(Long managerId, ManagerRole managerRole) {
+        return jwtUtil.generateAccessToken(managerId, managerRole);
     }
 
-    public String createRefreshToken(String username, Long managerId) {
-        String token = jwtUtil.generateRefreshToken(username);
+    public String createRefreshToken(Long managerId) {
+        String token = jwtUtil.generateRefreshToken(managerId);
 
         RefreshToken refreshToken =
                 RefreshToken.builder()

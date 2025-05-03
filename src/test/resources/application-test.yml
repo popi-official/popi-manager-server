@@ -4,5 +4,3 @@ spring:
       on-profile: "test"
   datasource:
     url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=MYSQL
-jwt:
-  access-token-expiration-time: 3600000

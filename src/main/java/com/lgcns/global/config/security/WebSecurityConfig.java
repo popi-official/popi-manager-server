@@ -17,7 +17,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,29 +37,27 @@ public class WebSecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        http.csrf(AbstractHttpConfigurer::disable)
-                .headers(
-                        header ->
-                                header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+    private void defaultFilterChain(HttpSecurity http) throws Exception {
+        http.httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        authorize ->
-                                authorize
-                                        .requestMatchers(
-                                                "/managers",
-                                                "/auth/login",
-                                                "/swagger-ui/**",
-                                                "/v3/api-docs/**",
-                                                "/h2-console/**")
-                                        .permitAll()
-                                        .anyRequest()
-                                        .authenticated())
-                .addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        defaultFilterChain(http);
+
+        http.authorizeHttpRequests(
+                auth ->
+                        auth.requestMatchers("/managers", "/auth/login")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated());
+
+        http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

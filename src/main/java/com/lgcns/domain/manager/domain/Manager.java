@@ -3,6 +3,7 @@ package com.lgcns.domain.manager.domain;
 import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,6 +24,7 @@ public class Manager extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ManagerRole role;
 
+    @Builder(access = AccessLevel.PRIVATE)
     private Manager(String username, String password, ManagerRole role) {
         this.username = username;
         this.password = password;
@@ -30,6 +32,10 @@ public class Manager extends BaseTimeEntity {
     }
 
     public static Manager createManager(String username, String password) {
-        return new Manager(username, password, ManagerRole.USER);
+        return Manager.builder()
+                .username(username)
+                .password(password)
+                .role(ManagerRole.USER)
+                .build();
     }
 }

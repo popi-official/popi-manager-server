@@ -11,6 +11,8 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -58,6 +60,19 @@ public class WebSecurityConfig {
                                 .authenticated());
 
         http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(1)
+    @Profile({"dev", "local"})
+    public SecurityFilterChain swaggerFilterChain(HttpSecurity http) throws Exception {
+        defaultFilterChain(http);
+
+        http.securityMatcher("/swagger-ui/**", "/v3/api-docs/**").httpBasic(withDefaults());
+
+        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
         return http.build();
     }

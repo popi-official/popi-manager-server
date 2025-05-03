@@ -1,7 +1,14 @@
 package com.lgcns.global.util;
 
+import static com.lgcns.global.common.constants.SecurityConstants.TOKEN_ROLE_NAME;
+
+import com.lgcns.domain.auth.dto.AccessTokenDto;
+import com.lgcns.domain.auth.dto.RefreshTokenDto;
 import com.lgcns.domain.manager.domain.ManagerRole;
 import com.lgcns.infra.jwt.JwtProperties;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
@@ -26,6 +33,42 @@ public class JwtUtil {
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.refreshTokenExpirationMilliTime());
         return buildRefreshToken(managerId, issuedAt, expiredAt);
+    }
+
+    public AccessTokenDto parseAccessToken(String accessTokenValue) throws ExpiredJwtException {
+        try {
+            Jws<Claims> claims = getClaims(accessTokenValue, getAccessTokenKey());
+
+            return AccessTokenDto.of(
+                    Long.parseLong(claims.getBody().getSubject()),
+                    ManagerRole.valueOf(claims.getBody().get(TOKEN_ROLE_NAME, String.class)),
+                    accessTokenValue);
+        } catch (ExpiredJwtException e) {
+            throw e;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public RefreshTokenDto parseRefreshToken(String refreshTokenValue) throws ExpiredJwtException {
+        try {
+            Jws<Claims> claims = getClaims(refreshTokenValue, getRefreshTokenKey());
+
+            return RefreshTokenDto.of(
+                    Long.parseLong(claims.getBody().getSubject()),
+                    refreshTokenValue,
+                    jwtProperties.refreshTokenExpirationTime());
+        } catch (ExpiredJwtException e) {
+            return null;
+        }
+    }
+
+    private Jws<Claims> getClaims(String token, Key key) {
+        return Jwts.parserBuilder()
+                .requireIssuer(jwtProperties.issuer())
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
     }
 
     public long getRefreshTokenExpirationTime() {

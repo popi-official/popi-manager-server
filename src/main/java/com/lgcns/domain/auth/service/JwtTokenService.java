@@ -1,6 +1,7 @@
 package com.lgcns.domain.auth.service;
 
 import com.lgcns.domain.auth.domain.RefreshToken;
+import com.lgcns.domain.auth.dto.AccessTokenDto;
 import com.lgcns.domain.auth.repository.RefreshTokenRepository;
 import com.lgcns.domain.manager.domain.ManagerRole;
 import com.lgcns.global.util.JwtUtil;
@@ -30,5 +31,13 @@ public class JwtTokenService {
         refreshTokenRepository.save(refreshToken);
 
         return token;
+    }
+
+    public AccessTokenDto retrieveAccessToken(String accessTokenValue) {
+        try {
+            return jwtUtil.parseAccessToken(accessTokenValue);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

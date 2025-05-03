@@ -2,7 +2,7 @@ package com.lgcns.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgcns.domain.auth.dto.response.LoginResponse;
-import com.lgcns.domain.auth.service.TokenService;
+import com.lgcns.domain.auth.service.JwtTokenService;
 import com.lgcns.domain.manager.domain.ManagerRole;
 import com.lgcns.global.common.response.GlobalResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private static final String RESPONSE_CONTENT_TYPE = "application/json;charset=utf-8";
     private final ObjectMapper objectMapper;
-    private final TokenService tokenService;
+    private final JwtTokenService jwtTokenService;
 
     @Override
     public void onAuthenticationSuccess(
@@ -33,8 +33,8 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 ManagerRole.valueOf(
                         principalDetails.getAuthorities().iterator().next().getAuthority());
 
-        String accessToken = tokenService.createAccessToken(managerId, managerRole);
-        String refreshToken = tokenService.createRefreshToken(managerId);
+        String accessToken = jwtTokenService.createAccessToken(managerId, managerRole);
+        String refreshToken = jwtTokenService.createRefreshToken(managerId);
 
         LoginResponse loginResponse = LoginResponse.of(accessToken, refreshToken);
 

@@ -5,10 +5,12 @@ import com.lgcns.domain.auth.dto.response.LoginResponse;
 import com.lgcns.domain.auth.service.JwtTokenService;
 import com.lgcns.domain.manager.domain.ManagerRole;
 import com.lgcns.global.common.response.GlobalResponse;
+import com.lgcns.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private static final String RESPONSE_CONTENT_TYPE = "application/json;charset=utf-8";
     private final ObjectMapper objectMapper;
     private final JwtTokenService jwtTokenService;
+    private final CookieUtil cookieUtil;
 
     @Override
     public void onAuthenticationSuccess(
@@ -35,6 +38,9 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         String accessToken = jwtTokenService.createAccessToken(managerId, managerRole);
         String refreshToken = jwtTokenService.createRefreshToken(managerId);
+
+        HttpHeaders httpHeaders = cookieUtil.generateRefreshTokenCookie(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, httpHeaders.getFirst(HttpHeaders.SET_COOKIE));
 
         LoginResponse loginResponse = LoginResponse.of(accessToken, refreshToken);
 

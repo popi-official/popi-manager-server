@@ -25,8 +25,8 @@ public class JwtUtil {
         Date issuedAt = new Date();
         Date expiredAt =
                 new Date(issuedAt.getTime() + jwtProperties.accessTokenExpirationMilliTime());
-        String tokenValue = buildAccessToken(managerId, managerRole, issuedAt, expiredAt);
-        return new AccessTokenDto(managerId, managerRole, tokenValue);
+        String accessTokenValue = buildAccessToken(managerId, managerRole, issuedAt, expiredAt);
+        return new AccessTokenDto(managerId, managerRole, accessTokenValue);
     }
 
     public String generateAccessToken(Long managerId, ManagerRole role) {

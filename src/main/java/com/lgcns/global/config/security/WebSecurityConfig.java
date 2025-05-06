@@ -3,10 +3,8 @@ package com.lgcns.global.config.security;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.security.config.Customizer.withDefaults;
 
-import com.lgcns.global.security.AuthenticationFilter;
-import com.lgcns.global.security.CustomUserDetailsService;
-import com.lgcns.global.security.LoginFailureHandler;
-import com.lgcns.global.security.LoginSuccessHandler;
+import com.lgcns.domain.auth.service.JwtTokenService;
+import com.lgcns.global.security.*;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -38,6 +36,7 @@ public class WebSecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
+    private final JwtTokenService jwtTokenService;
 
     private void defaultFilterChain(HttpSecurity http) throws Exception {
         http.httpBasic(AbstractHttpConfigurer::disable)
@@ -54,10 +53,14 @@ public class WebSecurityConfig {
 
         http.authorizeHttpRequests(
                 auth ->
-                        auth.requestMatchers("/managers", "/auth/login")
+                        auth.requestMatchers("/managers", "/auth/**")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated());
+
+        http.addFilterBefore(
+                jwtAuthenticationFilter(jwtTokenService),
+                UsernamePasswordAuthenticationFilter.class);
 
         http.addFilterAt(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
@@ -113,5 +116,10 @@ public class WebSecurityConfig {
         loginFilter.setAuthenticationSuccessHandler(loginSuccessHandler);
         loginFilter.setAuthenticationFailureHandler(loginFailureHandler);
         return loginFilter;
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenService jwtTokenService) {
+        return new JwtAuthenticationFilter(jwtTokenService);
     }
 }

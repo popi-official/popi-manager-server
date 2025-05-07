@@ -21,6 +21,7 @@ public class Popup extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @Column(name = "popup_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -14,6 +14,7 @@ public class MemberAnswer extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_answer_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

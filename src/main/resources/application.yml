@@ -3,7 +3,7 @@ spring:
     group:
       test: "test"
       local: "local, datasource"
-      dev: "dev, datasource, actuator"
+      dev: "dev, datasource"
     include:
       - redis
       - security

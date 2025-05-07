@@ -1,0 +1,23 @@
+services:
+  backend:
+    image: ${IMAGE_FULL_URL}
+    container_name: backend
+    restart: always
+    networks:
+      - popi-net
+    environment:
+      - TZ=Asia/Seoul
+    env_file:
+      - .env
+  redis:
+    image: "redis:alpine"
+    container_name: redis
+    networks:
+      - popi-net
+    environment:
+      - TZ=Asia/Seoul
+
+networks:
+  popi-net:
+    external: true
+    name: popi-net

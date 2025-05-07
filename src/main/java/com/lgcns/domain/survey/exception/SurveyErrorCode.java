@@ -1,12 +1,12 @@
-package com.lgcns.domain.survey.error;
+package com.lgcns.domain.survey.exception;
 
 import com.lgcns.global.error.exception.ErrorCode;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public enum SurveyErrorCode implements ErrorCode {
     SURVEY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 설문이 존재하지 않습니다.");
 

@@ -1,12 +1,12 @@
-package com.lgcns.domain.popup.error;
+package com.lgcns.domain.popup.exception;
 
 import com.lgcns.global.error.exception.ErrorCode;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@RequiredArgsConstructor
+@AllArgsConstructor
 public enum PopupErrorCode implements ErrorCode {
     POPUP_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 팝업이 존재하지 않습니다.");
 

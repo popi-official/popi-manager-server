@@ -66,6 +66,15 @@ jobs:
           source: docker-compose.yml
           target: /home/ubuntu/
 
+      - name: Copy default.conf to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: nginx/default.conf
+          target: /home/ubuntu/
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
         with:
@@ -76,4 +85,5 @@ jobs:
             aws ecr get-login-password --region ${{ env.AWS_REGION }} \
             | docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
             docker compose up -d
+            docker exec nginx nginx -s reload
             docker image prune -a -f

@@ -1,0 +1,18 @@
+spring:
+  config:
+    activate:
+      on-profile: "actuator"
+management:
+  endpoints:
+    jmx:
+      exposure:
+        exclude: "*"
+    web:
+      exposure:
+        include: health
+      base-path: /manager-actuator
+    access:
+      default: none
+  endpoint:
+    health:
+      access: unrestricted

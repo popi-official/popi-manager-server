@@ -25,6 +25,8 @@ public class PopupServiceImpl implements PopupService {
     private final ChoiceRepository choiceRepository;
     private final ManagerUtil managerUtil;
 
+    private final int MAX_SURVEY = 4;
+
     @Override
     public void createPopup(PopupWithChoicesCreateRequest popupWithChoicesCreateRequest) {
         Manager manager = managerUtil.getCurrentManager();
@@ -57,9 +59,9 @@ public class PopupServiceImpl implements PopupService {
 
     private void createSurveyFromRequest(
             Popup popup, List<ChoiceCreateRequest> choiceCreateRequestList) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 1; i <= MAX_SURVEY; i++) {
             Survey survey = surveyRepository.save(Survey.createSurvey(popup, i));
-            createChoiceFromRequest(survey, choiceCreateRequestList.get(i));
+            createChoiceFromRequest(survey, choiceCreateRequestList.get(i - 1));
         }
     }
 

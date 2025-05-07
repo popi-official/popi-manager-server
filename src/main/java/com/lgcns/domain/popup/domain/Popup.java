@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class Popup extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "popup_id")
     private Long id;
 

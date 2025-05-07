@@ -29,8 +29,7 @@ public class Survey {
     private final List<Choice> choiceList = new ArrayList<>();
 
     @Builder
-    private Survey(Long id, Popup popup, int number) {
-        this.id = id;
+    private Survey(Popup popup, int number) {
         this.popup = popup;
         this.number = number;
     }

@@ -23,8 +23,7 @@ public class Choice {
     private String content;
 
     @Builder
-    private Choice(Long id, Survey survey, String content) {
-        this.id = id;
+    private Choice(Survey survey, String content) {
         this.survey = survey;
         this.content = content;
     }

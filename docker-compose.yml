@@ -16,6 +16,17 @@ services:
       - popi-net
     environment:
       - TZ=Asia/Seoul
+  nginx:
+    image: "nginx:alpine"
+    container_name: nginx
+    ports:
+      - "80:80"
+    networks:
+      - popi-net
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
 
 networks:
   popi-net:

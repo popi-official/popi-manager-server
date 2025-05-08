@@ -6,14 +6,12 @@ import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
-import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.survey.domain.Choice;
 import com.lgcns.domain.survey.domain.Survey;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
 import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
-import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -83,12 +81,6 @@ public class PopupServiceImpl implements PopupService {
         for (String option : choiceCreateRequest.optionList()) {
             Choice choice = Choice.createChoice(survey, option);
             choiceRepository.save(choice);
-        }
-    }
-
-    private void verifyPopupManager(Popup popup, Manager manager) {
-        if (!popup.getManager().getId().equals(manager.getId())) {
-            throw new CustomException(PopupErrorCode.POPUP_UNAUTHORIZED);
         }
     }
 }

@@ -30,7 +30,7 @@ public class PopupController {
     }
 
     @GetMapping
-    @Operation(summary = "팝업 목록 조회", description = "모든 팝업스토어 정보를 조회합니다.")
+    @Operation(summary = "팝업 목록 조회", description = "로그인한 운영자의 모든 팝업스토어 목록을 조회합니다.")
     public ResponseEntity<List<PopupPreviewResponse>> popupFindAll() {
         List<PopupPreviewResponse> popupPreviewResponseList = popupService.findAllPopups();
         return ResponseEntity.ok(popupPreviewResponseList);

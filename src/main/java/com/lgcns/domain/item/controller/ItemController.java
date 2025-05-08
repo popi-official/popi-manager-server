@@ -32,7 +32,8 @@ public class ItemController {
     @PostMapping("/excel")
     @Operation(summary = "excel 상품 파일 등록", description = "excel 파일을 업로드하여 상품 리스트를 등록합니다.")
     public ResponseEntity<Void> itemCreateByExcel(
-            @RequestPart(value = "itemFile") MultipartFile itemFile)
+            @RequestPart(value = "itemFile") MultipartFile itemFile,
+            @RequestPart(value = "popupId") Long id)
             throws IOException, InvalidFormatException {
 
         itemService.createItemByExcel(itemFile);

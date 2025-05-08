@@ -3,6 +3,10 @@ package com.lgcns.domain.item.service;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.repository.ItemRepository;
+import com.lgcns.domain.popup.domain.Popup;
+import com.lgcns.domain.popup.exception.PopupErrorCode;
+import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.global.error.exception.CustomException;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,12 +26,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
+    private final PopupRepository popupRepository;
 
     @Override
     public void createItem(ItemCreateRequest request) {
+        Popup popup = findPopupById(request.popupId());
 
         Item item =
                 Item.createItem(
+                        popup,
                         request.name(),
                         request.imageUrl(),
                         request.price(),
@@ -41,6 +48,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void createItemByExcel(MultipartFile itemFile)
             throws InvalidFormatException, IOException {
+
+        Popup popup = findPopupById()
 
         // 업로드된 엑셀 파일을 읽어오기 위해 OPCPackage로 open
         OPCPackage opcPackage = OPCPackage.open(itemFile.getInputStream());
@@ -72,5 +81,11 @@ public class ItemServiceImpl implements ItemService {
         itemRepository.saveAll(items);
 
         workbook.close();
+    }
+
+    private Popup findPopupById(Long popupId){
+        return popupRepository
+                .findById(popupId)
+                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
     }
 }

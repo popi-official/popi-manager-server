@@ -5,6 +5,7 @@ import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
+import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.survey.domain.Choice;
 import com.lgcns.domain.survey.domain.Survey;
@@ -39,6 +40,13 @@ public class PopupServiceImpl implements PopupService {
         createSurveyFromRequest(popup, popupWithChoicesCreateRequest.choiceCreateRequestList());
 
         return PopupCreateResponse.of(popup.getId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PopupPreviewResponse> findAllPopups() {
+        Long managerId = managerUtil.getCurrentManagerId();
+        return popupRepository.findAllPopupsByManagerId(managerId);
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

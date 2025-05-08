@@ -1,5 +1,6 @@
 package com.lgcns.domain.popup.domain;
 
+import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.survey.domain.Survey;
 import com.lgcns.global.model.BaseTimeEntity;
@@ -50,6 +51,9 @@ public class Popup extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "popup", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Survey> surveyList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "popup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Item> itemList = new ArrayList<>();
 
     @Builder
     private Popup(

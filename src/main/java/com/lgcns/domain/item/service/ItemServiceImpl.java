@@ -29,10 +29,10 @@ public class ItemServiceImpl implements ItemService {
         Item item =
                 Item.createItem(
                         request.name(),
-                        request.price(),
                         request.imageUrl(),
-                        request.qty(),
-                        request.minQty(),
+                        request.price(),
+                        request.stock(),
+                        request.minStock(),
                         request.location());
 
         itemRepository.save(item);
@@ -60,13 +60,13 @@ public class ItemServiceImpl implements ItemService {
             Row row = sheet.getRow(rowIndex);
 
             String name = row.getCell(0).getStringCellValue();
-            String price = String.valueOf((int) row.getCell(1).getNumericCellValue());
             String imageUrl = row.getCell(2).getStringCellValue();
-            int qty = (int) row.getCell(3).getNumericCellValue();
-            int minQty = (int) row.getCell(4).getNumericCellValue();
+            int price = (int) row.getCell(1).getNumericCellValue();
+            int stock = (int) row.getCell(3).getNumericCellValue();
+            int minStock = (int) row.getCell(4).getNumericCellValue();
             String location = row.getCell(5).getStringCellValue();
 
-            items.add(Item.createItem(name, price, imageUrl, qty, minQty, location));
+            items.add(Item.createItem(name, imageUrl, price, stock, minStock, location));
         }
 
         itemRepository.saveAll(items);

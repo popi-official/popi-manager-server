@@ -1,24 +1,30 @@
 package com.lgcns.domain.item.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record ItemCreateRequest(
         @NotBlank(message = "상품 이름은 필수입니다.") @Schema(description = "상품 이름", example = "팝업 포스터")
                 String name,
-        @NotBlank(message = "상품 가격은 필수입니다.") @Schema(description = "상품 가격", example = "10000")
-                String price,
         @NotBlank(message = "상품 사진은 필수입니다.")
                 @Schema(description = "상품 사진", example = "aws.bucket.상품사진")
                 String imageUrl,
-        @NotBlank(message = "상품 수량은 필수입니다.") @Schema(description = "상품 수량", example = "100")
-                int qty,
-        @NotBlank(message = "최소 발주 수량은 필수입니다.") @Schema(description = "최소 발주 수량", example = "10")
-                int minQty,
+        @NotNull(message = "상품 가격은 필수입니다.") @Schema(description = "상품 가격", example = "10000")
+                int price,
+        @NotNull(message = "상품 수량은 필수입니다.")
+                @Min(value = 0, message = "수량은 0 이상이어야 합니다.")
+                @Schema(description = "상품 수량", example = "100")
+                int stock,
+        @NotNull(message = "최소 발주 수량은 필수입니다.")
+                @Min(value = 0, message = "발주 수량은 0 이상이어야 합니다.")
+                @Schema(description = "최소 발주 수량", example = "10")
+                int minStock,
         @NotBlank(message = "상품 위치는 필수입니다.") @Schema(description = "상품 위치", example = "A1")
                 String location) {
     public static ItemCreateRequest of(
-            String name, String price, String imageUrl, int qty, int minQty, String location) {
-        return new ItemCreateRequest(name, price, imageUrl, qty, minQty, location);
+            String name, String imageUrl, int price, int stock, int minStock, String location) {
+        return new ItemCreateRequest(name, imageUrl, price, stock, minStock, location);
     }
 }

@@ -81,7 +81,7 @@ public class ImageService {
     private Date getPresignedUrlExpiration() {
         Date expiration = new Date();
         long expTime = expiration.getTime();
-        expTime += TimeUnit.MINUTES.toMillis(3);
+        expTime += TimeUnit.MINUTES.toMillis(1);
         expiration.setTime(expTime);
 
         return expiration;

@@ -65,12 +65,12 @@ public class ItemServiceImpl implements ItemService {
         List<Item> items = new ArrayList<>();
 
         // row 0은 보통 header -> row 1부터 읽기
-        for (int rowIndex = 1; rowIndex < rows; rowIndex++) {
+        for (int rowIndex = 1; rowIndex <= rows; rowIndex++) {
             Row row = sheet.getRow(rowIndex);
 
             String name = row.getCell(0).getStringCellValue();
-            String imageUrl = row.getCell(2).getStringCellValue();
-            int price = (int) row.getCell(1).getNumericCellValue();
+            String imageUrl = row.getCell(1).getStringCellValue();
+            int price = (int) row.getCell(2).getNumericCellValue();
             int stock = (int) row.getCell(3).getNumericCellValue();
             int minStock = (int) row.getCell(4).getNumericCellValue();
             String location = row.getCell(5).getStringCellValue();

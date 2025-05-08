@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "3. 상품 API", description = "상품 관련 API 입니다.")
+@Tag(name = "4. 상품 API", description = "상품 관련 API 입니다.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")

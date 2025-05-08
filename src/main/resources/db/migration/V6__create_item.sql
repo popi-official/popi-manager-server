@@ -9,5 +9,5 @@ CREATE TABLE item (
     location VARCHAR(255),
     created_at DATETIME NOT NULL,
     updated_at DATETIME,
-    CONSTRAINT fk_item_popup Foreign Key (popup_id) REFERENCES popup(popup_id) ON DELETE CASECADE
+    CONSTRAINT fk_item_popup Foreign Key (popup_id) REFERENCES popup(popup_id) ON DELETE CASCADE
     );

@@ -1,6 +1,7 @@
 package com.lgcns.domain.item.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.lgcns.IntegrationTest;
@@ -178,13 +179,8 @@ class ItemServiceTest extends IntegrationTest {
             Long nonExistentPopupId = 9999L;
 
             // when & then
-            CustomException exception =
-                    assertThrows(
-                            CustomException.class,
-                            () -> {
-                                itemService.createItemByExcel(nonExistentPopupId, excelFile);
-                            });
-            assertThat(exception.getErrorCode()).isEqualTo(PopupErrorCode.POPUP_NOT_FOUND);
+            assertThatThrownBy(() -> itemService.createItemByExcel(nonExistentPopupId, excelFile))
+                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }
 
         private MultipartFile createExcelFile() throws IOException {

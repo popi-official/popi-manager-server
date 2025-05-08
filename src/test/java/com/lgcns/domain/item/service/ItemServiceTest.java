@@ -85,7 +85,7 @@ class ItemServiceTest extends IntegrationTest {
             ItemCreateRequest request = createItemCreateRequest();
 
             // when
-            itemService.createItem(request);
+            itemService.createItem(popup.getId(), request);
 
             // then
             Item item = itemRepository.findAll().get(0);
@@ -103,23 +103,23 @@ class ItemServiceTest extends IntegrationTest {
         @Transactional
         void 존재하지_않는_팝업_ID로_상품_등록을_시도하면_실패한다() {
             // given
+            final Long popupId = 9999L;
             ItemCreateRequest request =
                     new ItemCreateRequest(
-                            9999L, "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1");
+                            "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1");
 
             // when & then
             CustomException exception =
                     assertThrows(
                             CustomException.class,
                             () -> {
-                                itemService.createItem(request);
+                                itemService.createItem(popupId, request);
                             });
             assertThat(exception.getErrorCode()).isEqualTo(PopupErrorCode.POPUP_NOT_FOUND);
         }
 
         private ItemCreateRequest createItemCreateRequest() {
-            return new ItemCreateRequest(
-                    popup.getId(), "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1");
+            return new ItemCreateRequest("테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1");
         }
     }
 

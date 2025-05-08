@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ItemService {
 
-    void createItem(ItemCreateRequest request);
+    void createItem(Long popupId, ItemCreateRequest request);
 
     void createItemByExcel(MultipartFile itemFile, Long popupId)
             throws InvalidFormatException, IOException;

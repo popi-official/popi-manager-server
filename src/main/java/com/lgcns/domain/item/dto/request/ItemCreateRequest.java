@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record ItemCreateRequest(
-        @NotNull(message = "팝업 아이디는 필수입니다.") @Schema(description = "팝업 아이디", example = "1")
-                Long popupId,
         @NotBlank(message = "상품 이름은 필수입니다.") @Schema(description = "상품 이름", example = "팝업 포스터")
                 String name,
         @NotBlank(message = "상품 사진은 필수입니다.")
@@ -26,13 +24,7 @@ public record ItemCreateRequest(
         @NotBlank(message = "상품 위치는 필수입니다.") @Schema(description = "상품 위치", example = "A1")
                 String location) {
     public static ItemCreateRequest of(
-            Long popupId,
-            String name,
-            String imageUrl,
-            int price,
-            int stock,
-            int minStock,
-            String location) {
-        return new ItemCreateRequest(popupId, name, imageUrl, price, stock, minStock, location);
+            String name, String imageUrl, int price, int stock, int minStock, String location) {
+        return new ItemCreateRequest(name, imageUrl, price, stock, minStock, location);
     }
 }

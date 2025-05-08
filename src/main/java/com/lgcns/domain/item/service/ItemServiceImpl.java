@@ -29,8 +29,8 @@ public class ItemServiceImpl implements ItemService {
     private final PopupRepository popupRepository;
 
     @Override
-    public void createItem(ItemCreateRequest request) {
-        Popup popup = findPopupById(request.popupId());
+    public void createItem(Long popupId, ItemCreateRequest request) {
+        Popup popup = findPopupById(popupId);
 
         Item item =
                 Item.createItem(

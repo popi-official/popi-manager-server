@@ -11,16 +11,18 @@ public record ItemCreateRequest(
         @NotBlank(message = "상품 사진은 필수입니다.")
                 @Schema(description = "상품 사진", example = "aws.bucket.상품사진")
                 String imageUrl,
-        @NotNull(message = "상품 가격은 필수입니다.") @Schema(description = "상품 가격", example = "10000")
-                int price,
+        @NotNull(message = "상품 가격은 필수입니다.")
+                @Schema(description = "상품 가격", example = "10000")
+                @Min(value = 0, message = "가격은 0 이상이어야 합니다.")
+                Integer price,
         @NotNull(message = "상품 수량은 필수입니다.")
                 @Min(value = 0, message = "수량은 0 이상이어야 합니다.")
                 @Schema(description = "상품 수량", example = "100")
-                int stock,
+                Integer stock,
         @NotNull(message = "최소 발주 수량은 필수입니다.")
                 @Min(value = 0, message = "발주 수량은 0 이상이어야 합니다.")
                 @Schema(description = "최소 발주 수량", example = "10")
-                int minStock,
+                Integer minStock,
         @NotBlank(message = "상품 위치는 필수입니다.") @Schema(description = "상품 위치", example = "A1")
                 String location) {
     public static ItemCreateRequest of(

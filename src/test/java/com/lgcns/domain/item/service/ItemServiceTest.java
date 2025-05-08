@@ -133,7 +133,7 @@ class ItemServiceTest extends IntegrationTest {
 
             // when
             try {
-                itemService.createItemByExcel(excelFile, popup.getId());
+                itemService.createItemByExcel(popup.getId(), excelFile);
             } catch (Exception e) {
                 e.printStackTrace();
                 Assertions.fail("엑셀 업로드 실패: " + e.getMessage());
@@ -182,7 +182,7 @@ class ItemServiceTest extends IntegrationTest {
                     assertThrows(
                             CustomException.class,
                             () -> {
-                                itemService.createItemByExcel(excelFile, nonExistentPopupId);
+                                itemService.createItemByExcel(nonExistentPopupId, excelFile);
                             });
             assertThat(exception.getErrorCode()).isEqualTo(PopupErrorCode.POPUP_NOT_FOUND);
         }

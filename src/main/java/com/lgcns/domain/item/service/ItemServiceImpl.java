@@ -46,7 +46,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void createItemByExcel(MultipartFile itemFile, Long popupId)
+    public void createItemByExcel(Long popupId, MultipartFile itemFile)
             throws InvalidFormatException, IOException {
 
         Popup popup = findPopupById(popupId);

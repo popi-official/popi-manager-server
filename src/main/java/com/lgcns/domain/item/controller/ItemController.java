@@ -13,10 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name = "4. 상품 API", description = "상품 관련 API 입니다.")
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/popups/{popupId}/items")
+@RequiredArgsConstructor
+@Tag(name = "4. 상품 API", description = "상품 관련 API 입니다.")
 public class ItemController {
 
     private final ItemService itemService;
@@ -33,10 +33,10 @@ public class ItemController {
     @PostMapping("/excel")
     @Operation(summary = "excel 상품 파일 등록", description = "excel 파일을 업로드하여 상품 리스트를 등록합니다.")
     public ResponseEntity<Void> itemCreateByExcel(
-            @RequestPart(value = "itemFile") MultipartFile itemFile, @PathVariable Long popupId)
+            @PathVariable Long popupId, @RequestPart(value = "itemFile") MultipartFile itemFile)
             throws IOException, InvalidFormatException {
 
-        itemService.createItemByExcel(itemFile, popupId);
+        itemService.createItemByExcel(popupId, itemFile);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

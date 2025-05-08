@@ -46,10 +46,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void createItemByExcel(MultipartFile itemFile)
+    public void createItemByExcel(MultipartFile itemFile, Long popupId)
             throws InvalidFormatException, IOException {
 
-        Popup popup = findPopupById()
+        Popup popup = findPopupById(popupId);
 
         // 업로드된 엑셀 파일을 읽어오기 위해 OPCPackage로 open
         OPCPackage opcPackage = OPCPackage.open(itemFile.getInputStream());
@@ -75,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
             int minStock = (int) row.getCell(4).getNumericCellValue();
             String location = row.getCell(5).getStringCellValue();
 
-            items.add(Item.createItem(name, imageUrl, price, stock, minStock, location));
+            items.add(Item.createItem(popup, name, imageUrl, price, stock, minStock, location));
         }
 
         itemRepository.saveAll(items);
@@ -83,7 +83,7 @@ public class ItemServiceImpl implements ItemService {
         workbook.close();
     }
 
-    private Popup findPopupById(Long popupId){
+    private Popup findPopupById(Long popupId) {
         return popupRepository
                 .findById(popupId)
                 .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));

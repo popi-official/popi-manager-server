@@ -1,6 +1,7 @@
 package com.lgcns.domain.item.controller;
 
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.request.ItemUploadRequest;
 import com.lgcns.domain.item.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,10 +34,10 @@ public class ItemController {
     @Operation(summary = "excel 상품 파일 등록", description = "excel 파일을 업로드하여 상품 리스트를 등록합니다.")
     public ResponseEntity<Void> itemCreateByExcel(
             @RequestPart(value = "itemFile") MultipartFile itemFile,
-            @RequestPart(value = "popupId") Long id)
+            @RequestPart(value = "request") @Valid ItemUploadRequest request)
             throws IOException, InvalidFormatException {
 
-        itemService.createItemByExcel(itemFile);
+        itemService.createItemByExcel(itemFile, request.popupId());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

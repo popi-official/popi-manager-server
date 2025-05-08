@@ -26,7 +26,13 @@ public record ItemCreateRequest(
         @NotBlank(message = "상품 위치는 필수입니다.") @Schema(description = "상품 위치", example = "A1")
                 String location) {
     public static ItemCreateRequest of(
-            String name, String imageUrl, int price, int stock, int minStock, String location) {
-        return new ItemCreateRequest(name, imageUrl, price, stock, minStock, location);
+            Long popupId,
+            String name,
+            String imageUrl,
+            int price,
+            int stock,
+            int minStock,
+            String location) {
+        return new ItemCreateRequest(popupId, name, imageUrl, price, stock, minStock, location);
     }
 }

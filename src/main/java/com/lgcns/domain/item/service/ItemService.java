@@ -9,5 +9,6 @@ public interface ItemService {
 
     void createItem(ItemCreateRequest request);
 
-    void createItemByExcel(MultipartFile itemFile) throws InvalidFormatException, IOException;
+    void createItemByExcel(MultipartFile itemFile, Long popupId)
+            throws InvalidFormatException, IOException;
 }

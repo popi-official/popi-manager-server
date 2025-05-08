@@ -1,4 +1,4 @@
-name: Build and Deploy to Develop
+name: PoPI Develop Deploy
 
 on:
   push:

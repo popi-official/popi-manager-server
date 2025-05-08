@@ -8,6 +8,7 @@ import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
+import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.survey.domain.Choice;
 import com.lgcns.domain.survey.domain.Survey;
@@ -60,11 +61,12 @@ public class PopupServiceTest extends IntegrationTest {
                     createPopupWithChoicesCreateRequest();
 
             // when
-            popupService.createPopup(popupWithChoicesCreateRequest);
+            PopupCreateResponse response = popupService.createPopup(popupWithChoicesCreateRequest);
 
             // then
             Popup popup = popupRepository.findAll().get(0);
             Assertions.assertAll(
+                    () -> assertThat(response.popupId()).isEqualTo(popup.getId()),
                     () -> assertThat(popup.getName()).isEqualTo("popup1"),
                     () -> assertThat(popup.getImageUrl()).isEqualTo("https://bucket/asdf"),
                     () ->

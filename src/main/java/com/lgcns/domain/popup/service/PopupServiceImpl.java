@@ -4,6 +4,7 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
+import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.survey.domain.Choice;
 import com.lgcns.domain.survey.domain.Survey;
@@ -28,13 +29,16 @@ public class PopupServiceImpl implements PopupService {
     private final int MAX_SURVEY = 4;
 
     @Override
-    public void createPopup(PopupWithChoicesCreateRequest popupWithChoicesCreateRequest) {
+    public PopupCreateResponse createPopup(
+            PopupWithChoicesCreateRequest popupWithChoicesCreateRequest) {
         Manager manager = managerUtil.getCurrentManager();
         Popup popup =
                 createPopupFromRequest(manager, popupWithChoicesCreateRequest.popupCreateRequest());
         popupRepository.save(popup);
 
         createSurveyFromRequest(popup, popupWithChoicesCreateRequest.choiceCreateRequestList());
+
+        return PopupCreateResponse.of(popup.getId());
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

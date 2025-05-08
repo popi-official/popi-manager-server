@@ -57,16 +57,16 @@ public class Item extends BaseTimeEntity {
             String name,
             String imageUrl,
             int price,
-            int qty,
-            int minQty,
+            int stock,
+            int minStock,
             String location) {
         return Item.builder()
                 .popup(popup)
                 .name(name)
                 .imageUrl(imageUrl)
                 .price(price)
-                .stock(qty)
-                .minStock(minQty)
+                .stock(stock)
+                .minStock(minStock)
                 .location(location)
                 .build();
     }

@@ -45,6 +45,7 @@ public class PopupServiceImpl implements PopupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PopupPreviewResponse> findAllPopups() {
         Long managerId = managerUtil.getCurrentManagerId();
         return popupRepository.findAllPopupsByManagerId(managerId);

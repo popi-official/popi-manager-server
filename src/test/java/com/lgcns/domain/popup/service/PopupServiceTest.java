@@ -100,7 +100,10 @@ public class PopupServiceTest extends IntegrationTest {
             List<PopupPreviewResponse> popupPreviewResponseList = popupService.findAllPopups();
 
             // then
-            assertThat(popupPreviewResponseList).hasSize(2);
+            Assertions.assertAll(
+                    () -> assertThat(popupPreviewResponseList).hasSize(2),
+                    () -> assertThat(popupPreviewResponseList.get(0).popupId()).isEqualTo(2L),
+                    () -> assertThat(popupPreviewResponseList.get(1).popupId()).isEqualTo(1L));
         }
     }
 

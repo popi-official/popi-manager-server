@@ -20,11 +20,11 @@ public class ImageController {
 
     private final ImageService imageService;
 
+    @PostMapping("/presigned-url")
     @Operation(
             summary = "이미지 업로드용 Presigned URL 생성",
             description =
                     "디렉토리(popup/item)와 확장자(png/jpeg)에 따라 이미지를 업로드할 수 있는 Presigned URL을 생성합니다.")
-    @PostMapping("/presigned-url")
     public PresignedUrlResponse presignedUrlResponse(
             @Valid @RequestBody ImageUploadRequest request) {
         return imageService.createPresignedUrl(request);

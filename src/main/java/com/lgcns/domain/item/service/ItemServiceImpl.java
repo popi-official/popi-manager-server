@@ -9,6 +9,7 @@ import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -51,40 +52,38 @@ public class ItemServiceImpl implements ItemService {
 
         Popup popup = findPopupById(popupId);
 
-        // 업로드된 엑셀 파일을 읽어오기 위해 OPCPackage로 open
-        OPCPackage opcPackage = OPCPackage.open(itemFile.getInputStream());
+        // try-with-resources
+        try (InputStream inputStream = itemFile.getInputStream();
+                OPCPackage opcPackage = OPCPackage.open(inputStream);
+                XSSFWorkbook workbook = new XSSFWorkbook(opcPackage)) {
 
-        // XSSFWorkbook 객체로 변환 (xlsx 전용)
-        XSSFWorkbook workbook = new XSSFWorkbook(opcPackage);
+            // 첫 번째 sheet 읽기
+            String sheetName = workbook.getSheetName(0);
+            Sheet sheet = workbook.getSheet(sheetName);
 
-        // 첫 번째 sheet 읽기
-        String sheetName = workbook.getSheetName(0);
-        Sheet sheet = workbook.getSheet(sheetName);
+            int rows = sheet.getPhysicalNumberOfRows();
+            List<Item> items = new ArrayList<>();
 
-        int rows = sheet.getPhysicalNumberOfRows();
-        List<Item> items = new ArrayList<>();
+            // row 0은 header
+            for (int rowIndex = 0; rowIndex <= rows; rowIndex++) {
+                Row row = sheet.getRow(rowIndex);
 
-        // row 0은 header
-        for (int rowIndex = 0; rowIndex <= rows; rowIndex++) {
-            Row row = sheet.getRow(rowIndex);
+                if (rowIndex == 0 || row == null) {
+                    continue;
+                }
 
-            if (rowIndex == 0 || row == null) {
-                continue;
+                String name = row.getCell(0).getStringCellValue();
+                String imageUrl = row.getCell(1).getStringCellValue();
+                int price = (int) row.getCell(2).getNumericCellValue();
+                int stock = (int) row.getCell(3).getNumericCellValue();
+                int minStock = (int) row.getCell(4).getNumericCellValue();
+                String location = row.getCell(5).getStringCellValue();
+
+                items.add(Item.createItem(popup, name, imageUrl, price, stock, minStock, location));
             }
 
-            String name = row.getCell(0).getStringCellValue();
-            String imageUrl = row.getCell(1).getStringCellValue();
-            int price = (int) row.getCell(2).getNumericCellValue();
-            int stock = (int) row.getCell(3).getNumericCellValue();
-            int minStock = (int) row.getCell(4).getNumericCellValue();
-            String location = row.getCell(5).getStringCellValue();
-
-            items.add(Item.createItem(popup, name, imageUrl, price, stock, minStock, location));
+            itemRepository.saveAll(items);
         }
-
-        itemRepository.saveAll(items);
-
-        workbook.close();
     }
 
     private Popup findPopupById(Long popupId) {

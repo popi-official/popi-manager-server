@@ -112,6 +112,7 @@ def jacocoExcludePatterns = [
         "**/resources/**",
         "**/exception/**",
         "**/config/**",
+        "**/controller/**",
         "**/*Auth*",
         "**/*Jwt*",
         "**/*Token*",

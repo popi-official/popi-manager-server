@@ -22,10 +22,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    @Operation(summary = "단일 상품 등록", description = "단일 상품을 등록합니다.")
+    @Operation(summary = "단일 상품 등록", description = "단일 상품 정보를 모두 기입 한 후 등록합니다.")
     public ResponseEntity<Void> itemCreate(
-            @PathVariable Long popupId, @RequestBody @Valid ItemCreateRequest request) {
-
+            @PathVariable Long popupId, @Valid @RequestBody ItemCreateRequest request) {
         itemService.createItem(popupId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -35,7 +34,6 @@ public class ItemController {
     public ResponseEntity<Void> itemCreateByExcel(
             @PathVariable Long popupId, @RequestPart(value = "itemFile") MultipartFile itemFile)
             throws IOException, InvalidFormatException {
-
         itemService.createItemByExcel(popupId, itemFile);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

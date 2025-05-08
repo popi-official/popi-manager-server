@@ -64,9 +64,13 @@ public class ItemServiceImpl implements ItemService {
         int rows = sheet.getPhysicalNumberOfRows();
         List<Item> items = new ArrayList<>();
 
-        // row 0은 보통 header -> row 1부터 읽기
-        for (int rowIndex = 1; rowIndex <= rows; rowIndex++) {
+        // row 0은 header
+        for (int rowIndex = 0; rowIndex <= rows; rowIndex++) {
             Row row = sheet.getRow(rowIndex);
+
+            if (rowIndex == 0 || row == null) {
+                continue;
+            }
 
             String name = row.getCell(0).getStringCellValue();
             String imageUrl = row.getCell(1).getStringCellValue();

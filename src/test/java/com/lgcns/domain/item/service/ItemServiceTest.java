@@ -110,13 +110,9 @@ class ItemServiceTest extends IntegrationTest {
                             "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1");
 
             // when & then
-            CustomException exception =
-                    assertThrows(
-                            CustomException.class,
-                            () -> {
-                                itemService.createItem(popupId, request);
-                            });
-            assertThat(exception.getErrorCode()).isEqualTo(PopupErrorCode.POPUP_NOT_FOUND);
+            assertThatThrownBy(() -> itemService.createItem(popupId, request))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }
 
         private ItemCreateRequest createItemCreateRequest() {
@@ -180,12 +176,22 @@ class ItemServiceTest extends IntegrationTest {
 
             // when & then
             assertThatThrownBy(() -> itemService.createItemByExcel(nonExistentPopupId, excelFile))
+                    .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }
 
         private MultipartFile createExcelFile() throws IOException {
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Items");
+
+            // 헤더
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("상품명");
+            headerRow.createCell(1).setCellValue("이미지URL");
+            headerRow.createCell(2).setCellValue("가격");
+            headerRow.createCell(3).setCellValue("재고");
+            headerRow.createCell(4).setCellValue("최소재고");
+            headerRow.createCell(5).setCellValue("위치");
 
             // 데이터
             Row dataRow1 = sheet.createRow(1);

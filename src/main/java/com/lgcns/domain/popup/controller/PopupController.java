@@ -2,10 +2,12 @@ package com.lgcns.domain.popup.controller;
 
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
+import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.lgcns.domain.popup.service.PopupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +27,12 @@ public class PopupController {
             @RequestBody @Valid PopupWithChoicesCreateRequest popupWithChoicesCreateRequest) {
         PopupCreateResponse response = popupService.createPopup(popupWithChoicesCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    @Operation(summary = "팝업 목록 조회", description = "모든 팝업스토어 정보를 조회합니다.")
+    public ResponseEntity<List<PopupPreviewResponse>> popupFindAll() {
+        List<PopupPreviewResponse> popupPreviewResponseList = popupService.findAllPopups();
+        return ResponseEntity.ok(popupPreviewResponseList);
     }
 }

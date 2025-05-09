@@ -50,6 +50,11 @@ class ItemServiceTest extends IntegrationTest {
     private Manager manager;
     private Popup popup;
 
+    protected Item createTestItem() {
+        return itemRepository.save(
+                Item.createItem(popup, "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1"));
+    }
+
     @BeforeEach
     void setUp() {
         manager = managerRepository.save(Manager.createManager("testManager1", "testPassword"));
@@ -367,6 +372,58 @@ class ItemServiceTest extends IntegrationTest {
                     () -> assertThat(result.get("c").get(0).itemId()).isEqualTo(item3.getId()),
                     () -> assertThat(result.get("d").get(0).itemId()).isEqualTo(item4.getId()),
                     () -> assertThat(result.get("e").get(0).itemId()).isEqualTo(item5.getId()));
+        }
+    }
+
+    @Nested
+    class 상품_삭제 {
+        @Test
+        @Transactional
+        void 정상적으로_상품을_삭제한다() {
+            // given
+            Item savedItem = createTestItem();
+
+            // when
+            itemService.deleteItem(savedItem.getId());
+
+            // then
+            assertThat(itemRepository.findById(savedItem.getId())).isEmpty();
+        }
+
+        @Test
+        @Transactional
+        void 존재하지_않는_상품을_삭제하면_예외가_발생한다() {
+            // given
+            Long nonExistentItemId = 9999L;
+
+            // when & then
+            assertThatThrownBy(() -> itemService.deleteItem(nonExistentItemId))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_NOT_FOUND);
+        }
+
+        @Test
+        @Transactional
+        void 권한이_없는_사용자가_삭제하면_예외가_발생한다() {
+            // given
+            Item savedItem = createTestItem();
+
+            // 다른 관리자로 로그인
+            Manager otherManager =
+                    managerRepository.save(Manager.createManager("otherManager", "testPassword"));
+            UserDetails otherUserDetails =
+                    new PrincipalDetails(otherManager.getId(), otherManager.getRole(), null);
+            UsernamePasswordAuthenticationToken token =
+                    new UsernamePasswordAuthenticationToken(
+                            otherUserDetails, null, otherUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(token);
+
+            // when & then
+            // when & then
+            assertThatThrownBy(() -> itemService.deleteItem(savedItem.getId()))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue(
+                            "errorCode", ItemErrorCode.ITEM_DELETE_UNAUTHORIZED);
         }
     }
 }

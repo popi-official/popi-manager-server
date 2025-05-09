@@ -419,7 +419,6 @@ class ItemServiceTest extends IntegrationTest {
             SecurityContextHolder.getContext().setAuthentication(token);
 
             // when & then
-            // when & then
             assertThatThrownBy(() -> itemService.deleteItem(savedItem.getId()))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue(

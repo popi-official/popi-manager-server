@@ -1,7 +1,11 @@
 package com.lgcns.domain.item.repository;
 
-import com.lgcns.domain.item.domain.Item;
-import com.lgcns.domain.item.domain.QItem;
+import static com.lgcns.domain.item.domain.QItem.item;
+
+import com.lgcns.domain.item.dto.ItemLocationProjection;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +18,25 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<Item> findAllItemsByPopupId(Long popupId) {
-        QItem item = QItem.item;
+    public List<ItemLocationProjection> findItemsWithSplitLocation(Long popupId) {
+        StringExpression firstLetter =
+                Expressions.stringTemplate("SUBSTRING({0}, 1, 1)", item.location);
+        StringExpression lastLetter =
+                Expressions.stringTemplate("SUBSTRING({0}, 2)", item.location);
 
-        return queryFactory.selectFrom(item).where(item.popup.id.eq(popupId)).fetch();
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                ItemLocationProjection.class,
+                                item.id,
+                                item.name,
+                                item.imageUrl,
+                                item.price,
+                                item.stock,
+                                firstLetter,
+                                lastLetter))
+                .from(item)
+                .where(item.popup.id.eq(popupId))
+                .fetch();
     }
 }

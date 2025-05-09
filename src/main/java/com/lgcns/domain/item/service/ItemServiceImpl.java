@@ -1,10 +1,12 @@
 package com.lgcns.domain.item.service;
 
 import com.lgcns.domain.item.domain.Item;
+import com.lgcns.domain.item.dto.ItemLocationProjection;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
+import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
@@ -100,52 +102,42 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId) {
-        List<Item> items = itemRepository.findAllItemsByPopupId(popupId);
+        List<ItemLocationProjection> projections =
+                itemRepository.findItemsWithSplitLocation(popupId);
 
-        if (items.isEmpty()) {
-            throw new CustomException(ItemErrorCode.EMPTY_ITEM_LIST);
-        }
-
-        return processAndGroupItems(items);
+        return groupItemsByLocation(projections);
     }
 
-    private Map<String, List<ItemPreviewResponse>> processAndGroupItems(List<Item> items) {
-        return items.stream()
+    private Map<String, List<ItemPreviewResponse>> groupItemsByLocation(
+            List<ItemLocationProjection> projections) {
+        return projections.stream()
                 .collect(
                         Collectors.groupingBy(
-                                item -> String.valueOf(item.getLocation().charAt(0)),
+                                ItemLocationProjection::locationGroup,
                                 Collectors.mapping(
-                                        item -> mapToItemPreviewResponse(item),
+                                        ItemLocationProjection::toPreviewResponse,
                                         Collectors.toList())));
-    }
-
-    private ItemPreviewResponse mapToItemPreviewResponse(Item item) {
-        return ItemPreviewResponse.of(
-                item.getLocation().substring(1),
-                item.getId(),
-                item.getName(),
-                item.getImageUrl(),
-                item.getPrice(),
-                item.getStock());
     }
 
     @Override
     public void deleteItem(Long itemId) {
-        Item item =
-                itemRepository
-                        .findById(itemId)
-                        .orElseThrow(() -> new CustomException(ItemErrorCode.ITEM_NOT_FOUND));
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Item item = findByItemId(itemId);
 
-        validateItemOwnership(item);
+        validateItemOwnership(currentManager, item);
 
         itemRepository.delete(item);
     }
 
-    private void validateItemOwnership(Item item) {
-        Long currentManagerId = managerUtil.getCurrentManagerId();
-
-        if (!item.getPopup().getManager().getId().equals(currentManagerId)) {
+    private void validateItemOwnership(Manager currentManager, Item item) {
+        if (!item.getPopup().getManager().equals(currentManager)) {
             throw new CustomException(ItemErrorCode.ITEM_DELETE_UNAUTHORIZED);
         }
+    }
+
+    private Item findByItemId(Long itemId) {
+        return itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new CustomException(ItemErrorCode.ITEM_NOT_FOUND));
     }
 }

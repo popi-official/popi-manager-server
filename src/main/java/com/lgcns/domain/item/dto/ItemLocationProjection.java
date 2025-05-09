@@ -9,16 +9,9 @@ public record ItemLocationProjection(
         int price,
         int stock,
         String locationGroup, // 위치의 첫 글자 (a, b, c 등)
-        String locationNumber  // 위치의 숫자 부분
-) {
+        String locationNumber // 위치의 숫자 부분
+        ) {
     public ItemPreviewResponse toPreviewResponse() {
-        return ItemPreviewResponse.of(
-                locationNumber,
-                id,
-                name,
-                imageUrl,
-                price,
-                stock
-        );
+        return ItemPreviewResponse.of(locationNumber, id, name, imageUrl, price, stock);
     }
 }

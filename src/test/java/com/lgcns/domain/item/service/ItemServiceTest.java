@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
+import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
@@ -22,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -228,6 +231,142 @@ class ItemServiceTest extends IntegrationTest {
                     "test_items.xlsx",
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     new ByteArrayInputStream(outputStream.toByteArray()));
+        }
+    }
+
+    @Nested
+    class 상품_목록_조회 {
+        @Test
+        @Transactional
+        void 상품_목록_조회에_성공한다() {
+            // given
+            Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+
+            // when
+            Map<String, List<ItemPreviewResponse>> result = itemService.findAllItems(popupId);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result).hasSize(2), // 'a'와 'b' 두 그룹
+                    () -> assertThat(result).containsKeys("a", "b"),
+                    () -> assertThat(result.get("a")).hasSize(2), // 'a' 그룹에 2개 아이템
+                    () -> assertThat(result.get("b")).hasSize(1), // 'b' 그룹에 1개 아이템
+
+                    // a 그룹 첫 번째 아이템 검증
+                    () -> assertThat(result.get("a").get(0).location()).isEqualTo("1"),
+                    () -> assertThat(result.get("a").get(0).itemId()).isEqualTo(item1.getId()),
+                    () -> assertThat(result.get("a").get(0).name()).isEqualTo("지수 포토카드"),
+                    () ->
+                            assertThat(result.get("a").get(0).imageUrl())
+                                    .isEqualTo("https://bucket/jisoo.jpg"),
+                    () -> assertThat(result.get("a").get(0).price()).isEqualTo(5000),
+                    () -> assertThat(result.get("a").get(0).stock()).isEqualTo(50),
+
+                    // a 그룹 두 번째 아이템 검증
+                    () -> assertThat(result.get("a").get(1).location()).isEqualTo("2"),
+                    () -> assertThat(result.get("a").get(1).itemId()).isEqualTo(item2.getId()),
+                    () -> assertThat(result.get("a").get(1).name()).isEqualTo("제니 포토카드"),
+                    () ->
+                            assertThat(result.get("a").get(1).imageUrl())
+                                    .isEqualTo("https://bucket/jennie.jpg"),
+                    () -> assertThat(result.get("a").get(1).price()).isEqualTo(15000),
+                    () -> assertThat(result.get("a").get(1).stock()).isEqualTo(100),
+
+                    // b 그룹 첫 번째 아이템 검증
+                    () -> assertThat(result.get("b").get(0).location()).isEqualTo("1"),
+                    () -> assertThat(result.get("b").get(0).itemId()).isEqualTo(item3.getId()),
+                    () -> assertThat(result.get("b").get(0).name()).isEqualTo("로제 포토카드"),
+                    () ->
+                            assertThat(result.get("b").get(0).imageUrl())
+                                    .isEqualTo("https://bucket/rose.jpg"),
+                    () -> assertThat(result.get("b").get(0).price()).isEqualTo(15000),
+                    () -> assertThat(result.get("b").get(0).stock()).isEqualTo(100));
+        }
+
+        @Test
+        @Transactional
+        void 팝업에_상품이_없으면_예외가_발생한() {
+            // given
+            Long popupId = popup.getId();
+
+            // when & then
+            assertThatThrownBy(() -> itemService.findAllItems(popupId))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.EMPTY_ITEM_LIST);
+        }
+
+        @Test
+        @Transactional
+        void 여러_위치에_존재하는_상품_목록을_조회한다() {
+            //  given
+            Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "b1");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "c1");
+            Item item4 =
+                    Item.createItem(
+                            popup, "리사 포토카드", "https://bucket/lisa.jpg", 15000, 100, 10, "d1");
+            Item item5 =
+                    Item.createItem(
+                            popup, "블랙핑크 포스터", "https://bucket/blackpink.jpg", 25000, 30, 3, "e1");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+            itemRepository.save(item4);
+            itemRepository.save(item5);
+
+            // when
+            Map<String, List<ItemPreviewResponse>> result = itemService.findAllItems(popupId);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result).hasSize(5), // 'a', 'b', 'c', 'd', 'e' 다섯 그룹
+                    () -> assertThat(result).containsKeys("a", "b", "c", "d", "e"),
+
+                    // 각 그룹에 아이템이 1개씩 있는지 확인
+                    () -> assertThat(result.get("a")).hasSize(1),
+                    () -> assertThat(result.get("b")).hasSize(1),
+                    () -> assertThat(result.get("c")).hasSize(1),
+                    () -> assertThat(result.get("d")).hasSize(1),
+                    () -> assertThat(result.get("e")).hasSize(1),
+
+                    // 각 아이템의 location 값이 올바르게 추출되었는지 확인
+                    () -> assertThat(result.get("a").get(0).location()).isEqualTo("1"),
+                    () -> assertThat(result.get("b").get(0).location()).isEqualTo("1"),
+                    () -> assertThat(result.get("c").get(0).location()).isEqualTo("1"),
+                    () -> assertThat(result.get("d").get(0).location()).isEqualTo("1"),
+                    () -> assertThat(result.get("e").get(0).location()).isEqualTo("1"),
+
+                    // 각 아이템의 itemId가 원본 Item과 일치하는지 확인
+                    () -> assertThat(result.get("a").get(0).itemId()).isEqualTo(item1.getId()),
+                    () -> assertThat(result.get("b").get(0).itemId()).isEqualTo(item2.getId()),
+                    () -> assertThat(result.get("c").get(0).itemId()).isEqualTo(item3.getId()),
+                    () -> assertThat(result.get("d").get(0).itemId()).isEqualTo(item4.getId()),
+                    () -> assertThat(result.get("e").get(0).itemId()).isEqualTo(item5.getId()));
         }
     }
 }

@@ -46,4 +46,11 @@ public class ItemController {
     public Map<String, List<ItemPreviewResponse>> itemFindAll(@PathVariable Long popupId) {
         return itemService.findAllItems(popupId);
     }
+
+    @DeleteMapping("/{itemId}")
+    @Operation(summary = "상품 삭제", description = "선택한 상품을 삭제합니다.")
+    public ResponseEntity<Void> itemDelete(@PathVariable Long itemId) {
+        itemService.deleteItem(itemId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

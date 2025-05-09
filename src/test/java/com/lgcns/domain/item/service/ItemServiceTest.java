@@ -49,13 +49,13 @@ class ItemServiceTest extends IntegrationTest {
     private Manager manager;
     private Popup popup;
 
-    protected Item createTestItem() {
+    private Item createTestItem() {
         return itemRepository.save(
                 Item.createItem(popup, "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1"));
     }
 
     // 새로운 관리자를 생성하고 해당 관리자로 로그인 상태로 변경
-    protected Manager loginAsNewManager(String username) {
+    private Manager loginAsNewManager(String username) {
         Manager newManager =
                 managerRepository.save(Manager.createManager(username, "testPassword"));
         loginAs(newManager);
@@ -63,7 +63,7 @@ class ItemServiceTest extends IntegrationTest {
     }
 
     // 지정된 관리자로 로그인 상태로 변경
-    protected void loginAs(Manager manager) {
+    private void loginAs(Manager manager) {
         UserDetails userDetails = new PrincipalDetails(manager.getId(), manager.getRole(), null);
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(

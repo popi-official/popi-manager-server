@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ItemErrorCode implements ErrorCode {
-    ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상품을 찾을 수 없습니다."),
-    ITEM_NOT_FOUND_IN_POPUP(HttpStatus.NOT_FOUND, "해당 팝업에 등록된 상품이 아닙니다.");
+    ITEM_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 상품을 찾을 수 없습니다."),
+    ITEM_NOT_FOUND_IN_POPUP(HttpStatus.BAD_REQUEST, "해당 팝업에 등록된 상품이 아닙니다.");
     private final HttpStatus httpStatus;
     private final String message;
 }

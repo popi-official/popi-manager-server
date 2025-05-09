@@ -3,6 +3,7 @@ package com.lgcns.domain.item.service;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
+import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -15,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -97,21 +97,24 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId){
+    public Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId) {
         List<Item> items = itemRepository.findAllItemsByPopupId(popupId);
+
+        if (items.isEmpty()) {
+            throw new CustomException(ItemErrorCode.EMPTY_ITEM_LIST);
+        }
 
         return processAndGroupItems(items);
     }
 
-    private Map<String, List<ItemPreviewResponse>> processAndGroupItems(List<Item> items){
+    private Map<String, List<ItemPreviewResponse>> processAndGroupItems(List<Item> items) {
         return items.stream()
-                .collect(Collectors.groupingBy(
-                        item -> String.valueOf(item.getLocation().charAt(0)),
-                        Collectors.mapping(
-                                item -> mapToItemPreviewResponse(item),
-                                Collectors.toList()
-                        )
-                ));
+                .collect(
+                        Collectors.groupingBy(
+                                item -> String.valueOf(item.getLocation().charAt(0)),
+                                Collectors.mapping(
+                                        item -> mapToItemPreviewResponse(item),
+                                        Collectors.toList())));
     }
 
     private ItemPreviewResponse mapToItemPreviewResponse(Item item) {
@@ -121,7 +124,6 @@ public class ItemServiceImpl implements ItemService {
                 item.getName(),
                 item.getImageUrl(),
                 item.getPrice(),
-                item.getStock()
-        );
+                item.getStock());
     }
 }

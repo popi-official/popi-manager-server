@@ -55,6 +55,23 @@ class ItemServiceTest extends IntegrationTest {
                 Item.createItem(popup, "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1"));
     }
 
+    // 새로운 관리자를 생성하고 해당 관리자로 로그인 상태로 변경
+    protected Manager loginAsNewManager(String username) {
+        Manager newManager =
+                managerRepository.save(Manager.createManager(username, "testPassword"));
+        loginAs(newManager);
+        return newManager;
+    }
+
+    // 지정된 관리자로 로그인 상태로 변경
+    protected void loginAs(Manager manager) {
+        UserDetails userDetails = new PrincipalDetails(manager.getId(), manager.getRole(), null);
+        UsernamePasswordAuthenticationToken token =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(token);
+    }
+
     @BeforeEach
     void setUp() {
         manager = managerRepository.save(Manager.createManager("testManager1", "testPassword"));
@@ -113,9 +130,7 @@ class ItemServiceTest extends IntegrationTest {
         void 존재하지_않는_팝업_ID로_상품_등록을_시도하면_실패한다() {
             // given
             final Long popupId = 9999L;
-            ItemCreateRequest request =
-                    new ItemCreateRequest(
-                            "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1");
+            ItemCreateRequest request = createItemCreateRequest();
 
             // when & then
             assertThatThrownBy(() -> itemService.createItem(popupId, request))
@@ -125,6 +140,21 @@ class ItemServiceTest extends IntegrationTest {
 
         private ItemCreateRequest createItemCreateRequest() {
             return new ItemCreateRequest("테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1");
+        }
+
+        @Test
+        @Transactional
+        void 권한이_없는_사용자가_상품을_등록하면_예외가_발생한다() {
+            // give
+            Manager otherManager = loginAsNewManager("otherManager");
+
+            ItemCreateRequest request = createItemCreateRequest();
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItem(popup.getId(), request))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue(
+                            "errorCode", ItemErrorCode.ITEM_CREATE_UNAUTHORIZED);
         }
     }
 
@@ -236,6 +266,21 @@ class ItemServiceTest extends IntegrationTest {
                     "test_items.xlsx",
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     new ByteArrayInputStream(outputStream.toByteArray()));
+        }
+
+        @Test
+        @Transactional
+        void 권한이_없는_사용자가_엑셀로_상품을_등록하면_예외가_발생한다() throws IOException {
+            // given
+            Manager otherManager = loginAsNewManager("otherManager");
+
+            MultipartFile excelFile = createExcelFile();
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), excelFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue(
+                            "errorCode", ItemErrorCode.ITEM_CREATE_UNAUTHORIZED);
         }
     }
 

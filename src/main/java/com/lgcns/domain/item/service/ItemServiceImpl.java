@@ -39,7 +39,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void createItem(Long popupId, ItemCreateRequest request) {
-        Popup popup = findPopupById(popupId);
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
+
+        validatePopupOwnership(currentManager, popup);
 
         Item item =
                 Item.createItem(
@@ -57,8 +60,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void createItemByExcel(Long popupId, MultipartFile itemFile)
             throws InvalidFormatException, IOException {
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
 
-        Popup popup = findPopupById(popupId);
+        validatePopupOwnership(currentManager, popup);
 
         // try-with-resources
         try (InputStream inputStream = itemFile.getInputStream();
@@ -127,6 +132,12 @@ public class ItemServiceImpl implements ItemService {
         validateItemOwnership(currentManager, item);
 
         itemRepository.delete(item);
+    }
+
+    private void validatePopupOwnership(Manager manager, Popup popup) {
+        if (!popup.getManager().equals(manager)) {
+            throw new CustomException(ItemErrorCode.ITEM_CREATE_UNAUTHORIZED);
+        }
     }
 
     private void validateItemOwnership(Manager currentManager, Item item) {

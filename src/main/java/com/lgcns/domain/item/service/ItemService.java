@@ -17,5 +17,5 @@ public interface ItemService {
 
     Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId);
 
-    void deleteItem(Long itemId);
+    void deleteItem(Long popupId, Long itemId);
 }

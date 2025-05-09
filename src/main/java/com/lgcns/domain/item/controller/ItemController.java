@@ -49,8 +49,8 @@ public class ItemController {
 
     @DeleteMapping("/{itemId}")
     @Operation(summary = "상품 삭제", description = "선택한 상품을 삭제합니다.")
-    public ResponseEntity<Void> itemDelete(@PathVariable Long itemId) {
-        itemService.deleteItem(itemId);
+    public ResponseEntity<Void> itemDelete(@PathVariable Long popupId, @PathVariable Long itemId) {
+        itemService.deleteItem(popupId, itemId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

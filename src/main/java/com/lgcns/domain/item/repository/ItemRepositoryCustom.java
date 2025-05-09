@@ -1,8 +1,8 @@
 package com.lgcns.domain.item.repository;
 
-import com.lgcns.domain.item.dto.ItemLocationProjection;
+import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import java.util.List;
 
 public interface ItemRepositoryCustom {
-    List<ItemLocationProjection> findItemsWithSplitLocation(Long popupId);
+    List<ItemLocationResponse> findItemsWithSplitLocation(Long popupId);
 }

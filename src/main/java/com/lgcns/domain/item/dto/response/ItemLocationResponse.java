@@ -1,8 +1,6 @@
-package com.lgcns.domain.item.dto;
+package com.lgcns.domain.item.dto.response;
 
-import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
-
-public record ItemLocationProjection(
+public record ItemLocationResponse(
         Long id,
         String name,
         String imageUrl,

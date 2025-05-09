@@ -1,8 +1,8 @@
 package com.lgcns.domain.item.service;
 
 import com.lgcns.domain.item.domain.Item;
-import com.lgcns.domain.item.dto.ItemLocationProjection;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
@@ -107,42 +107,44 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId) {
-        List<ItemLocationProjection> projections =
-                itemRepository.findItemsWithSplitLocation(popupId);
+        List<ItemLocationResponse> projections = itemRepository.findItemsWithSplitLocation(popupId);
 
         return groupItemsByLocation(projections);
     }
 
     private Map<String, List<ItemPreviewResponse>> groupItemsByLocation(
-            List<ItemLocationProjection> projections) {
+            List<ItemLocationResponse> projections) {
         return projections.stream()
                 .collect(
                         Collectors.groupingBy(
-                                ItemLocationProjection::locationGroup,
+                                ItemLocationResponse::locationGroup,
                                 Collectors.mapping(
-                                        ItemLocationProjection::toPreviewResponse,
+                                        ItemLocationResponse::toPreviewResponse,
                                         Collectors.toList())));
     }
 
     @Override
-    public void deleteItem(Long itemId) {
+    public void deleteItem(Long popupId, Long itemId) {
         final Manager currentManager = managerUtil.getCurrentManager();
-        final Item item = findByItemId(itemId);
 
-        validateItemOwnership(currentManager, item);
+        final Popup popup = findPopupById(popupId);
+        validatePopupOwnership(currentManager, popup);
+
+        final Item item = findByItemId(itemId);
+        validateItemBelongsToPopup(item, popupId);
 
         itemRepository.delete(item);
     }
 
     private void validatePopupOwnership(Manager manager, Popup popup) {
         if (!popup.getManager().equals(manager)) {
-            throw new CustomException(ItemErrorCode.ITEM_CREATE_UNAUTHORIZED);
+            throw new CustomException(PopupErrorCode.POPUP_UNAUTHORIZED);
         }
     }
 
-    private void validateItemOwnership(Manager currentManager, Item item) {
-        if (!item.getPopup().getManager().equals(currentManager)) {
-            throw new CustomException(ItemErrorCode.ITEM_DELETE_UNAUTHORIZED);
+    private void validateItemBelongsToPopup(Item item, Long popupId) {
+        if (!item.getPopup().getId().equals(popupId)) {
+            throw new CustomException(ItemErrorCode.ITEM_NOT_FOUND_IN_POPUP);
         }
     }
 

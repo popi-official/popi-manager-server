@@ -2,7 +2,7 @@ package com.lgcns.domain.item.repository;
 
 import static com.lgcns.domain.item.domain.QItem.item;
 
-import com.lgcns.domain.item.dto.ItemLocationProjection;
+import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
@@ -18,7 +18,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<ItemLocationProjection> findItemsWithSplitLocation(Long popupId) {
+    public List<ItemLocationResponse> findItemsWithSplitLocation(Long popupId) {
         StringExpression firstLetter =
                 Expressions.stringTemplate("SUBSTRING({0}, 1, 1)", item.location);
         StringExpression lastLetter =
@@ -27,7 +27,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return queryFactory
                 .select(
                         Projections.constructor(
-                                ItemLocationProjection.class,
+                                ItemLocationResponse.class,
                                 item.id,
                                 item.name,
                                 item.imageUrl,

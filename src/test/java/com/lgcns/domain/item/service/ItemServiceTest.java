@@ -2,7 +2,6 @@ package com.lgcns.domain.item.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.item.domain.Item;
@@ -153,8 +152,7 @@ class ItemServiceTest extends IntegrationTest {
             // when & then
             assertThatThrownBy(() -> itemService.createItem(popup.getId(), request))
                     .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue(
-                            "errorCode", ItemErrorCode.ITEM_CREATE_UNAUTHORIZED);
+                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
         }
     }
 
@@ -279,8 +277,7 @@ class ItemServiceTest extends IntegrationTest {
             // when & then
             assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), excelFile))
                     .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue(
-                            "errorCode", ItemErrorCode.ITEM_CREATE_UNAUTHORIZED);
+                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
         }
     }
 
@@ -417,7 +414,7 @@ class ItemServiceTest extends IntegrationTest {
             Item savedItem = createTestItem();
 
             // when
-            itemService.deleteItem(savedItem.getId());
+            itemService.deleteItem(popup.getId(), savedItem.getId());
 
             // then
             assertThat(itemRepository.findById(savedItem.getId())).isEmpty();
@@ -430,32 +427,43 @@ class ItemServiceTest extends IntegrationTest {
             Long nonExistentItemId = 9999L;
 
             // when & then
-            assertThatThrownBy(() -> itemService.deleteItem(nonExistentItemId))
+            assertThatThrownBy(() -> itemService.deleteItem(popup.getId(), nonExistentItemId))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_NOT_FOUND);
         }
 
         @Test
         @Transactional
-        void 권한이_없는_사용자가_삭제하면_예외가_발생한다() {
+        void 상품이_해당_팝업에_속하지_않으면_예외가_발생한다() {
             // given
             Item savedItem = createTestItem();
 
-            // 다른 관리자로 로그인
-            Manager otherManager =
-                    managerRepository.save(Manager.createManager("otherManager", "testPassword"));
-            UserDetails otherUserDetails =
-                    new PrincipalDetails(otherManager.getId(), otherManager.getRole(), null);
-            UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(
-                            otherUserDetails, null, otherUserDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(token);
+            Popup anotherPopup =
+                    Popup.createPopup(
+                            manager, // 동일한 관리자
+                            "anotherPopup",
+                            "https://bucket/another.jpg",
+                            LocalDate.parse("2025-01-01"),
+                            LocalDate.parse("2025-01-31"),
+                            LocalDateTime.parse("2025-01-01T10:00:00"),
+                            LocalDateTime.parse("2025-01-31T20:00:00"),
+                            LocalTime.parse("10:00:00"),
+                            LocalTime.parse("20:00:00"),
+                            100,
+                            20,
+                            "서울특별시 강남구 테헤란로 456",
+                            "5층 B호",
+                            37.654321,
+                            127.654321);
+            Popup savedAnotherPopup = popupRepository.save(anotherPopup);
+
+            Long wrongPopupId = savedAnotherPopup.getId();
 
             // when & then
-            assertThatThrownBy(() -> itemService.deleteItem(savedItem.getId()))
+            assertThatThrownBy(() -> itemService.deleteItem(wrongPopupId, savedItem.getId()))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue(
-                            "errorCode", ItemErrorCode.ITEM_DELETE_UNAUTHORIZED);
+                            "errorCode", ItemErrorCode.ITEM_NOT_FOUND_IN_POPUP);
         }
     }
 }

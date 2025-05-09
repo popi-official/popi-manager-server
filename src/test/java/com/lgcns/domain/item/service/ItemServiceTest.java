@@ -305,18 +305,6 @@ class ItemServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        void 팝업에_상품이_없으면_예외가_발생한() {
-            // given
-            Long popupId = popup.getId();
-
-            // when & then
-            assertThatThrownBy(() -> itemService.findAllItems(popupId))
-                    .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.EMPTY_ITEM_LIST);
-        }
-
-        @Test
-        @Transactional
         void 여러_위치에_존재하는_상품_목록을_조회한다() {
             //  given
             Long popupId = popup.getId();

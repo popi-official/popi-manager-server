@@ -16,4 +16,6 @@ public interface ItemService {
             throws InvalidFormatException, IOException;
 
     Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId);
+
+    void deleteItem(Long itemId);
 }

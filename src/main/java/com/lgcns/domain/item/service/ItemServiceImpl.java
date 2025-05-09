@@ -9,6 +9,7 @@ import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
+import com.lgcns.global.util.ManagerUtil;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,7 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
+    private final ManagerUtil managerUtil;
 
     @Override
     public void createItem(Long popupId, ItemCreateRequest request) {
@@ -125,5 +127,25 @@ public class ItemServiceImpl implements ItemService {
                 item.getImageUrl(),
                 item.getPrice(),
                 item.getStock());
+    }
+
+    @Override
+    public void deleteItem(Long itemId) {
+        Item item =
+                itemRepository
+                        .findById(itemId)
+                        .orElseThrow(() -> new CustomException(ItemErrorCode.ITEM_NOT_FOUND));
+
+        validateItemOwnership(item);
+
+        itemRepository.delete(item);
+    }
+
+    private void validateItemOwnership(Item item) {
+        Long currentManagerId = managerUtil.getCurrentManagerId();
+
+        if (!item.getPopup().getManager().getId().equals(currentManagerId)) {
+            throw new CustomException(ItemErrorCode.ITEM_DELETE_UNAUTHORIZED);
+        }
     }
 }

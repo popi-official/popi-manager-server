@@ -323,6 +323,7 @@ class ItemServiceTest extends IntegrationTest {
                                     .isEqualTo("https://bucket/jisoo.jpg"),
                     () -> assertThat(result.get("a").get(0).price()).isEqualTo(5000),
                     () -> assertThat(result.get("a").get(0).stock()).isEqualTo(50),
+                    () -> assertThat(result.get("a").get(0).minStock()).isEqualTo(5),
 
                     // a 그룹 두 번째 아이템 검증
                     () -> assertThat(result.get("a").get(1).location()).isEqualTo("2"),
@@ -333,6 +334,7 @@ class ItemServiceTest extends IntegrationTest {
                                     .isEqualTo("https://bucket/jennie.jpg"),
                     () -> assertThat(result.get("a").get(1).price()).isEqualTo(15000),
                     () -> assertThat(result.get("a").get(1).stock()).isEqualTo(100),
+                    () -> assertThat(result.get("a").get(1).minStock()).isEqualTo(10),
 
                     // b 그룹 첫 번째 아이템 검증
                     () -> assertThat(result.get("b").get(0).location()).isEqualTo("1"),
@@ -342,7 +344,8 @@ class ItemServiceTest extends IntegrationTest {
                             assertThat(result.get("b").get(0).imageUrl())
                                     .isEqualTo("https://bucket/rose.jpg"),
                     () -> assertThat(result.get("b").get(0).price()).isEqualTo(15000),
-                    () -> assertThat(result.get("b").get(0).stock()).isEqualTo(100));
+                    () -> assertThat(result.get("b").get(0).stock()).isEqualTo(100),
+                    () -> assertThat(result.get("b").get(0).minStock()).isEqualTo(10));
         }
 
         @Test

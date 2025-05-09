@@ -33,6 +33,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                                 item.imageUrl,
                                 item.price,
                                 item.stock,
+                                item.minStock,
                                 firstLetter,
                                 lastLetter))
                 .from(item)

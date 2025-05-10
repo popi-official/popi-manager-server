@@ -13,6 +13,7 @@ public class CookieUtil {
     public HttpHeaders generateRefreshTokenCookie(String refreshToken) {
         ResponseCookie refreshTokenCookie =
                 ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
+                        .domain(".ceo.popi.today")
                         .path("/")
                         .secure(true)
                         .sameSite(Cookie.SameSite.NONE.attributeValue())

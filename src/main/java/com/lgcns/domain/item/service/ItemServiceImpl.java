@@ -2,6 +2,7 @@ package com.lgcns.domain.item.service;
 
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.exception.ItemErrorCode;
@@ -152,5 +153,27 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository
                 .findById(itemId)
                 .orElseThrow(() -> new CustomException(ItemErrorCode.ITEM_NOT_FOUND));
+    }
+
+    private void validateMinStock(Item item, int minStock) {
+        if (minStock > item.getStock()) {
+            throw new CustomException(ItemErrorCode.MIN_STOCK_EXCEEDED);
+        }
+    }
+
+    @Override
+    public ItemDetailResponse updateItemMinStock(Long popupId, Long itemId, int minStock) {
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
+        validatePopupOwnership(currentManager, popup);
+
+        final Item item = findByItemId(itemId);
+        validateItemBelongsToPopup(item, popupId);
+
+        validateMinStock(item, minStock);
+
+        item.updateMinStock(minStock);
+
+        return ItemDetailResponse.from(item);
     }
 }

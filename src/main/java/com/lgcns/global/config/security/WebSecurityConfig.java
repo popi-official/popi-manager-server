@@ -1,7 +1,6 @@
 package com.lgcns.global.config.security;
 
-import static com.lgcns.global.common.constants.UrlConstants.DEV_CLIENT_URL;
-import static com.lgcns.global.common.constants.UrlConstants.LOCAL_CLIENT_URL;
+import static com.lgcns.global.common.constants.UrlConstants.*;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -98,6 +97,7 @@ public class WebSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         if (springEnvironmentHelper.isDevProfile()) {
+            configuration.addAllowedOriginPattern(DEV_SERVER_URL);
             configuration.addAllowedOriginPattern(DEV_CLIENT_URL);
             configuration.addAllowedOriginPattern(LOCAL_CLIENT_URL);
         }

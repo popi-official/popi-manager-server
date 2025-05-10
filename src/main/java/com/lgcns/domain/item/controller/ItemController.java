@@ -1,6 +1,8 @@
 package com.lgcns.domain.item.controller;
 
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
+import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,5 +54,14 @@ public class ItemController {
     public ResponseEntity<Void> itemDelete(@PathVariable Long popupId, @PathVariable Long itemId) {
         itemService.deleteItem(popupId, itemId);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/{itemId}")
+    @Operation(summary = "상품 최소 발주 수량 수정", description = "선택한 상품의 최소 발주 수량을 설정한 값으로 수정합니다.")
+    public ItemDetailResponse itemMinStockUpdate(
+            @PathVariable Long popupId,
+            @PathVariable Long itemId,
+            @Valid @RequestBody ItemMinStockUpdateRequest request) {
+        return itemService.updateItemMinStock(popupId, itemId, request);
     }
 }

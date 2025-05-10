@@ -1,6 +1,8 @@
 package com.lgcns.domain.item.service;
 
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
+import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import java.io.IOException;
 import java.util.List;
@@ -18,4 +20,7 @@ public interface ItemService {
     Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId);
 
     void deleteItem(Long popupId, Long itemId);
+
+    ItemDetailResponse updateItemMinStock(
+            Long popupId, Long itemId, ItemMinStockUpdateRequest request);
 }

@@ -70,4 +70,8 @@ public class Item extends BaseTimeEntity {
                 .location(location)
                 .build();
     }
+
+    public void updateMinStock(int minStock) {
+        this.minStock = minStock;
+    }
 }

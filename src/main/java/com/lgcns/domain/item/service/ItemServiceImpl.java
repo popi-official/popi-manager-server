@@ -144,7 +144,7 @@ public class ItemServiceImpl implements ItemService {
 
     private void validateItemBelongsToPopup(Item item, Long popupId) {
         if (!item.getPopup().getId().equals(popupId)) {
-            throw new CustomException(ItemErrorCode.ITEM_NOT_FOUND_IN_POPUP);
+            throw new CustomException(ItemErrorCode.ITEM_POPUP_MISMATCH);
         }
     }
 

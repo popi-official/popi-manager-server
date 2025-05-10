@@ -15,7 +15,6 @@ import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
-import com.lgcns.global.security.PrincipalDetails;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,9 +33,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,7 +42,8 @@ class ItemServiceTest extends IntegrationTest {
     @Autowired PopupRepository popupRepository;
     @Autowired ManagerRepository managerRepository;
 
-    private Manager manager;
+    private Manager ownerManager;
+    private Manager otherManager;
     private Popup popup;
 
     private Item createTestItem() {
@@ -54,36 +51,18 @@ class ItemServiceTest extends IntegrationTest {
                 Item.createItem(popup, "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1"));
     }
 
-    // 새로운 관리자를 생성하고 해당 관리자로 로그인 상태로 변경
-    private Manager loginAsNewManager(String username) {
-        Manager newManager =
-                managerRepository.save(Manager.createManager(username, "testPassword"));
-        loginAs(newManager);
-        return newManager;
-    }
-
-    // 지정된 관리자로 로그인 상태로 변경
-    private void loginAs(Manager manager) {
-        UserDetails userDetails = new PrincipalDetails(manager.getId(), manager.getRole(), null);
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(token);
-    }
-
     @BeforeEach
     void setUp() {
-        manager = managerRepository.save(Manager.createManager("testManager1", "testPassword"));
+        ownerManager =
+                managerRepository.save(Manager.createManager("testManager1", "testPassword"));
+        otherManager =
+                managerRepository.save(Manager.createManager("otherManager", "testPassword"));
 
-        UserDetails userDetails = new PrincipalDetails(manager.getId(), manager.getRole(), null);
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(token);
+        setAuthentication(ownerManager);
 
         popup =
                 Popup.createPopup(
-                        manager,
+                        ownerManager,
                         "testPopup",
                         "https://bucket/이미지.jpg",
                         LocalDate.parse("2025-01-01"),
@@ -145,7 +124,7 @@ class ItemServiceTest extends IntegrationTest {
         @Transactional
         void 권한이_없는_사용자가_상품을_등록하면_예외가_발생한다() {
             // give
-            Manager otherManager = loginAsNewManager("otherManager");
+            setAuthentication(otherManager);
 
             ItemCreateRequest request = createItemCreateRequest();
 
@@ -270,7 +249,7 @@ class ItemServiceTest extends IntegrationTest {
         @Transactional
         void 권한이_없는_사용자가_엑셀로_상품을_등록하면_예외가_발생한다() throws IOException {
             // given
-            Manager otherManager = loginAsNewManager("otherManager");
+            setAuthentication(otherManager);
 
             MultipartFile excelFile = createExcelFile();
 
@@ -443,7 +422,7 @@ class ItemServiceTest extends IntegrationTest {
 
             Popup anotherPopup =
                     Popup.createPopup(
-                            manager, // 동일한 관리자
+                            ownerManager, // 동일한 관리자
                             "anotherPopup",
                             "https://bucket/another.jpg",
                             LocalDate.parse("2025-01-01"),
@@ -465,8 +444,7 @@ class ItemServiceTest extends IntegrationTest {
             // when & then
             assertThatThrownBy(() -> itemService.deleteItem(wrongPopupId, savedItem.getId()))
                     .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue(
-                            "errorCode", ItemErrorCode.ITEM_NOT_FOUND_IN_POPUP);
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_POPUP_MISMATCH);
         }
     }
 }

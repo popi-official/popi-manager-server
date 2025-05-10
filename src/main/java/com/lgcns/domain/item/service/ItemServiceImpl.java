@@ -2,16 +2,23 @@ package com.lgcns.domain.item.service;
 
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.response.ItemLocationResponse;
+import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
+import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
+import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
+import com.lgcns.global.util.ManagerUtil;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -28,10 +35,14 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
+    private final ManagerUtil managerUtil;
 
     @Override
     public void createItem(Long popupId, ItemCreateRequest request) {
-        Popup popup = findPopupById(popupId);
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
+
+        validatePopupOwnership(currentManager, popup);
 
         Item item =
                 Item.createItem(
@@ -49,8 +60,10 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public void createItemByExcel(Long popupId, MultipartFile itemFile)
             throws InvalidFormatException, IOException {
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
 
-        Popup popup = findPopupById(popupId);
+        validatePopupOwnership(currentManager, popup);
 
         // try-with-resources
         try (InputStream inputStream = itemFile.getInputStream();
@@ -90,5 +103,54 @@ public class ItemServiceImpl implements ItemService {
         return popupRepository
                 .findById(popupId)
                 .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    }
+
+    @Override
+    public Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId) {
+        List<ItemLocationResponse> projections = itemRepository.findItemsWithSplitLocation(popupId);
+
+        return groupItemsByLocation(projections);
+    }
+
+    private Map<String, List<ItemPreviewResponse>> groupItemsByLocation(
+            List<ItemLocationResponse> projections) {
+        return projections.stream()
+                .collect(
+                        Collectors.groupingBy(
+                                ItemLocationResponse::locationGroup,
+                                Collectors.mapping(
+                                        ItemLocationResponse::toPreviewResponse,
+                                        Collectors.toList())));
+    }
+
+    @Override
+    public void deleteItem(Long popupId, Long itemId) {
+        final Manager currentManager = managerUtil.getCurrentManager();
+
+        final Popup popup = findPopupById(popupId);
+        validatePopupOwnership(currentManager, popup);
+
+        final Item item = findByItemId(itemId);
+        validateItemBelongsToPopup(item, popupId);
+
+        itemRepository.delete(item);
+    }
+
+    private void validatePopupOwnership(Manager manager, Popup popup) {
+        if (!popup.getManager().equals(manager)) {
+            throw new CustomException(PopupErrorCode.POPUP_UNAUTHORIZED);
+        }
+    }
+
+    private void validateItemBelongsToPopup(Item item, Long popupId) {
+        if (!item.getPopup().getId().equals(popupId)) {
+            throw new CustomException(ItemErrorCode.ITEM_POPUP_MISMATCH);
+        }
+    }
+
+    private Item findByItemId(Long itemId) {
+        return itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new CustomException(ItemErrorCode.ITEM_NOT_FOUND));
     }
 }

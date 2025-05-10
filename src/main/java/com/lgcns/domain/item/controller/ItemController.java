@@ -1,11 +1,14 @@
 package com.lgcns.domain.item.controller;
 
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.http.HttpStatus;
@@ -36,5 +39,18 @@ public class ItemController {
             throws IOException, InvalidFormatException {
         itemService.createItemByExcel(popupId, itemFile);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping
+    @Operation(summary = "전체 상품 조회", description = "해당 팝업에 등록된 모든 상품을 위치 그룹별 리스트로 반환합니다.")
+    public Map<String, List<ItemPreviewResponse>> itemFindAll(@PathVariable Long popupId) {
+        return itemService.findAllItems(popupId);
+    }
+
+    @DeleteMapping("/{itemId}")
+    @Operation(summary = "상품 삭제", description = "선택한 상품을 삭제합니다.")
+    public ResponseEntity<Void> itemDelete(@PathVariable Long popupId, @PathVariable Long itemId) {
+        itemService.deleteItem(popupId, itemId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

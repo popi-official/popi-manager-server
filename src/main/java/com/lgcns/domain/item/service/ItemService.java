@@ -1,7 +1,10 @@
 package com.lgcns.domain.item.service;
 
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,4 +14,8 @@ public interface ItemService {
 
     void createItemByExcel(Long popupId, MultipartFile itemFile)
             throws InvalidFormatException, IOException;
+
+    Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId);
+
+    void deleteItem(Long popupId, Long itemId);
 }

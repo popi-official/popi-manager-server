@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
@@ -45,6 +46,7 @@ class ItemServiceTest extends IntegrationTest {
     private Manager ownerManager;
     private Manager otherManager;
     private Popup popup;
+    private Popup otherPopup;
 
     private Item createTestItem() {
         return itemRepository.save(
@@ -78,6 +80,25 @@ class ItemServiceTest extends IntegrationTest {
                         37.123456,
                         127.123456);
         popup = popupRepository.save(popup);
+
+        otherPopup =
+                Popup.createPopup(
+                        ownerManager,
+                        "testPopup2",
+                        "https://bucket/이미지2.jpg",
+                        LocalDate.parse("2025-01-11"),
+                        LocalDate.parse("2025-02-20"),
+                        LocalDateTime.parse("2025-01-01T10:00:00"),
+                        LocalDateTime.parse("2025-01-31T20:00:00"),
+                        LocalTime.parse("10:00:00"),
+                        LocalTime.parse("20:00:00"),
+                        200,
+                        30,
+                        "인천광역시 서구 비즈니스로 123",
+                        "16층 1601호",
+                        39.123456,
+                        129.123456);
+        otherPopup = popupRepository.save(otherPopup);
     }
 
     @Nested
@@ -266,7 +287,7 @@ class ItemServiceTest extends IntegrationTest {
         @Transactional
         void 상품_목록_조회에_성공한다() {
             // given
-            Long popupId = popup.getId();
+            final Long popupId = popup.getId();
 
             Item item1 =
                     Item.createItem(
@@ -420,31 +441,136 @@ class ItemServiceTest extends IntegrationTest {
             // given
             Item savedItem = createTestItem();
 
-            Popup anotherPopup =
-                    Popup.createPopup(
-                            ownerManager, // 동일한 관리자
-                            "anotherPopup",
-                            "https://bucket/another.jpg",
-                            LocalDate.parse("2025-01-01"),
-                            LocalDate.parse("2025-01-31"),
-                            LocalDateTime.parse("2025-01-01T10:00:00"),
-                            LocalDateTime.parse("2025-01-31T20:00:00"),
-                            LocalTime.parse("10:00:00"),
-                            LocalTime.parse("20:00:00"),
-                            100,
-                            20,
-                            "서울특별시 강남구 테헤란로 456",
-                            "5층 B호",
-                            37.654321,
-                            127.654321);
-            Popup savedAnotherPopup = popupRepository.save(anotherPopup);
-
-            Long wrongPopupId = savedAnotherPopup.getId();
+            Long wrongPopupId = otherPopup.getId();
 
             // when & then
             assertThatThrownBy(() -> itemService.deleteItem(wrongPopupId, savedItem.getId()))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_POPUP_MISMATCH);
+        }
+    }
+
+    @Nested
+    class 상품_최소_발주_수량_수정 {
+        @Test
+        @Transactional
+        void 정상적으로_최소_발주_수량_수정에_성공한다() {
+            // given
+            Item savedItem = createTestItem(); // 기본 minStock = 10
+            final Long popupId = popup.getId();
+            final Long itemId = savedItem.getId();
+            final int newMinStock = 30;
+
+            // when
+            ItemDetailResponse response =
+                    itemService.updateItemMinStock(popupId, itemId, newMinStock);
+
+            // then
+            assertThat(response).isNotNull();
+            assertThat(response.minStock()).isEqualTo(newMinStock);
+
+            Item updatedItem = itemRepository.findById(itemId).orElseThrow();
+            assertThat(updatedItem.getMinStock()).isEqualTo(newMinStock);
+        }
+
+        @Test
+        @Transactional
+        void 성공_응답에_알맞은_상품_정보가_포함되어있다() {
+            // given
+            Item savedItem = createTestItem();
+            Long popupId = popup.getId();
+            Long itemId = savedItem.getId();
+            int newMinStock = 30;
+
+            // when
+            ItemDetailResponse response =
+                    itemService.updateItemMinStock(popupId, itemId, newMinStock);
+
+            // then
+            assertThat(response).isNotNull();
+
+            Assertions.assertAll(
+                    () -> assertThat(response.id()).isEqualTo(savedItem.getId()),
+                    () -> assertThat(response.popupId()).isEqualTo(popupId),
+                    () -> assertThat(response.name()).isEqualTo(savedItem.getName()),
+                    () -> assertThat(response.imageUrl()).isEqualTo(savedItem.getImageUrl()),
+                    () -> assertThat(response.price()).isEqualTo(savedItem.getPrice()),
+                    () -> assertThat(response.stock()).isEqualTo(savedItem.getStock()),
+                    () -> assertThat(response.minStock()).isEqualTo(newMinStock),
+                    () -> assertThat(response.location()).isEqualTo(savedItem.getLocation()));
+        }
+
+        @Test
+        @Transactional
+        void 존재하지_않는_상품의_최소_발주_수량을_수정하면_예외가_발생한다() {
+            // given
+            Long popupId = popup.getId();
+            Long nonExistentItemId = 9999L;
+            int newMinStock = 30;
+
+            // when & then
+            assertThatThrownBy(
+                            () ->
+                                    itemService.updateItemMinStock(
+                                            popupId, nonExistentItemId, newMinStock))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_NOT_FOUND);
+        }
+
+        @Test
+        @Transactional
+        void 권한이_없는_사용자가_최소_발주_수량을_수정하면_예외가_발생한다() {
+            // given
+            Item savedItem = createTestItem();
+            Long popupId = popup.getId();
+            int newMinStock = 30;
+
+            // 다른 관리자로 로그인
+            setAuthentication(otherManager);
+
+            // when & then
+            assertThatThrownBy(
+                            () ->
+                                    itemService.updateItemMinStock(
+                                            popupId, savedItem.getId(), newMinStock))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
+        }
+
+        @Test
+        @Transactional
+        void 상품이_해당_팝업에_속하지_않으면_예외가_발생한다() {
+            // given
+            Item savedItem = createTestItem();
+            int newMinStock = 30;
+
+            // 다른 팝업 ID 사용
+            Long wrongPopupId = otherPopup.getId();
+
+            // when & then
+            assertThatThrownBy(
+                            () ->
+                                    itemService.updateItemMinStock(
+                                            wrongPopupId, savedItem.getId(), newMinStock))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_POPUP_MISMATCH);
+        }
+
+        @Test
+        @Transactional
+        void 최소_발주_수량이_재고보다_크면_예외가_발생한다() {
+            // given
+            Item savedItem = createTestItem(); // stock = 100
+            Long popupId = popup.getId();
+            int invalidMinStock = 150; // 재고(100)보다 큰 값
+
+            // when & then
+            assertThatThrownBy(
+                            () ->
+                                    itemService.updateItemMinStock(
+                                            popupId, savedItem.getId(), invalidMinStock))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.MIN_STOCK_EXCEEDED);
         }
     }
 }

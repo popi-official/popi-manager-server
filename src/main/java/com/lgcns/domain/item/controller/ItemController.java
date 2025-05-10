@@ -62,6 +62,6 @@ public class ItemController {
             @PathVariable Long popupId,
             @PathVariable Long itemId,
             @Valid @RequestBody ItemMinStockUpdateRequest request) {
-        return itemService.updateItemMinStock(popupId, itemId, request.minStock());
+        return itemService.updateItemMinStock(popupId, itemId, request);
     }
 }

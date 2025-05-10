@@ -2,6 +2,7 @@ package com.lgcns.domain.item.service;
 
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
 import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
@@ -162,7 +163,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDetailResponse updateItemMinStock(Long popupId, Long itemId, int minStock) {
+    public ItemDetailResponse updateItemMinStock(
+            Long popupId, Long itemId, ItemMinStockUpdateRequest request) {
         final Manager currentManager = managerUtil.getCurrentManager();
         final Popup popup = findPopupById(popupId);
         validatePopupOwnership(currentManager, popup);
@@ -170,9 +172,9 @@ public class ItemServiceImpl implements ItemService {
         final Item item = findByItemId(itemId);
         validateItemBelongsToPopup(item, popupId);
 
-        validateMinStock(item, minStock);
+        validateMinStock(item, request.minStock());
 
-        item.updateMinStock(minStock);
+        item.updateMinStock(request.minStock());
 
         return ItemDetailResponse.from(item);
     }

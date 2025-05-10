@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
+import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
 import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.exception.ItemErrorCode;
@@ -459,18 +460,17 @@ class ItemServiceTest extends IntegrationTest {
             Item savedItem = createTestItem(); // 기본 minStock = 10
             final Long popupId = popup.getId();
             final Long itemId = savedItem.getId();
-            final int newMinStock = 30;
+            ItemMinStockUpdateRequest request = new ItemMinStockUpdateRequest(30);
 
             // when
-            ItemDetailResponse response =
-                    itemService.updateItemMinStock(popupId, itemId, newMinStock);
+            ItemDetailResponse response = itemService.updateItemMinStock(popupId, itemId, request);
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.minStock()).isEqualTo(newMinStock);
+            assertThat(response.minStock()).isEqualTo(request.minStock());
 
             Item updatedItem = itemRepository.findById(itemId).orElseThrow();
-            assertThat(updatedItem.getMinStock()).isEqualTo(newMinStock);
+            assertThat(updatedItem.getMinStock()).isEqualTo(request.minStock());
         }
 
         @Test
@@ -480,11 +480,10 @@ class ItemServiceTest extends IntegrationTest {
             Item savedItem = createTestItem();
             Long popupId = popup.getId();
             Long itemId = savedItem.getId();
-            int newMinStock = 30;
+            ItemMinStockUpdateRequest request = new ItemMinStockUpdateRequest(30);
 
             // when
-            ItemDetailResponse response =
-                    itemService.updateItemMinStock(popupId, itemId, newMinStock);
+            ItemDetailResponse response = itemService.updateItemMinStock(popupId, itemId, request);
 
             // then
             assertThat(response).isNotNull();
@@ -496,7 +495,7 @@ class ItemServiceTest extends IntegrationTest {
                     () -> assertThat(response.imageUrl()).isEqualTo(savedItem.getImageUrl()),
                     () -> assertThat(response.price()).isEqualTo(savedItem.getPrice()),
                     () -> assertThat(response.stock()).isEqualTo(savedItem.getStock()),
-                    () -> assertThat(response.minStock()).isEqualTo(newMinStock),
+                    () -> assertThat(response.minStock()).isEqualTo(request.minStock()),
                     () -> assertThat(response.location()).isEqualTo(savedItem.getLocation()));
         }
 
@@ -504,15 +503,15 @@ class ItemServiceTest extends IntegrationTest {
         @Transactional
         void 존재하지_않는_상품의_최소_발주_수량을_수정하면_예외가_발생한다() {
             // given
-            Long popupId = popup.getId();
-            Long nonExistentItemId = 9999L;
-            int newMinStock = 30;
+            final Long popupId = popup.getId();
+            final Long nonExistentItemId = 9999L;
+            ItemMinStockUpdateRequest request = new ItemMinStockUpdateRequest(30);
 
             // when & then
             assertThatThrownBy(
                             () ->
                                     itemService.updateItemMinStock(
-                                            popupId, nonExistentItemId, newMinStock))
+                                            popupId, nonExistentItemId, request))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_NOT_FOUND);
         }
@@ -523,7 +522,7 @@ class ItemServiceTest extends IntegrationTest {
             // given
             Item savedItem = createTestItem();
             Long popupId = popup.getId();
-            int newMinStock = 30;
+            ItemMinStockUpdateRequest request = new ItemMinStockUpdateRequest(30);
 
             // 다른 관리자로 로그인
             setAuthentication(otherManager);
@@ -532,7 +531,7 @@ class ItemServiceTest extends IntegrationTest {
             assertThatThrownBy(
                             () ->
                                     itemService.updateItemMinStock(
-                                            popupId, savedItem.getId(), newMinStock))
+                                            popupId, savedItem.getId(), request))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
         }
@@ -542,7 +541,7 @@ class ItemServiceTest extends IntegrationTest {
         void 상품이_해당_팝업에_속하지_않으면_예외가_발생한다() {
             // given
             Item savedItem = createTestItem();
-            int newMinStock = 30;
+            ItemMinStockUpdateRequest request = new ItemMinStockUpdateRequest(30);
 
             // 다른 팝업 ID 사용
             Long wrongPopupId = otherPopup.getId();
@@ -551,7 +550,7 @@ class ItemServiceTest extends IntegrationTest {
             assertThatThrownBy(
                             () ->
                                     itemService.updateItemMinStock(
-                                            wrongPopupId, savedItem.getId(), newMinStock))
+                                            wrongPopupId, savedItem.getId(), request))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.ITEM_POPUP_MISMATCH);
         }
@@ -561,14 +560,14 @@ class ItemServiceTest extends IntegrationTest {
         void 최소_발주_수량이_재고보다_크면_예외가_발생한다() {
             // given
             Item savedItem = createTestItem(); // stock = 100
-            Long popupId = popup.getId();
-            int invalidMinStock = 150; // 재고(100)보다 큰 값
+            final Long popupId = popup.getId();
+            ItemMinStockUpdateRequest request = new ItemMinStockUpdateRequest(150); // 재고(100)보다 큰 값
 
             // when & then
             assertThatThrownBy(
                             () ->
                                     itemService.updateItemMinStock(
-                                            popupId, savedItem.getId(), invalidMinStock))
+                                            popupId, savedItem.getId(), request))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.MIN_STOCK_EXCEEDED);
         }

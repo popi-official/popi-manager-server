@@ -1,9 +1,11 @@
 package com.lgcns.global.config.security;
 
+import static com.lgcns.global.common.constants.UrlConstants.*;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.lgcns.domain.auth.service.JwtTokenService;
+import com.lgcns.global.helper.SpringEnvironmentHelper;
 import com.lgcns.global.security.*;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
+    private final SpringEnvironmentHelper springEnvironmentHelper;
     private final Validator validator;
     private final CustomUserDetailsService customUserDetailsService;
     private final LoginSuccessHandler loginSuccessHandler;
@@ -92,6 +95,13 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        if (springEnvironmentHelper.isDevProfile()) {
+            configuration.addAllowedOriginPattern(DEV_SERVER_URL);
+            configuration.addAllowedOriginPattern(DEV_CLIENT_URL);
+            configuration.addAllowedOriginPattern(DEV_CLIENT_WWW_URL);
+            configuration.addAllowedOriginPattern(LOCAL_CLIENT_URL);
+        }
 
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");

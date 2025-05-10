@@ -99,7 +99,6 @@ public class WebSecurityConfig {
         if (springEnvironmentHelper.isDevProfile()) {
             configuration.addAllowedOriginPattern(DEV_SERVER_URL);
             configuration.addAllowedOriginPattern(DEV_CLIENT_URL);
-            configuration.addAllowedOriginPattern(DEV_CLIENT_WWW_URL);
             configuration.addAllowedOriginPattern(LOCAL_CLIENT_URL);
         }
 

@@ -34,4 +34,11 @@ public class PopupController {
     public List<PopupPreviewResponse> popupFindAll() {
         return popupService.findAllPopups();
     }
+
+    @DeleteMapping("/{popupId}")
+    @Operation(summary = "팝업 삭제", description = "로그인한 운영자 소유의 팝업 하나를 삭제합니다.")
+    public ResponseEntity<Void> popupDelete(@PathVariable Long popupId) {
+        popupService.deletePopup(popupId);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

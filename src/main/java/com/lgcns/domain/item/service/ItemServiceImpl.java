@@ -101,12 +101,6 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private Popup findPopupById(Long popupId) {
-        return popupRepository
-                .findById(popupId)
-                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
-    }
-
     @Override
     public Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId) {
         List<ItemLocationResponse> projections = itemRepository.findItemsWithSplitLocation(popupId);
@@ -114,15 +108,21 @@ public class ItemServiceImpl implements ItemService {
         return groupItemsByLocation(projections);
     }
 
-    private Map<String, List<ItemPreviewResponse>> groupItemsByLocation(
-            List<ItemLocationResponse> projections) {
-        return projections.stream()
-                .collect(
-                        Collectors.groupingBy(
-                                ItemLocationResponse::locationGroup,
-                                Collectors.mapping(
-                                        ItemLocationResponse::toPreviewResponse,
-                                        Collectors.toList())));
+    @Override
+    public ItemDetailResponse updateItemMinStock(
+            Long popupId, Long itemId, ItemMinStockUpdateRequest request) {
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
+        validatePopupOwnership(currentManager, popup);
+
+        final Item item = findByItemId(itemId);
+        validateItemBelongsToPopup(item, popupId);
+
+        validateMinStock(item, request.minStock());
+
+        item.updateMinStock(request.minStock());
+
+        return ItemDetailResponse.from(item);
     }
 
     @Override
@@ -136,6 +136,23 @@ public class ItemServiceImpl implements ItemService {
         validateItemBelongsToPopup(item, popupId);
 
         itemRepository.delete(item);
+    }
+
+    private Popup findPopupById(Long popupId) {
+        return popupRepository
+                .findById(popupId)
+                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    }
+
+    private Map<String, List<ItemPreviewResponse>> groupItemsByLocation(
+            List<ItemLocationResponse> projections) {
+        return projections.stream()
+                .collect(
+                        Collectors.groupingBy(
+                                ItemLocationResponse::locationGroup,
+                                Collectors.mapping(
+                                        ItemLocationResponse::toPreviewResponse,
+                                        Collectors.toList())));
     }
 
     private void validatePopupOwnership(Manager manager, Popup popup) {
@@ -160,22 +177,5 @@ public class ItemServiceImpl implements ItemService {
         if (minStock > item.getStock()) {
             throw new CustomException(ItemErrorCode.MIN_STOCK_EXCEEDED);
         }
-    }
-
-    @Override
-    public ItemDetailResponse updateItemMinStock(
-            Long popupId, Long itemId, ItemMinStockUpdateRequest request) {
-        final Manager currentManager = managerUtil.getCurrentManager();
-        final Popup popup = findPopupById(popupId);
-        validatePopupOwnership(currentManager, popup);
-
-        final Item item = findByItemId(itemId);
-        validateItemBelongsToPopup(item, popupId);
-
-        validateMinStock(item, request.minStock());
-
-        item.updateMinStock(request.minStock());
-
-        return ItemDetailResponse.from(item);
     }
 }

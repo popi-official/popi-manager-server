@@ -6,12 +6,14 @@ import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
+import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.survey.domain.Choice;
 import com.lgcns.domain.survey.domain.Survey;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
 import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
+import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +51,16 @@ public class PopupServiceImpl implements PopupService {
         return popupRepository.findAllPopupsByManagerId(managerId);
     }
 
+    @Override
+    public void deletePopup(Long popupId) {
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
+
+        validatePopupOwnership(currentManager, popup);
+
+        popupRepository.delete(popup);
+    }
+
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {
 
         return Popup.createPopup(
@@ -82,5 +94,17 @@ public class PopupServiceImpl implements PopupService {
             Choice choice = Choice.createChoice(survey, option);
             choiceRepository.save(choice);
         }
+    }
+
+    private void validatePopupOwnership(Manager manager, Popup popup) {
+        if (!popup.getManager().equals(manager)) {
+            throw new CustomException(PopupErrorCode.POPUP_UNAUTHORIZED);
+        }
+    }
+
+    private Popup findPopupById(Long popupId) {
+        return popupRepository
+                .findById(popupId)
+                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
     }
 }

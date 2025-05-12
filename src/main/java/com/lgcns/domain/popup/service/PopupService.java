@@ -9,4 +9,6 @@ public interface PopupService {
     PopupCreateResponse createPopup(PopupWithChoicesCreateRequest popupWithChoicesCreateRequest);
 
     List<PopupPreviewResponse> findAllPopups();
+
+    void deletePopup(Long popupId);
 }

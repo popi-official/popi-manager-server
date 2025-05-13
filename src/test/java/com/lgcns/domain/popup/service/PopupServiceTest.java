@@ -21,7 +21,6 @@ import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
 import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
 import com.lgcns.global.error.exception.CustomException;
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -42,8 +41,6 @@ public class PopupServiceTest extends IntegrationTest {
     @Autowired private ManagerRepository managerRepository;
     @Autowired private ChoiceRepository choiceRepository;
     @Autowired ItemRepository itemRepository;
-
-    @Autowired EntityManager entityManager;
 
     private Manager ownerManager;
     private Manager otherManager;

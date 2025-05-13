@@ -10,7 +10,7 @@ public record PopupEnterCreateRequest(
         @NotNull(message = "방문자 성별은 필수입니다.") @Schema(description = "방문자 성별", example = "FEMALE")
                 UserGender gender,
         @NotNull(message = "방문자 나이대는 필수입니다.") @Schema(description = "방문자 나이대", example = "20")
-                Integer ageGroup,
+                int ageGroup,
         @NotNull(message = "예약 날짜는 필수입니다.")
                 @Schema(description = "팝업 예약 날짜", example = "2025-05-13")
                 LocalDate date,

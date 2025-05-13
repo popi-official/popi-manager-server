@@ -1,4 +1,4 @@
-INSERT INTO popup_enter (popup_enter_id, popup_id, gender, age_group, date, time)
+INSERT INTO entrance (entrance_id, popup_id, gender, age_group, date, time)
 VALUES
     (1, 1, 'MALE', 20, '2025-05-13', '10:00:00'),
     (2, 1, 'FEMALE', 30, '2025-05-13', '11:00:00'),

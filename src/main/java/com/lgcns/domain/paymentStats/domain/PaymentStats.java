@@ -2,8 +2,8 @@ package com.lgcns.domain.paymentStats.domain;
 
 import com.lgcns.domain.popup.domain.Popup;
 import jakarta.persistence.*;
-import java.sql.Date;
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,16 +23,17 @@ public class PaymentStats {
     @JoinColumn(name = "popup_id")
     private Popup popup;
 
-    private Date date;
+    private LocalDate date;
 
-    private Time time;
+    private LocalTime time;
 
     private int totalPayment;
 
     private int userCount;
 
     @Builder(access = AccessLevel.PRIVATE)
-    public Item(Popup popup, Date date, Time time, int totalPayment, int userCount) {
+    public PaymentStats(
+            Popup popup, LocalDate date, LocalTime time, int totalPayment, int userCount) {
         this.popup = popup;
         this.date = date;
         this.time = time;
@@ -41,7 +42,7 @@ public class PaymentStats {
     }
 
     public static PaymentStats createPaymentStats(
-            Popup popup, Date date, Time time, int totalPayment, int userCount) {
+            Popup popup, LocalDate date, LocalTime time, int totalPayment, int userCount) {
         return PaymentStats.builder()
                 .popup(popup)
                 .date(date)

@@ -1,9 +1,8 @@
 CREATE TABLE popup_enter (
-                             popup_enter_id BIGINT NOT NULL,
-                             popup_id BIGINT NULL,
-                             gender VARCHAR(10) NULL,
-                             age_group INT NULL,
-                             reservation_date DATE NULL,
-                             reservation_time TIME NULL,
-                             PRIMARY KEY (popup_enter_id)
+                             popup_enter_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                             popup_id BIGINT NOT NULL,
+                             gender VARCHAR(10) NOT NULL,
+                             age_group INT NOT NULL,
+                             date DATE NOT NULL,
+                             time TIME NOT NULL
 );

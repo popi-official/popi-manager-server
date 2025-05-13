@@ -32,6 +32,23 @@ public class CookieUtil {
         return headers;
     }
 
+    public HttpHeaders deleteRefreshTokenCookie() {
+        ResponseCookie refreshTokenCookie =
+                ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                        .path("/")
+                        .maxAge(0)
+                        .domain(getCookieDomain())
+                        .secure(true)
+                        .sameSite(Cookie.SameSite.NONE.attributeValue())
+                        .httpOnly(true)
+                        .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+        return headers;
+    }
+
     private String getCookieDomain() {
         return switch (springEnvironmentHelper.getCurrentProfile()) {
             case DEV -> ".ceo.popi.today";

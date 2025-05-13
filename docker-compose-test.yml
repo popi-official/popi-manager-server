@@ -4,4 +4,4 @@ services:
   redis:
     image: "redis:alpine"
     ports:
-      - "6379:6379"
+      - "7379:6379"

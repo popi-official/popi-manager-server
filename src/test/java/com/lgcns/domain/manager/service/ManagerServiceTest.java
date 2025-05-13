@@ -4,14 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.lgcns.IntegrationTest;
+import com.lgcns.domain.auth.domain.RefreshToken;
+import com.lgcns.domain.auth.repository.RefreshTokenRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.manager.exception.ManagerErrorCode;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.global.error.exception.CustomException;
+import com.lgcns.global.security.PrincipalDetails;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +25,7 @@ class ManagerServiceTest extends IntegrationTest {
     @Autowired private ManagerRepository managerRepository;
     @Autowired private ManagerService managerService;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private RefreshTokenRepository refreshTokenRepository;
 
     @Nested
     class 운영자_회원가입을_할_때 {
@@ -65,6 +72,36 @@ class ManagerServiceTest extends IntegrationTest {
             String encodedPassword = passwordEncoder.encode(plainPassword);
 
             return Manager.createManager(username, encodedPassword);
+        }
+    }
+
+    @Nested
+    class 운영자가_로그아웃을_할_때 {
+        @Test
+        void 로그아웃하면_리프레시_토큰이_삭제된다() {
+            // given
+            Manager manager =
+                    managerRepository.save(Manager.createManager("testUsername", "testPassword"));
+
+            UserDetails userDetails =
+                    new PrincipalDetails(manager.getId(), manager.getRole(), null);
+            UsernamePasswordAuthenticationToken token =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(token);
+
+            RefreshToken refreshToken =
+                    RefreshToken.builder()
+                            .managerId(manager.getId())
+                            .token("testRefreshToken")
+                            .build();
+            refreshTokenRepository.save(refreshToken);
+
+            // when
+            managerService.logoutManager();
+
+            // then
+            assertThat(refreshTokenRepository.findById(manager.getId())).isEmpty();
         }
     }
 }

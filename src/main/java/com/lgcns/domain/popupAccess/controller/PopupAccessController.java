@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/popups/{popupId}")
 @RequiredArgsConstructor
-@Tag(name = "6. 방문자 출입 기록 API", description = "QR 인식 장치를 통해 입퇴장 기록을 수집하는 운영자용 API입니다.")
+@Tag(name = "6. 방문자 출입 기록 API", description = "QR 인식을 통해 입퇴장 기록을 수집하는 API입니다.")
 public class PopupAccessController {
 
     private final PopupAccessService popupAccessService;

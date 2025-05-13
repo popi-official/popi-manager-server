@@ -81,6 +81,7 @@ jobs:
           script: |
             aws ecr get-login-password --region ${{ env.AWS_REGION }} \
             | docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
+            docker compose pull
             docker compose up -d
             docker exec nginx nginx -s reload
             docker image prune -a -f

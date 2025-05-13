@@ -1,0 +1,1 @@
+ALTER TABLE choice ADD COLUMN number INT NOT NULL;

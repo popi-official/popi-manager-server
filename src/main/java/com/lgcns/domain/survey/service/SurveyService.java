@@ -1,3 +1,8 @@
 package com.lgcns.domain.survey.service;
 
-public interface SurveyService {}
+import com.lgcns.domain.survey.dto.response.SurveyAnalysisResponse;
+
+public interface SurveyService {
+
+    SurveyAnalysisResponse getSurveyAnalysis(Long popupId);
+}

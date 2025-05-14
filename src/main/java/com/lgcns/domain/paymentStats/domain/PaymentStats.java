@@ -1,6 +1,5 @@
 package com.lgcns.domain.paymentStats.domain;
 
-import com.lgcns.domain.popup.domain.Popup;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,13 +18,14 @@ public class PaymentStats {
     @Column(name = "payment_stats_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "popup_id")
-    private Popup popup;
+    @Column(name = "popup_id")
+    private Long popupId;
 
-    private LocalDate date;
+    @Column(name = "analyzed_date")
+    private LocalDate analyzedDate;
 
-    private LocalTime time;
+    @Column(name = "analyzed_time")
+    private LocalTime analyzedTime;
 
     private int totalPayment;
 
@@ -33,20 +33,28 @@ public class PaymentStats {
 
     @Builder(access = AccessLevel.PRIVATE)
     public PaymentStats(
-            Popup popup, LocalDate date, LocalTime time, int totalPayment, int userCount) {
-        this.popup = popup;
-        this.date = date;
-        this.time = time;
+            Long popupId,
+            LocalDate analyzedDate,
+            LocalTime analyzedTime,
+            int totalPayment,
+            int userCount) {
+        this.popupId = popupId;
+        this.analyzedDate = analyzedDate;
+        this.analyzedTime = analyzedTime;
         this.totalPayment = totalPayment;
         this.userCount = userCount;
     }
 
     public static PaymentStats createPaymentStats(
-            Popup popup, LocalDate date, LocalTime time, int totalPayment, int userCount) {
+            Long popupId,
+            LocalDate analyzedDate,
+            LocalTime analyzedTime,
+            int totalPayment,
+            int userCount) {
         return PaymentStats.builder()
-                .popup(popup)
-                .date(date)
-                .time(time)
+                .popupId(popupId)
+                .analyzedDate(analyzedDate)
+                .analyzedTime(analyzedTime)
                 .totalPayment(totalPayment)
                 .userCount(userCount)
                 .build();

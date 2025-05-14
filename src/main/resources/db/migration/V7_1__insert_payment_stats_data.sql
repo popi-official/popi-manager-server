@@ -6,7 +6,7 @@
 
 -- 설정: 시간 범위는 6:00 ~ 22:00까지 2시간 간격으로 (마지막 시간대는 22:00)
 
-INSERT INTO payment_stats (payment_stats_id, popup_id, date, time, total_payment, user_count) VALUES
+INSERT INTO payment_stats (payment_stats_id, popup_id, analyzed_date, analyzed_time, total_payment, user_count) VALUES
 -- 팝업 1 데이터 (2025-05-15 ~ 2025-06-15)
 -- 2025-05-15
 (1, 1, '2025-05-15', '06:00:00', 780000, 45),

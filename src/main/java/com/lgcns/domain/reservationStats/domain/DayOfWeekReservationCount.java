@@ -1,5 +1,6 @@
 package com.lgcns.domain.reservationStats.domain;
 
+import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class DayOfWeekReservationCount {
+public class DayOfWeekReservationCount extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

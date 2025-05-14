@@ -1,17 +1,17 @@
 package com.lgcns.domain.survey.dto.response;
 
 public record SurveyResultResponse(
-        int surveyNumber,
+        Integer surveyNumber,
         String choiceContent,
-        int choiceNumber,
-        int memberAnswerCount,
-        double ratio) {
+        Integer choiceNumber,
+        Long memberAnswerCount,
+        Double ratio) {
     public static SurveyResultResponse of(
-            int surveyNumber,
+            Integer surveyNumber,
             String choiceContent,
-            int choiceNumber,
-            int memberAnswerCount,
-            double ratio) {
+            Integer choiceNumber,
+            Long memberAnswerCount,
+            Double ratio) {
         return new SurveyResultResponse(
                 surveyNumber, choiceContent, choiceNumber, memberAnswerCount, ratio);
     }

@@ -2,8 +2,8 @@ package com.lgcns.domain.survey.dto.response;
 
 import java.util.List;
 
-public record SurveyAnalysisResponse(int totalCount, List<SurveyResultResponse> surveys) {
-    public static SurveyAnalysisResponse of(int totalCount, List<SurveyResultResponse> surveys) {
+public record SurveyAnalysisResponse(Long totalCount, List<SurveyStatsResponse> surveys) {
+    public static SurveyAnalysisResponse of(Long totalCount, List<SurveyStatsResponse> surveys) {
         return new SurveyAnalysisResponse(totalCount, surveys);
     }
 }

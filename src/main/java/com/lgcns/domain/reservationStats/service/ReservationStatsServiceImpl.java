@@ -5,12 +5,12 @@ import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.reservationStats.domain.DailyReservationCount;
-import com.lgcns.domain.reservationStats.domain.WeekDayReservationCount;
+import com.lgcns.domain.reservationStats.domain.DayOfWeekReservationCount;
 import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
+import com.lgcns.domain.reservationStats.dto.response.DayOfWeekReservationCountResponse;
 import com.lgcns.domain.reservationStats.dto.response.ReservationStatsResponse;
-import com.lgcns.domain.reservationStats.dto.response.WeekDayReservationCountResponse;
 import com.lgcns.domain.reservationStats.repository.DailyReservationCountRepository;
-import com.lgcns.domain.reservationStats.repository.WeekDayReservationCountRepository;
+import com.lgcns.domain.reservationStats.repository.DayOfWeekReservationCountRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
 
     private final PopupRepository popupRepository;
     private final DailyReservationCountRepository dailyReservationCountRepository;
-    private final WeekDayReservationCountRepository weekDayReservationCountRepository;
+    private final DayOfWeekReservationCountRepository dayOfWeekReservationCountRepository;
     private final ManagerUtil managerUtil;
 
     @Override
@@ -42,9 +42,10 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
         int dailyCount =
                 dailyReservationCount.map(DailyReservationCount::getReservationCount).orElse(0);
 
-        Optional<WeekDayReservationCount> weekDayReservationCountList =
-                weekDayReservationCountRepository.findByPopupId(popupId);
-        List<WeekDayReservationCountResponse> chart = convertToChart(weekDayReservationCountList);
+        Optional<DayOfWeekReservationCount> dayOfWeekReservationCountList =
+                dayOfWeekReservationCountRepository.findByPopupId(popupId);
+        List<DayOfWeekReservationCountResponse> chart =
+                convertToChart(dayOfWeekReservationCountList);
 
         return ReservationStatsResponse.of(dailyCount, chart);
     }
@@ -61,10 +62,10 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
         }
     }
 
-    private List<WeekDayReservationCountResponse> convertToChart(
-            Optional<WeekDayReservationCount> countOpt) {
-        WeekDayReservationCount count = countOpt.orElse(null);
-        List<WeekDayReservationCountResponse> chart = new ArrayList<>();
+    private List<DayOfWeekReservationCountResponse> convertToChart(
+            Optional<DayOfWeekReservationCount> countOpt) {
+        DayOfWeekReservationCount count = countOpt.orElse(null);
+        List<DayOfWeekReservationCountResponse> chart = new ArrayList<>();
 
         for (DayOfWeek day : DayOfWeek.values()) {
             int reservedCount = 0;
@@ -81,7 +82,7 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
                         };
             }
 
-            chart.add(WeekDayReservationCountResponse.of(day, reservedCount));
+            chart.add(DayOfWeekReservationCountResponse.of(day, reservedCount));
         }
 
         return chart;

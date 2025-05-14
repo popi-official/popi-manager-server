@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class WeekDayReservationCount {
+public class DayOfWeekReservationCount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "week_day_reservation_count_id")
+    @Column(name = "day_of_week_reservation_count_id")
     private Long id;
 
     private Long popupId;
@@ -26,7 +26,7 @@ public class WeekDayReservationCount {
     private int sundayCount;
 
     @Builder
-    private WeekDayReservationCount(
+    private DayOfWeekReservationCount(
             Long popupId,
             int mondayCount,
             int tuesdayCount,
@@ -45,7 +45,7 @@ public class WeekDayReservationCount {
         this.sundayCount = sundayCount;
     }
 
-    public static WeekDayReservationCount createWeekDayReservationCount(
+    public static DayOfWeekReservationCount createDayOfWeekReservationCount(
             Long popupId,
             int mondayCount,
             int tuesdayCount,
@@ -54,7 +54,7 @@ public class WeekDayReservationCount {
             int fridayCount,
             int saturdayCount,
             int sundayCount) {
-        return WeekDayReservationCount.builder()
+        return DayOfWeekReservationCount.builder()
                 .popupId(popupId)
                 .mondayCount(mondayCount)
                 .tuesdayCount(tuesdayCount)

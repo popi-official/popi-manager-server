@@ -8,8 +8,8 @@ CREATE TABLE daily_reservation_count (
 );
 
 -- 요일별 예약 수 테이블
-CREATE TABLE week_day_reservation_count (
-    week_day_reservation_count_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE day_of_week_reservation_count (
+    day_of_week_reservation_count_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     popup_id BIGINT NOT NULL,
     monday_count INT NOT NULL,
     tuesday_count INT NOT NULL,
@@ -24,4 +24,4 @@ CREATE TABLE week_day_reservation_count (
 
 -- 인덱스 추가 (조회 성능 개선)
 CREATE INDEX idx_daily_reservation_popup_id ON daily_reservation_count(popup_id);
-CREATE INDEX idx_weekday_reservation_popup_id ON week_day_reservation_count(popup_id);
+CREATE INDEX idx_day_of_week_reservation_popup_id ON day_of_week_reservation_count(popup_id);

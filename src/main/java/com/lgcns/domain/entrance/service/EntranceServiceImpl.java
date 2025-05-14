@@ -1,8 +1,8 @@
-package com.lgcns.domain.visitLog.service;
+package com.lgcns.domain.entrance.service;
 
-import com.lgcns.domain.visitLog.domain.Entrance;
-import com.lgcns.domain.visitLog.dto.request.EntranceCreateRequest;
-import com.lgcns.domain.visitLog.repository.EntranceRepository;
+import com.lgcns.domain.entrance.domain.Entrance;
+import com.lgcns.domain.entrance.dto.request.EntranceCreateRequest;
+import com.lgcns.domain.entrance.repository.EntranceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class VisitLogServiceImpl implements VisitLogService {
+public class EntranceServiceImpl implements EntranceService {
 
     private final EntranceRepository entranceRepository;
 

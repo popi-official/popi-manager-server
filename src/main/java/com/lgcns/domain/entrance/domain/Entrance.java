@@ -1,4 +1,4 @@
-package com.lgcns.domain.visitLog.domain;
+package com.lgcns.domain.entrance.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

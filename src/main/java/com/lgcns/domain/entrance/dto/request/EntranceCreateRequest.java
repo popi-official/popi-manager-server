@@ -1,6 +1,6 @@
-package com.lgcns.domain.visitLog.dto.request;
+package com.lgcns.domain.entrance.dto.request;
 
-import com.lgcns.domain.visitLog.domain.UserGender;
+import com.lgcns.domain.entrance.domain.UserGender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;

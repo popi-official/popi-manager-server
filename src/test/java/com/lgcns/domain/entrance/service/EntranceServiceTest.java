@@ -1,12 +1,12 @@
-package com.lgcns.domain.visitLog.service;
+package com.lgcns.domain.entrance.service;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import com.lgcns.IntegrationTest;
-import com.lgcns.domain.visitLog.domain.Entrance;
-import com.lgcns.domain.visitLog.domain.UserGender;
-import com.lgcns.domain.visitLog.dto.request.EntranceCreateRequest;
-import com.lgcns.domain.visitLog.repository.EntranceRepository;
+import com.lgcns.domain.entrance.domain.Entrance;
+import com.lgcns.domain.entrance.domain.UserGender;
+import com.lgcns.domain.entrance.dto.request.EntranceCreateRequest;
+import com.lgcns.domain.entrance.repository.EntranceRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Assertions;
@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-class VisitLogServiceTest extends IntegrationTest {
+class EntranceServiceTest extends IntegrationTest {
 
-    @Autowired private VisitLogService visitLogService;
+    @Autowired private EntranceService entranceService;
 
     @Autowired private EntranceRepository entranceRepository;
 
@@ -38,7 +38,7 @@ class VisitLogServiceTest extends IntegrationTest {
                     new EntranceCreateRequest(popupId, gender, ageGroup, date, time);
 
             // when
-            visitLogService.createEntrance(request);
+            entranceService.createEntrance(request);
 
             // then
             Entrance savedEntrance = entranceRepository.findAll().get(0);

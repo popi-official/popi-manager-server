@@ -21,6 +21,6 @@ public class PaymentStatsController {
     @GetMapping("/average-purchase")
     @Operation(summary = "1인당 평균 구매액 조회", description = "팝업의 총 평균 구매액과 오늘의 평균 구매액을 조회합니다.")
     public PaymentAverageResponse paymentAverageGet(@PathVariable Long popupId) {
-        return paymentStatsService.getPaymentAverage(popupId);
+        return paymentStatsService.getPaymentAverages(popupId);
     }
 }

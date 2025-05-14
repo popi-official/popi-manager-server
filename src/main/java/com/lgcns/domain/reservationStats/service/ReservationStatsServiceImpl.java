@@ -63,22 +63,22 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
             Optional<WeekDayReservationCount> count) {
         List<WeekDayReservationCountResponse> chart = new ArrayList<>();
         if (count.isEmpty()) {
-            chart.add(WeekDayReservationCountResponse.of("월", 0));
-            chart.add(WeekDayReservationCountResponse.of("화", 0));
-            chart.add(WeekDayReservationCountResponse.of("수", 0));
-            chart.add(WeekDayReservationCountResponse.of("목", 0));
-            chart.add(WeekDayReservationCountResponse.of("금", 0));
-            chart.add(WeekDayReservationCountResponse.of("토", 0));
-            chart.add(WeekDayReservationCountResponse.of("일", 0));
+            chart.add(WeekDayReservationCountResponse.of("월요일", 0));
+            chart.add(WeekDayReservationCountResponse.of("화요일", 0));
+            chart.add(WeekDayReservationCountResponse.of("수요일", 0));
+            chart.add(WeekDayReservationCountResponse.of("목요일", 0));
+            chart.add(WeekDayReservationCountResponse.of("금요일", 0));
+            chart.add(WeekDayReservationCountResponse.of("토요일", 0));
+            chart.add(WeekDayReservationCountResponse.of("일요일", 0));
             return chart;
         }
-        chart.add(WeekDayReservationCountResponse.of("월", count.get().getMondayCount()));
-        chart.add(WeekDayReservationCountResponse.of("화", count.get().getTuesdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("수", count.get().getWednesdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("목", count.get().getThursdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("금", count.get().getFridayCount()));
-        chart.add(WeekDayReservationCountResponse.of("토", count.get().getSaturdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("일", count.get().getSundayCount()));
+        chart.add(WeekDayReservationCountResponse.of("월요일", count.get().getMondayCount()));
+        chart.add(WeekDayReservationCountResponse.of("화요일", count.get().getTuesdayCount()));
+        chart.add(WeekDayReservationCountResponse.of("수요일", count.get().getWednesdayCount()));
+        chart.add(WeekDayReservationCountResponse.of("목요일", count.get().getThursdayCount()));
+        chart.add(WeekDayReservationCountResponse.of("금요일", count.get().getFridayCount()));
+        chart.add(WeekDayReservationCountResponse.of("토요일", count.get().getSaturdayCount()));
+        chart.add(WeekDayReservationCountResponse.of("일요일", count.get().getSundayCount()));
         return chart;
     }
 }

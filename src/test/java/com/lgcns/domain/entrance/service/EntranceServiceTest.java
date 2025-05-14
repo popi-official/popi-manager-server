@@ -47,10 +47,10 @@ class EntranceServiceTest extends IntegrationTest {
                     () -> assertThat(savedEntrance.getGender()).isEqualTo(UserGender.MALE),
                     () -> assertThat(savedEntrance.getAgeGroup()).isEqualTo(20),
                     () ->
-                            assertThat(savedEntrance.getDate())
+                            assertThat(savedEntrance.getReservationDate())
                                     .isEqualTo(LocalDate.parse("2025-05-13")),
                     () ->
-                            assertThat(savedEntrance.getTime())
+                            assertThat(savedEntrance.getReservationTime())
                                     .isEqualTo(LocalTime.parse("10:00:00")));
         }
     }

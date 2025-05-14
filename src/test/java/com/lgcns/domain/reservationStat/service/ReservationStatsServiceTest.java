@@ -10,6 +10,7 @@ import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.reservationStats.domain.DailyReservationCount;
 import com.lgcns.domain.reservationStats.domain.WeekDayReservationCount;
+import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
 import com.lgcns.domain.reservationStats.dto.response.ReservationStatsResponse;
 import com.lgcns.domain.reservationStats.dto.response.WeekDayReservationCountResponse;
 import com.lgcns.domain.reservationStats.repository.DailyReservationCountRepository;
@@ -92,25 +93,39 @@ public class ReservationStatsServiceTest extends IntegrationTest {
                     () -> assertThat(reservationStats.chart().size()).isEqualTo(7),
                     () ->
                             assertThat(reservationStats.chart().get(0))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("월요일", 1)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.MONDAY, 1)),
                     () ->
                             assertThat(reservationStats.chart().get(1))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("화요일", 1)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.TUESDAY, 1)),
                     () ->
                             assertThat(reservationStats.chart().get(2))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("수요일", 1)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.WEDNESDAY, 1)),
                     () ->
                             assertThat(reservationStats.chart().get(3))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("목요일", 1)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.THURSDAY, 1)),
                     () ->
                             assertThat(reservationStats.chart().get(4))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("금요일", 1)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.FRIDAY, 1)),
                     () ->
                             assertThat(reservationStats.chart().get(5))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("토요일", 0)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.SATURDAY, 0)),
                     () ->
                             assertThat(reservationStats.chart().get(6))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("일요일", 0)));
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.SUNDAY, 0)));
         }
 
         @Test
@@ -129,25 +144,39 @@ public class ReservationStatsServiceTest extends IntegrationTest {
                     () -> assertThat(reservationStats.chart().size()).isEqualTo(7),
                     () ->
                             assertThat(reservationStats.chart().get(0))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("월요일", 0)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.MONDAY, 0)),
                     () ->
                             assertThat(reservationStats.chart().get(1))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("화요일", 0)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.TUESDAY, 0)),
                     () ->
                             assertThat(reservationStats.chart().get(2))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("수요일", 0)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.WEDNESDAY, 0)),
                     () ->
                             assertThat(reservationStats.chart().get(3))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("목요일", 0)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.THURSDAY, 0)),
                     () ->
                             assertThat(reservationStats.chart().get(4))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("금요일", 0)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.FRIDAY, 0)),
                     () ->
                             assertThat(reservationStats.chart().get(5))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("토요일", 0)),
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.SATURDAY, 0)),
                     () ->
                             assertThat(reservationStats.chart().get(6))
-                                    .isEqualTo(WeekDayReservationCountResponse.of("일요일", 0)));
+                                    .isEqualTo(
+                                            WeekDayReservationCountResponse.of(
+                                                    DayOfWeek.SUNDAY, 0)));
         }
 
         @Test

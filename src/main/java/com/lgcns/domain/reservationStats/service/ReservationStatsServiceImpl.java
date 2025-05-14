@@ -6,6 +6,7 @@ import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.reservationStats.domain.DailyReservationCount;
 import com.lgcns.domain.reservationStats.domain.WeekDayReservationCount;
+import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
 import com.lgcns.domain.reservationStats.dto.response.ReservationStatsResponse;
 import com.lgcns.domain.reservationStats.dto.response.WeekDayReservationCountResponse;
 import com.lgcns.domain.reservationStats.repository.DailyReservationCountRepository;
@@ -30,6 +31,7 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
     private final ManagerUtil managerUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public ReservationStatsResponse getReservationStats(Long popupId) {
         Manager currentManager = managerUtil.getCurrentManager();
         Popup popup = findPopupById(popupId);
@@ -59,26 +61,29 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
         }
     }
 
-    public List<WeekDayReservationCountResponse> convertToChart(
-            Optional<WeekDayReservationCount> count) {
+    private List<WeekDayReservationCountResponse> convertToChart(
+            Optional<WeekDayReservationCount> countOpt) {
+        WeekDayReservationCount count = countOpt.orElse(null);
         List<WeekDayReservationCountResponse> chart = new ArrayList<>();
-        if (count.isEmpty()) {
-            chart.add(WeekDayReservationCountResponse.of("월요일", 0));
-            chart.add(WeekDayReservationCountResponse.of("화요일", 0));
-            chart.add(WeekDayReservationCountResponse.of("수요일", 0));
-            chart.add(WeekDayReservationCountResponse.of("목요일", 0));
-            chart.add(WeekDayReservationCountResponse.of("금요일", 0));
-            chart.add(WeekDayReservationCountResponse.of("토요일", 0));
-            chart.add(WeekDayReservationCountResponse.of("일요일", 0));
-            return chart;
+
+        for (DayOfWeek day : DayOfWeek.values()) {
+            int reservedCount = 0;
+            if (count != null) {
+                reservedCount =
+                        switch (day) {
+                            case MONDAY -> count.getMondayCount();
+                            case TUESDAY -> count.getTuesdayCount();
+                            case WEDNESDAY -> count.getWednesdayCount();
+                            case THURSDAY -> count.getThursdayCount();
+                            case FRIDAY -> count.getFridayCount();
+                            case SATURDAY -> count.getSaturdayCount();
+                            case SUNDAY -> count.getSundayCount();
+                        };
+            }
+
+            chart.add(WeekDayReservationCountResponse.of(day, reservedCount));
         }
-        chart.add(WeekDayReservationCountResponse.of("월요일", count.get().getMondayCount()));
-        chart.add(WeekDayReservationCountResponse.of("화요일", count.get().getTuesdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("수요일", count.get().getWednesdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("목요일", count.get().getThursdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("금요일", count.get().getFridayCount()));
-        chart.add(WeekDayReservationCountResponse.of("토요일", count.get().getSaturdayCount()));
-        chart.add(WeekDayReservationCountResponse.of("일요일", count.get().getSundayCount()));
+
         return chart;
     }
 }

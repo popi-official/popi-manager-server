@@ -21,7 +21,7 @@ public class Entrance {
     private Long popupId;
 
     @Enumerated(EnumType.STRING)
-    private UserGender gender;
+    private MemberGender gender;
 
     private int ageGroup;
 
@@ -32,7 +32,7 @@ public class Entrance {
     @Builder
     private Entrance(
             Long popupId,
-            UserGender gender,
+            MemberGender gender,
             int ageGroup,
             LocalDate reservationDate,
             LocalTime reservationTime) {
@@ -45,7 +45,7 @@ public class Entrance {
 
     public static Entrance createPopupEnter(
             Long popupId,
-            UserGender gender,
+            MemberGender gender,
             int ageGroup,
             LocalDate reservationDate,
             LocalTime reservationTime) {

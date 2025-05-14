@@ -4,5 +4,5 @@ CREATE TABLE payment_stats (
     `analyzed_date`	DATE	NOT NULL,
     `analyzed_time`	TIME	NOT NULL,
     `total_payment`	INT	NOT NULL,
-    `user_count`	INT	NOT NULL,
+    `user_count`	INT	NOT NULL
 );

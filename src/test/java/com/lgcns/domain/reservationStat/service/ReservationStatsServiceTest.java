@@ -163,5 +163,18 @@ public class ReservationStatsServiceTest extends IntegrationTest {
                     () -> reservationStatsService.getReservationStats(popupId),
                     PopupErrorCode.POPUP_UNAUTHORIZED.getMessage());
         }
+
+        @Test
+        @Transactional
+        void 존재하지_않는_팝업에_대한_예약_통계_조회는_실패한다() {
+            // given
+            Long popupId = -1L;
+
+            // when & then
+            Assertions.assertThrows(
+                    CustomException.class,
+                    () -> reservationStatsService.getReservationStats(popupId),
+                    PopupErrorCode.POPUP_NOT_FOUND.getMessage());
+        }
     }
 }

@@ -1,9 +1,18 @@
 package com.lgcns.domain.survey.dto.response;
 
-import java.util.List;
-
-public record SurveyResultResponse(int surveyNumber, List<ChoiceResultResponse> contents) {
-    public static SurveyResultResponse of(int surveyNumber, List<ChoiceResultResponse> contents) {
-        return new SurveyResultResponse(surveyNumber, contents);
+public record SurveyResultResponse(
+        int surveyNumber,
+        String choiceContent,
+        int choiceNumber,
+        int memberAnswerCount,
+        double ratio) {
+    public static SurveyResultResponse of(
+            int surveyNumber,
+            String choiceContent,
+            int choiceNumber,
+            int memberAnswerCount,
+            double ratio) {
+        return new SurveyResultResponse(
+                surveyNumber, choiceContent, choiceNumber, memberAnswerCount, ratio);
     }
 }

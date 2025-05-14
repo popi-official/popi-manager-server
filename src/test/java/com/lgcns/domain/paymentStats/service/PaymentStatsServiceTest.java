@@ -8,7 +8,6 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.paymentStats.domain.PaymentStats;
 import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
-import com.lgcns.domain.paymentStats.exception.PaymentStatsErrorCode;
 import com.lgcns.domain.paymentStats.repository.PaymentStatsRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -49,9 +48,9 @@ class PaymentStatsServiceTest extends IntegrationTest {
                         "testPopup",
                         "https://bucket/이미지.jpg",
                         LocalDate.now().minusMonths(1),
-                        LocalDate.parse("2025-06-15"),
+                        LocalDate.parse("2025-05-01"),
                         LocalDateTime.of(LocalDate.now().minusMonths(1), LocalTime.of(6, 0)),
-                        LocalDateTime.parse("2025-06-15T22:00:00"),
+                        LocalDateTime.parse("2025-05-01T22:00:00"),
                         LocalTime.parse("06:00:00"),
                         LocalTime.parse("22:00:00"),
                         100,
@@ -69,25 +68,40 @@ class PaymentStatsServiceTest extends IntegrationTest {
         // 팝업 1 결제 통계 데이터
         paymentStatsRepository.save(
                 PaymentStats.createPaymentStats(
-                        popup, LocalDate.of(2025, 5, 15), LocalTime.of(8, 0), 1250000, 124));
+                        popup.getId(), LocalDate.of(2025, 5, 2), LocalTime.of(8, 0), 1250000, 124));
         paymentStatsRepository.save(
                 PaymentStats.createPaymentStats(
-                        popup, LocalDate.of(2025, 5, 15), LocalTime.of(10, 0), 2345000, 156));
+                        popup.getId(),
+                        LocalDate.of(2025, 5, 2),
+                        LocalTime.of(10, 0),
+                        2345000,
+                        156));
         paymentStatsRepository.save(
                 PaymentStats.createPaymentStats(
-                        popup, LocalDate.of(2025, 5, 15), LocalTime.of(12, 0), 3560000, 187));
+                        popup.getId(),
+                        LocalDate.of(2025, 5, 2),
+                        LocalTime.of(12, 0),
+                        3560000,
+                        187));
         paymentStatsRepository.save(
                 PaymentStats.createPaymentStats(
-                        popup, LocalDate.of(2025, 5, 15), LocalTime.of(14, 0), 4250000, 195));
+                        popup.getId(),
+                        LocalDate.of(2025, 5, 3),
+                        LocalTime.of(14, 0),
+                        4250000,
+                        195));
 
         // 오늘 날짜로 가정한 데이터 추가
         LocalDate today = LocalDate.now();
         paymentStatsRepository.save(
-                PaymentStats.createPaymentStats(popup, today, LocalTime.of(8, 0), 980000, 98));
+                PaymentStats.createPaymentStats(
+                        popup.getId(), today, LocalTime.of(8, 0), 980000, 98));
         paymentStatsRepository.save(
-                PaymentStats.createPaymentStats(popup, today, LocalTime.of(10, 0), 1870000, 145));
+                PaymentStats.createPaymentStats(
+                        popup.getId(), today, LocalTime.of(10, 0), 1870000, 145));
         paymentStatsRepository.save(
-                PaymentStats.createPaymentStats(popup, today, LocalTime.of(12, 0), 4120000, 194));
+                PaymentStats.createPaymentStats(
+                        popup.getId(), today, LocalTime.of(12, 0), 4120000, 194));
     }
 
     @Nested
@@ -96,13 +110,12 @@ class PaymentStatsServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        @DisplayName("정상적으로 평균 결제액 조회에 성공한다")
-        void getPaymentAverage_Success() {
+        void 정상적으로_평균_결제액_조회에_성공한다() {
             // given
             Long popupId = popup.getId();
 
             // when
-            PaymentAverageResponse response = paymentStatsService.getPaymentAverage(popupId);
+            PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
 
             // then
             assertThat(response).isNotNull();
@@ -112,21 +125,19 @@ class PaymentStatsServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        @DisplayName("존재하지 않는 팝업 ID로 조회하면 예외가 발생한다")
-        void getPaymentAverage_PopupNotFound() {
+        void 존재하지_않는_팝업_ID로_조회하면_예외가_발생한다() {
             // given
             Long nonExistentPopupId = 9999L;
 
             // when & then
-            assertThatThrownBy(() -> paymentStatsService.getPaymentAverage(nonExistentPopupId))
+            assertThatThrownBy(() -> paymentStatsService.getPaymentAverages(nonExistentPopupId))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }
 
         @Test
         @Transactional
-        @DisplayName("다른 매니저의 팝업에 접근하면 예외가 발생한다")
-        void getPaymentAverage_Unauthorized() {
+        void 다른_매니저의_팝업에_접근하면_예외가_발생한다() {
             // given
             Popup otherPopup =
                     Popup.createPopup(
@@ -149,48 +160,14 @@ class PaymentStatsServiceTest extends IntegrationTest {
             final Long otherPopupId = otherPopup.getId();
 
             // when & then
-            assertThatThrownBy(() -> paymentStatsService.getPaymentAverage(otherPopupId))
+            assertThatThrownBy(() -> paymentStatsService.getPaymentAverages(otherPopupId))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
         }
 
         @Test
         @Transactional
-        @DisplayName("팝업의 시작일이 현재 날짜보다 미래인 경우 예외가 발생한다")
-        void getPaymentAverage_InvalidDateRange() {
-            // given
-            LocalDate futureDate = LocalDate.now().plusDays(7); // 미래 날짜로 설정
-            Popup futurePopup =
-                    Popup.createPopup(
-                            ownerManager,
-                            "futurePopup",
-                            "https://bucket/future.jpg",
-                            futureDate,
-                            futureDate.plusDays(30),
-                            LocalDateTime.of(futureDate, LocalTime.of(6, 0)),
-                            LocalDateTime.of(futureDate.plusDays(30), LocalTime.of(22, 0)),
-                            LocalTime.parse("06:00:00"),
-                            LocalTime.parse("22:00:00"),
-                            100,
-                            20,
-                            "서울특별시 강남구 테헤란로 888",
-                            "8층 8호",
-                            37.888888,
-                            127.888888);
-            futurePopup = popupRepository.save(futurePopup);
-            final Long futurePopupId = futurePopup.getId();
-
-            // when & then
-            assertThatThrownBy(() -> paymentStatsService.getPaymentAverage(futurePopupId))
-                    .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue(
-                            "errorCode", PaymentStatsErrorCode.INVALID_DATE_RANGE);
-        }
-
-        @Test
-        @Transactional
-        @DisplayName("계산된 1인당 구매 평균값이 정확한지 확인한다")
-        void getPaymentAverage_CorrectCalculation() {
+        void 계산된_1인당_구매_평균값이_정확한지_확인한다() {
             // given
             Long popupId = popup.getId();
 
@@ -204,17 +181,33 @@ class PaymentStatsServiceTest extends IntegrationTest {
             // 초기
             paymentStatsRepository.save(
                     PaymentStats.createPaymentStats(
-                            popup, today.minusDays(1), LocalTime.of(12, 0), 40000, 10));
+                            popup.getId(), today.minusDays(1), LocalTime.of(12, 0), 40000, 10));
             // 오늘
             paymentStatsRepository.save(
-                    PaymentStats.createPaymentStats(popup, today, LocalTime.of(12, 0), 60000, 10));
+                    PaymentStats.createPaymentStats(
+                            popup.getId(), today, LocalTime.of(12, 0), 60000, 10));
 
             // when
-            PaymentAverageResponse response = paymentStatsService.getPaymentAverage(popupId);
+            PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
 
             // then
             assertThat(response.totalPrice()).isEqualTo("5000"); // 5000
             assertThat(response.todayPrice()).isEqualTo("6000"); // 6000
+        }
+
+        @Test
+        @Transactional
+        void 데이터가_없을_경우_0을_반환한다() {
+            // given
+            Long popupId = popup.getId();
+            paymentStatsRepository.deleteAll();
+
+            // when
+            PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
+
+            // then
+            assertThat(response.totalPrice()).isEqualTo("0");
+            assertThat(response.todayPrice()).isEqualTo("0");
         }
     }
 }

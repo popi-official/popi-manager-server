@@ -3,6 +3,6 @@ CREATE TABLE entrance (
                              popup_id BIGINT NOT NULL,
                              gender VARCHAR(10) NOT NULL,
                              age_group INT NOT NULL,
-                             date DATE NOT NULL,
-                             time TIME NOT NULL
+                             reservation_date DATE NOT NULL,
+                             reservation_time TIME NOT NULL
 );

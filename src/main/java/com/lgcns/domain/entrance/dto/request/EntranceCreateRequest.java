@@ -15,11 +15,16 @@ public record EntranceCreateRequest(
                 Integer ageGroup,
         @NotNull(message = "예약 날짜는 필수입니다.")
                 @Schema(description = "팝업 예약 날짜", example = "2025-05-13")
-                LocalDate date,
+                LocalDate reservationDate,
         @NotNull(message = "예약 시간은 필수입니다.") @Schema(description = "팝업 예약 시간", example = "10:00:00")
-                LocalTime time) {
+                LocalTime reservationTime) {
     public static EntranceCreateRequest of(
-            Long popupId, UserGender gender, Integer ageGroup, LocalDate date, LocalTime time) {
-        return new EntranceCreateRequest(popupId, gender, ageGroup, date, time);
+            Long popupId,
+            UserGender gender,
+            Integer ageGroup,
+            LocalDate reservationDate,
+            LocalTime reservationTime) {
+        return new EntranceCreateRequest(
+                popupId, gender, ageGroup, reservationDate, reservationTime);
     }
 }

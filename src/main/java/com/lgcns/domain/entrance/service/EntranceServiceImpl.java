@@ -21,8 +21,8 @@ public class EntranceServiceImpl implements EntranceService {
                         request.popupId(),
                         request.gender(),
                         request.ageGroup(),
-                        request.date(),
-                        request.time());
+                        request.reservationDate(),
+                        request.reservationTime());
 
         entranceRepository.save(entrance);
     }

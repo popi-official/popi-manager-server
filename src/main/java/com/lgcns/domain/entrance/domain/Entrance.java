@@ -25,28 +25,36 @@ public class Entrance {
 
     private int ageGroup;
 
-    private LocalDate date;
+    private LocalDate reservationDate;
 
-    private LocalTime time;
+    private LocalTime reservationTime;
 
     @Builder
     private Entrance(
-            Long popupId, UserGender gender, int ageGroup, LocalDate date, LocalTime time) {
+            Long popupId,
+            UserGender gender,
+            int ageGroup,
+            LocalDate reservationDate,
+            LocalTime reservationTime) {
         this.popupId = popupId;
         this.gender = gender;
         this.ageGroup = ageGroup;
-        this.date = date;
-        this.time = time;
+        this.reservationDate = reservationDate;
+        this.reservationTime = reservationTime;
     }
 
     public static Entrance createPopupEnter(
-            Long popupId, UserGender gender, int ageGroup, LocalDate date, LocalTime time) {
+            Long popupId,
+            UserGender gender,
+            int ageGroup,
+            LocalDate reservationDate,
+            LocalTime reservationTime) {
         return Entrance.builder()
                 .popupId(popupId)
                 .gender(gender)
                 .ageGroup(ageGroup)
-                .date(date)
-                .time(time)
+                .reservationDate(reservationDate)
+                .reservationTime(reservationTime)
                 .build();
     }
 }

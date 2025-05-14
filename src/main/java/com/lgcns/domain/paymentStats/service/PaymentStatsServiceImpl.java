@@ -2,7 +2,6 @@ package com.lgcns.domain.paymentStats.service;
 
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
-import com.lgcns.domain.paymentStats.exception.PaymentStatsErrorCode;
 import com.lgcns.domain.paymentStats.repository.PaymentStatsRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -10,7 +9,6 @@ import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,38 +24,15 @@ public class PaymentStatsServiceImpl implements PaymentStatsService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaymentAverageResponse getPaymentAverage(Long popupId) {
+    public PaymentAverageResponse getPaymentAverages(Long popupId) {
         Manager currentManager = managerUtil.getCurrentManager();
-
         Popup popup = findPopupById(popupId);
 
         validatePopupOwnership(currentManager, popup);
 
         final LocalDate today = LocalDate.now();
-        final LocalTime currentTime = LocalTime.now();
 
-        final LocalDate openDate = popup.getPopupStartDate();
-        final LocalTime previousTime = getPreviousTimeSlot(currentTime);
-
-        validateDateRange(openDate, today);
-
-        return paymentStatsRepository.findAveragePayment(popupId, openDate, today, previousTime);
-    }
-
-    private LocalTime getPreviousTimeSlot(LocalTime time) {
-        int hour = time.getHour();
-
-        if (hour % 2 != 0) {
-            hour = hour - 1;
-        }
-
-        if (hour < 6) {
-            hour = 6;
-        } else if (hour > 22) {
-            hour = 22;
-        }
-
-        return LocalTime.of(hour, 0);
+        return paymentStatsRepository.getPaymentAverages(popupId, today);
     }
 
     private Popup findPopupById(Long popupId) {
@@ -69,12 +44,6 @@ public class PaymentStatsServiceImpl implements PaymentStatsService {
     private void validatePopupOwnership(Manager manager, Popup popup) {
         if (!popup.getManager().equals(manager)) {
             throw new CustomException(PopupErrorCode.POPUP_UNAUTHORIZED);
-        }
-    }
-
-    private void validateDateRange(LocalDate openDate, LocalDate today) {
-        if (openDate.isAfter(today)) {
-            throw new CustomException(PaymentStatsErrorCode.INVALID_DATE_RANGE);
         }
     }
 }

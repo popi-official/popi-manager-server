@@ -1,0 +1,16 @@
+spring:
+  config:
+    activate:
+      on-profile: "aws"
+cloud:
+  aws:
+    region: ${AWS_REGION:ap-northeast-2}
+    accessKey: ${AWS_ACCESS_KEY}
+    secretKey: ${AWS_SECRET_KEY}
+
+    s3:
+      bucket: ${S3_BUCKET}
+      endpoint: ${S3_ENDPOINT:https://s3.ap-northeast-2.amazonaws.com}
+
+    dynamodb:
+      table-name: ${DYNAMODB_TABLE_NAME:popup_event}

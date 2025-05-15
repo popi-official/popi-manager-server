@@ -24,6 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final ManagerUtil managerUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public List<NotificationResponseDTO> findNotificationList(Long popupId) {
         Manager currentManager = managerUtil.getCurrentManager();
         Popup popup = findPopupById(popupId);

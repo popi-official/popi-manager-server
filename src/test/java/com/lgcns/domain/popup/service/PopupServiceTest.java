@@ -33,14 +33,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class PopupServiceTest extends IntegrationTest {
-    @Autowired PopupService popupService;
-    @Autowired ItemService itemService;
-    @Autowired PopupRepository popupRepository;
-    @Autowired SurveyRepository surveyRepository;
+    @Autowired private PopupService popupService;
+    @Autowired private ItemService itemService;
+    @Autowired private PopupRepository popupRepository;
+    @Autowired private SurveyRepository surveyRepository;
 
     @Autowired private ManagerRepository managerRepository;
     @Autowired private ChoiceRepository choiceRepository;
-    @Autowired ItemRepository itemRepository;
+    @Autowired private ItemRepository itemRepository;
 
     private Manager ownerManager;
     private Manager otherManager;

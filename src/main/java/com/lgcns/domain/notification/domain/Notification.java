@@ -3,6 +3,7 @@ package com.lgcns.domain.notification.domain;
 import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,4 +27,37 @@ public class Notification extends BaseTimeEntity {
     private Popularity popularity;
 
     private Integer minStock;
+
+    @Builder
+    private Notification(
+            Long userId,
+            Long popupId,
+            Long itemId,
+            String itemName,
+            Popularity popularity,
+            Integer minStock) {
+        this.userId = userId;
+        this.popupId = popupId;
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.popularity = popularity;
+        this.minStock = minStock;
+    }
+
+    public static Notification createNotification(
+            Long userId,
+            Long popupId,
+            Long itemId,
+            String itemName,
+            Popularity popularity,
+            Integer minStock) {
+        return Notification.builder()
+                .userId(userId)
+                .popupId(popupId)
+                .itemId(itemId)
+                .itemName(itemName)
+                .popularity(popularity)
+                .minStock(minStock)
+                .build();
+    }
 }

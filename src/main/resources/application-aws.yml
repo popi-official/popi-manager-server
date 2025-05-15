@@ -11,3 +11,6 @@ cloud:
     s3:
       bucket: ${S3_BUCKET}
       endpoint: ${S3_ENDPOINT:https://s3.ap-northeast-2.amazonaws.com}
+
+    dynamodb:
+      table-name: ${DYNAMODB_TABLE_NAME}

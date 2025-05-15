@@ -17,7 +17,7 @@ public class Notification extends BaseTimeEntity {
     @Column(name = "notification_id")
     private Long id;
 
-    private Long userId;
+    private Long managerId;
     private Long popupId;
     private Long itemId;
 
@@ -30,13 +30,13 @@ public class Notification extends BaseTimeEntity {
 
     @Builder
     private Notification(
-            Long userId,
+            Long managerId,
             Long popupId,
             Long itemId,
             String itemName,
             Popularity popularity,
             Integer minStock) {
-        this.userId = userId;
+        this.managerId = managerId;
         this.popupId = popupId;
         this.itemId = itemId;
         this.itemName = itemName;
@@ -45,14 +45,14 @@ public class Notification extends BaseTimeEntity {
     }
 
     public static Notification createNotification(
-            Long userId,
+            Long managerId,
             Long popupId,
             Long itemId,
             String itemName,
             Popularity popularity,
             Integer minStock) {
         return Notification.builder()
-                .userId(userId)
+                .managerId(managerId)
                 .popupId(popupId)
                 .itemId(itemId)
                 .itemName(itemName)

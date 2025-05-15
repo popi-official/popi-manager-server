@@ -31,7 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
         validatePopupOwnership(currentManager, popup);
 
         List<Notification> notificationList =
-                notificationRepository.findByUserIdAndPopupId(currentManager.getId(), popupId);
+                notificationRepository.findByManagerIdAndPopupId(currentManager.getId(), popupId);
 
         return notificationList.stream()
                 .map(

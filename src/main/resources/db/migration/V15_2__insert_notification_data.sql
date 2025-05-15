@@ -1,4 +1,4 @@
-INSERT INTO notification (user_id, popup_id, item_id, item_name, popularity, min_stock, created_at, updated_at) VALUES
+INSERT INTO notification (manager_id, popup_id, item_id, item_name, popularity, min_stock, created_at, updated_at) VALUES
         (1, 1, 11, '[EUP23] BLACKPINK COLLECTIBLE FIGURE_JENNIE', 'HOT', 200, NOW(), NOW()),
         (1, 1, 5,  '[BLACKPINK THE GAME PHOTOCARD COLLECTION] BACK TO RETRO','HOT', 200, NOW(), NOW()),
         (1, 1, 6,  'BLACKPINK THE GAME PHOTOCARD COLLECTION LOVELY VALENTINES EDITION', 'NORMAL', 200, NOW(), NOW()),

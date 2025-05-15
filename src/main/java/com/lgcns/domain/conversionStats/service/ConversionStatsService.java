@@ -2,7 +2,7 @@ package com.lgcns.domain.conversionStats.service;
 
 // import com.lgcns.domain.conversionStats.domain.Interest;
 
-import com.lgcns.domain.conversionStats.domain.ItemEvent;
+import com.lgcns.domain.conversionStats.domain.PopupEvent;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -37,9 +37,9 @@ public class ConversionStatsService {
 
         validatePopupOwnership(currentManager, popup);
 
-        DynamoDbTable<ItemEvent> table =
+        DynamoDbTable<PopupEvent> table =
                 dynamoDbEnhancedClient.table(
-                        dynamoDbProperties.tableName(), TableSchema.fromBean(ItemEvent.class));
+                        dynamoDbProperties.tableName(), TableSchema.fromBean(PopupEvent.class));
 
         QueryConditional condition =
                 QueryConditional.keyEqualTo(

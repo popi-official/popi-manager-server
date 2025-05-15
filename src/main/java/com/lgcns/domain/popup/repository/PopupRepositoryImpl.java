@@ -23,7 +23,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                                 PopupPreviewResponse.class, popup.id, popup.name, popup.imageUrl))
                 .from(popup)
                 .where(popup.manager.id.eq(managerId))
-                .orderBy(popup.id.desc())
+                .orderBy(popup.id.asc())
                 .fetch();
     }
 }

@@ -23,15 +23,15 @@ public class DailyEntrantCount extends BaseTimeEntity {
 
     private Long popupId;
 
-    private Long entrantCount;
+    private int entrantCount;
 
     @Builder
-    private DailyEntrantCount(Long popupId, Long entrantCount) {
+    private DailyEntrantCount(Long popupId, int entrantCount) {
         this.popupId = popupId;
         this.entrantCount = entrantCount;
     }
 
-    public static DailyEntrantCount createDailyEntrantCount(Long popupId, Long entrantCount) {
+    public static DailyEntrantCount createDailyEntrantCount(Long popupId, int entrantCount) {
         return DailyEntrantCount.builder().popupId(popupId).entrantCount(entrantCount).build();
     }
 }

@@ -48,7 +48,9 @@ public class SurveyServiceImpl implements SurveyService {
                                                         ChoiceStatsResponse.of(
                                                                 result.choiceContent(),
                                                                 result.memberAnswerCount(),
-                                                                result.ratio()),
+                                                                getMemberAnswerRatio(
+                                                                        result.memberAnswerCount(),
+                                                                        totalCount)),
                                                 Collectors.toList())));
 
         List<SurveyStatsResponse> surveys =
@@ -70,5 +72,13 @@ public class SurveyServiceImpl implements SurveyService {
         return popupRepository
                 .findById(popupId)
                 .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    }
+
+    private Integer getMemberAnswerRatio(Long memberAnswerCount, Long totalCount) {
+        if (memberAnswerCount == 0 || totalCount == 0) {
+            return 0;
+        }
+        double ratio = (memberAnswerCount * 100.0) / totalCount;
+        return (int) Math.round(ratio);
     }
 }

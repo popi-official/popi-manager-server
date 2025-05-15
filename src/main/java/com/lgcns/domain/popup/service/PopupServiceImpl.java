@@ -90,8 +90,9 @@ public class PopupServiceImpl implements PopupService {
     }
 
     private void createChoiceFromRequest(Survey survey, ChoiceCreateRequest choiceCreateRequest) {
-        for (String option : choiceCreateRequest.optionList()) {
-            Choice choice = Choice.createChoice(survey, option);
+        for (int i = 1; i <= choiceCreateRequest.optionList().size(); i++) {
+            String option = choiceCreateRequest.optionList().get(i - 1);
+            Choice choice = Choice.createChoice(survey, option, i);
             choiceRepository.save(choice);
         }
     }

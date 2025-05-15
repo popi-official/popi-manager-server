@@ -22,13 +22,16 @@ public class Choice {
 
     private String content;
 
+    private int number;
+
     @Builder
-    private Choice(Survey survey, String content) {
+    private Choice(Survey survey, String content, int number) {
         this.survey = survey;
         this.content = content;
+        this.number = number;
     }
 
-    public static Choice createChoice(Survey survey, String content) {
-        return Choice.builder().survey(survey).content(content).build();
+    public static Choice createChoice(Survey survey, String content, int number) {
+        return Choice.builder().survey(survey).content(content).number(number).build();
     }
 }

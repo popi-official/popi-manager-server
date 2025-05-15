@@ -25,6 +25,7 @@ public class DailyEntrantCountImpl implements DailyEntrantCountService {
     private final ManagerUtil managerUtil;
 
     @Override
+    @Transactional(readOnly = true)
     public DailyEntrantCountResponse findDailyEntrantCount(Long popupId) {
         Manager manager = managerUtil.getCurrentManager();
         Popup popup = findPopupById(popupId);

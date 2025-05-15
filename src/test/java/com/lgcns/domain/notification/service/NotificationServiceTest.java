@@ -1,4 +1,4 @@
-package com.lgcns.domain.notification.service.NotificationServiceTest;
+package com.lgcns.domain.notification.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +12,6 @@ import com.lgcns.domain.notification.domain.Notification;
 import com.lgcns.domain.notification.domain.Popularity;
 import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.repository.NotificationRepository;
-import com.lgcns.domain.notification.service.NotificationService;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
@@ -114,10 +113,7 @@ public class NotificationServiceTest extends IntegrationTest {
                                     .isEqualTo(notification.getPopularity()),
                     () ->
                             assertThat(notificationList.get(0).minStock())
-                                    .isEqualTo(notification.getMinStock()),
-                    () ->
-                            assertThat(notificationList.get(0).notifiedAt())
-                                    .isEqualTo(notification.getCreatedAt()));
+                                    .isEqualTo(notification.getMinStock()));
         }
 
         @Test

@@ -1,7 +1,6 @@
 package com.lgcns.domain.notification.service;
 
 import com.lgcns.domain.manager.domain.Manager;
-import com.lgcns.domain.notification.domain.Notification;
 import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.repository.NotificationRepository;
 import com.lgcns.domain.popup.domain.Popup;
@@ -30,19 +29,7 @@ public class NotificationServiceImpl implements NotificationService {
         Popup popup = findPopupById(popupId);
         validatePopupOwnership(currentManager, popup);
 
-        List<Notification> notificationList =
-                notificationRepository.findByManagerIdAndPopupId(currentManager.getId(), popupId);
-
-        return notificationList.stream()
-                .map(
-                        notification ->
-                                NotificationResponse.of(
-                                        notification.getId(),
-                                        notification.getPopularity(),
-                                        notification.getItemName(),
-                                        notification.getMinStock(),
-                                        notification.getCreatedAt()))
-                .toList();
+        return notificationRepository.findByManagerIdAndPopupId(currentManager.getId(), popupId);
     }
 
     private Popup findPopupById(Long popupId) {

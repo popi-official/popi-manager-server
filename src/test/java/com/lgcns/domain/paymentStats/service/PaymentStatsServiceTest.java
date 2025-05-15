@@ -191,8 +191,8 @@ class PaymentStatsServiceTest extends IntegrationTest {
             PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
 
             // then
-            assertThat(response.totalPrice()).isEqualTo("5000"); // 5000
-            assertThat(response.todayPrice()).isEqualTo("6000"); // 6000
+            assertThat(response.totalPrice()).isEqualTo(5000);
+            assertThat(response.todayPrice()).isEqualTo(6000);
         }
 
         @Test
@@ -206,8 +206,8 @@ class PaymentStatsServiceTest extends IntegrationTest {
             PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
 
             // then
-            assertThat(response.totalPrice()).isEqualTo("0");
-            assertThat(response.todayPrice()).isEqualTo("0");
+            assertThat(response.totalPrice()).isEqualTo(0);
+            assertThat(response.todayPrice()).isEqualTo(0);
         }
     }
 }

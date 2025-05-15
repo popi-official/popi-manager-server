@@ -1,6 +1,6 @@
 package com.lgcns.domain.notification.controller;
 
-import com.lgcns.domain.notification.dto.NotificationResponseDTO;
+import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +21,7 @@ public class NotificationController {
 
     @GetMapping("/stock")
     @Operation(summary = "알림 목록 조회", description = "알림 목록을 조회합니다.")
-    public List<NotificationResponseDTO> getNotificationList(@PathVariable Long popupId) {
+    public List<NotificationResponse> getNotificationList(@PathVariable Long popupId) {
         return notificationService.findNotificationList(popupId);
     }
 }

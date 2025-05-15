@@ -2,7 +2,7 @@ package com.lgcns.domain.notification.service;
 
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.notification.domain.Notification;
-import com.lgcns.domain.notification.dto.NotificationResponseDTO;
+import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.repository.NotificationRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -25,7 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<NotificationResponseDTO> findNotificationList(Long popupId) {
+    public List<NotificationResponse> findNotificationList(Long popupId) {
         Manager currentManager = managerUtil.getCurrentManager();
         Popup popup = findPopupById(popupId);
         validatePopupOwnership(currentManager, popup);
@@ -36,7 +36,7 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationList.stream()
                 .map(
                         notification ->
-                                NotificationResponseDTO.of(
+                                NotificationResponse.of(
                                         notification.getId(),
                                         notification.getPopularity(),
                                         notification.getItemName(),

@@ -10,7 +10,7 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.notification.domain.Notification;
 import com.lgcns.domain.notification.domain.Popularity;
-import com.lgcns.domain.notification.dto.NotificationResponseDTO;
+import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.repository.NotificationRepository;
 import com.lgcns.domain.notification.service.NotificationService;
 import com.lgcns.domain.popup.domain.Popup;
@@ -97,7 +97,7 @@ public class NotificationServiceTest extends IntegrationTest {
                                     managerId, popupId, itemId, "testItem", Popularity.HOT, 100));
 
             // when
-            List<NotificationResponseDTO> notificationList =
+            List<NotificationResponse> notificationList =
                     notificationService.findNotificationList(popupId);
 
             // then
@@ -127,7 +127,7 @@ public class NotificationServiceTest extends IntegrationTest {
             Long popupId = popup.getId();
 
             // when
-            List<NotificationResponseDTO> notificationList =
+            List<NotificationResponse> notificationList =
                     notificationService.findNotificationList(popupId);
 
             // then

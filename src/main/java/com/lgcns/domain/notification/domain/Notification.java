@@ -21,6 +21,9 @@ public class Notification extends BaseTimeEntity {
     private Long itemId;
 
     private String itemName;
+
+    @Enumerated(EnumType.STRING)
     private Popularity popularity;
+
     private Integer minStock;
 }

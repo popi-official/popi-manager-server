@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/popup/{popupId}/dashboard/reservations")
+@RequestMapping("/popups/{popupId}/dashboard/reservations")
 @RequiredArgsConstructor
 @Tag(name = "9. 예약 분석 API", description = "예약 분석 관련 API 입니다.")
 public class ReservationStatsController {

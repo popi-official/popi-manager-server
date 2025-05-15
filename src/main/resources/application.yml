@@ -7,7 +7,7 @@ spring:
     include:
       - redis
       - security
-      - s3
+      - aws
 
 spring-doc:
   default-consumes-media-type: application/json

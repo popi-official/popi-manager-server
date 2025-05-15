@@ -44,7 +44,7 @@ public class PaymentStatsRepositoryImpl implements PaymentStatsRepositoryCustom 
                         .fetchOne();
 
         return new PaymentAverageResponse(
-                String.valueOf(Math.round(totalAvg != null ? totalAvg : 0)),
-                String.valueOf(Math.round(todayAvg != null ? todayAvg : 0)));
+                (int) Math.round(totalAvg != null ? totalAvg : 0),
+                (int) Math.round(todayAvg != null ? todayAvg : 0));
     }
 }

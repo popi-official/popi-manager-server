@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/popups/{popupId}/dashboard/entrants")
 @RequiredArgsConstructor
-@Tag(name = "10.입장자 수 조회 API", description = "일일 입장자 수 조회 API입니다.")
+@Tag(name = "10. 일일 입장자 수 조회 API", description = "일일 입장자 수 조회 API입니다.")
 public class DailyEntrantCountController {
 
     private final DailyEntrantCountService dailyEntrantCountService;

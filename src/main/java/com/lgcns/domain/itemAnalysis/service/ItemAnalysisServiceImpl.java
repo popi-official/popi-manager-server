@@ -8,9 +8,12 @@ import com.lgcns.domain.itemAnalysis.dto.response.ItemTrendingResponse;
 import com.lgcns.domain.itemAnalysis.dto.response.PopupEventResponse;
 import com.lgcns.domain.itemAnalysis.repository.DynamoDBRepository;
 import com.lgcns.domain.itemAnalysis.repository.ItemSalesStatsRepository;
+import com.lgcns.domain.manager.domain.Manager;
+import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
+import com.lgcns.global.util.ManagerUtil;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -29,39 +32,51 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
     private final ItemSalesStatsRepository itemSalesStatsRepository;
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
+    private final ManagerUtil managerUtil;
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemTrendingResponse> getTrendingItems(Long popupId) {
-        // 팝업 존재 확인
-        validatePopupExists(popupId);
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
+
+        validatePopupOwnership(currentManager, popup);
 
         // 현재 시간 기준으로 직전 타임 계산
         LocalDateTime endTime = calculatePreviousTimeEnd(LocalDateTime.now());
 
-        // 인기도와 판매량 데이터 수집
-        Map<Long, Integer> popularityMap = getPopularityMap(popupId, endTime);
-        Map<Long, Integer> salesMap = getSalesMap(popupId);
+        Map<Long, Integer> popularityMap = getItemPopularityScores(popupId, endTime);
+
+        Map<Long, Integer> salesMap = getItemSalesVolumes(popupId);
 
         // 인기 상품 TOP 3 조회
         List<ItemScoreResponse> topItems = findTopItems(popularityMap, salesMap);
+        if (topItems.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        // 상품 정보 조회 및 응답 생성
         return createTrendingResponses(topItems);
     }
 
-    private void validatePopupExists(Long popupId) {
-        popupRepository
+    private Popup findPopupById(Long popupId) {
+        return popupRepository
                 .findById(popupId)
                 .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    }
+
+    private void validatePopupOwnership(Manager manager, Popup popup) {
+        if (!popup.getManager().equals(manager)) {
+            throw new CustomException(PopupErrorCode.POPUP_UNAUTHORIZED);
+        }
     }
 
     private LocalDateTime calculatePreviousTimeEnd(LocalDateTime currentTime) {
         int hour = currentTime.getHour();
 
-        // 오전 6시부터 8시 사이인 경우, 직전 타임은 전날 22:00~24:00
+        // 오전 6시부터 8시 사이인 경우, 직전 타임은 전날 22:00~23:59:59
         if (hour >= 6 && hour < 8) {
-            return LocalDateTime.of(currentTime.toLocalDate(), LocalTime.of(0, 0));
+            return LocalDateTime.of(
+                    currentTime.toLocalDate().minusDays(1), LocalTime.of(23, 59, 59));
         } else {
             // 직전 타임 계산 (2시간 간격)
             int previousTimeBlockEnd = ((hour - 6) / 2) * 2 + 6;
@@ -73,32 +88,38 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
         }
     }
 
-    private Map<Long, Integer> getPopularityMap(Long popupId, LocalDateTime endTime) {
-        // DynamoDB에서 이벤트 데이터 조회 및 인기도 점수 계산
-        return dynamoDBRepository.getEventsUntilTime(popupId, endTime).stream()
+    // 팝업의 아이템별 인기도 점수 조회
+    private Map<Long, Integer> getItemPopularityScores(Long popupId, LocalDateTime endTime) {
+        List<PopupEventResponse> events = dynamoDBRepository.getEventsUntilTime(popupId, endTime);
+        return events.stream()
+                .filter(event -> event.getItemId() != null && event.getScore() > 0)
                 .collect(
                         Collectors.groupingBy(
                                 PopupEventResponse::getItemId,
                                 Collectors.summingInt(PopupEventResponse::getScore)));
     }
 
-    private Map<Long, Integer> getSalesMap(Long popupId) {
-        // 판매량 데이터 조회
-        return itemSalesStatsRepository.findByPopupId(popupId).stream()
+    // 팝업의 아이템별 판매량 조회
+    private Map<Long, Integer> getItemSalesVolumes(Long popupId) {
+        List<ItemSalesStats> itemSalesStats = itemSalesStatsRepository.findByPopupId(popupId);
+        return itemSalesStats.stream()
                 .collect(
                         Collectors.toMap(
                                 ItemSalesStats::getItemId,
                                 ItemSalesStats::getSalesVolume,
-                                (v1, v2) -> v1 // 중복 키가 있을 경우 첫 번째 값 사용
-                                ));
+                                (v1, v2) -> v1));
     }
 
     private List<ItemScoreResponse> findTopItems(
             Map<Long, Integer> popularityMap, Map<Long, Integer> salesMap) {
-        // 모든 아이템 ID 목록 생성
+
         Set<Long> allItemIds = new HashSet<>();
         allItemIds.addAll(popularityMap.keySet());
         allItemIds.addAll(salesMap.keySet());
+
+        if (allItemIds.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         // 인기도 + 판매량을 기준으로 상위 3개 아이템 선정
         return allItemIds.stream()
@@ -134,10 +155,13 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
         // 원래 순서(점수 순)대로 응답 생성
         return topItems.stream()
                 .map(
-                        scoreItem ->
-                                Optional.ofNullable(itemMap.get(scoreItem.itemId()))
-                                        .map(ItemTrendingResponse::from)
-                                        .orElse(null))
+                        scoreItem -> {
+                            Item item = itemMap.get(scoreItem.itemId());
+                            if (item == null) {
+                                return null;
+                            }
+                            return ItemTrendingResponse.from(item);
+                        })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }

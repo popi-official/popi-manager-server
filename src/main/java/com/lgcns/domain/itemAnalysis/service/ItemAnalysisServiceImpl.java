@@ -46,12 +46,9 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
         LocalDateTime endTime = calculatePreviousTimeEnd(LocalDateTime.now());
 
         Map<Long, Integer> popularityMap = getItemPopularityScores(popupId, endTime);
-
         Map<Long, Integer> salesMap = getItemSalesVolumes(popupId);
 
-        Set<Long> allItemIds = new HashSet<>();
-        allItemIds.addAll(popularityMap.keySet());
-        allItemIds.addAll(salesMap.keySet());
+        Set<Long> allItemIds = collectAllItemIds(popularityMap, salesMap);
 
         if (allItemIds.isEmpty()) {
             return Collections.emptyList();
@@ -59,16 +56,13 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
 
         updateItemAnalysis(allItemIds, popularityMap, salesMap);
 
-        // 인기 상품 TOP 3 조회
         List<ItemAnalysis> topItems = findTopItems(popupId);
 
         if (topItems.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return topItems.stream()
-                .map(analysis -> ItemTrendingResponse.from(analysis.getItem()))
-                .collect(Collectors.toList());
+        return convertToResponse(topItems);
     }
 
     private Popup findPopupById(Long popupId) {
@@ -123,6 +117,14 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
                                 (v1, v2) -> v1));
     }
 
+    private Set<Long> collectAllItemIds(
+            Map<Long, Integer> popularityMap, Map<Long, Integer> salesMap) {
+        Set<Long> allItemIds = new HashSet<>();
+        allItemIds.addAll(popularityMap.keySet());
+        allItemIds.addAll(salesMap.keySet());
+        return allItemIds;
+    }
+
     private void updateItemAnalysis(
             Set<Long> itemIds, Map<Long, Integer> popularityMap, Map<Long, Integer> salesMap) {
         for (Long itemId : itemIds) {
@@ -144,5 +146,11 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
 
     private List<ItemAnalysis> findTopItems(Long popupId) {
         return itemAnalysisRepository.findTop3ItemsByPopupId(popupId);
+    }
+
+    private List<ItemTrendingResponse> convertToResponse(List<ItemAnalysis> topItems) {
+        return topItems.stream()
+                .map(analysis -> ItemTrendingResponse.from(analysis.getItem()))
+                .collect(Collectors.toList());
     }
 }

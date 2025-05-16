@@ -106,7 +106,7 @@ public class NotificationServiceTest extends IntegrationTest {
                             assertThat(notificationList.get(0).notificationId())
                                     .isEqualTo(notification.getId()),
                     () ->
-                            assertThat(notificationList.get(0).itemName())
+                            assertThat(notificationList.get(0).name())
                                     .isEqualTo(notification.getItemName()),
                     () ->
                             assertThat(notificationList.get(0).popularity())

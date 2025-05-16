@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Popularity {
-    norma("일반 상품"),
+    normal("일반 상품"),
     hot("인기 상품"),
     ;
 

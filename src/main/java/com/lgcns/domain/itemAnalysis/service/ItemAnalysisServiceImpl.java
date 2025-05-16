@@ -7,6 +7,7 @@ import com.lgcns.domain.itemAnalysis.dto.response.ItemScoreResponse;
 import com.lgcns.domain.itemAnalysis.dto.response.ItemTrendingResponse;
 import com.lgcns.domain.itemAnalysis.dto.response.PopupEventResponse;
 import com.lgcns.domain.itemAnalysis.repository.DynamoDBRepository;
+import com.lgcns.domain.itemAnalysis.repository.ItemAnalysisRepository;
 import com.lgcns.domain.itemAnalysis.repository.ItemSalesStatsRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
@@ -33,6 +34,7 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;
+    private final ItemAnalysisRepository itemAnalysisRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,12 +44,13 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
 
         validatePopupOwnership(currentManager, popup);
 
-        // 현재 시간 기준으로 직전 타임 계산
         LocalDateTime endTime = calculatePreviousTimeEnd(LocalDateTime.now());
 
         Map<Long, Integer> popularityMap = getItemPopularityScores(popupId, endTime);
 
         Map<Long, Integer> salesMap = getItemSalesVolumes(popupId);
+
+        saveItemAnalysis(topItems, popup);
 
         // 인기 상품 TOP 3 조회
         List<ItemScoreResponse> topItems = findTopItems(popularityMap, salesMap);

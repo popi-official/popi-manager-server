@@ -1,12 +1,12 @@
 -- 인기 상품 8개 (stock < 200, min_stock = 200)
-UPDATE item SET stock = 150, min_stock = 200 WHERE item_id = 5;
-UPDATE item SET stock = 120, min_stock = 200 WHERE item_id = 6;
+UPDATE item SET stock = 150, min_stock = 250 WHERE item_id = 5;
+UPDATE item SET stock = 120, min_stock = 100 WHERE item_id = 6;
 UPDATE item SET stock = 100, min_stock = 200 WHERE item_id = 7;
-UPDATE item SET stock = 170, min_stock = 200 WHERE item_id = 8;
+UPDATE item SET stock = 170, min_stock = 150 WHERE item_id = 8;
 UPDATE item SET stock = 90,  min_stock = 200 WHERE item_id = 11;
-UPDATE item SET stock = 160, min_stock = 200 WHERE item_id = 15;
-UPDATE item SET stock = 110, min_stock = 200 WHERE item_id = 17;
-UPDATE item SET stock = 130, min_stock = 200 WHERE item_id = 22;
+UPDATE item SET stock = 160, min_stock = 180 WHERE item_id = 15;
+UPDATE item SET stock = 110, min_stock = 100 WHERE item_id = 17;
+UPDATE item SET stock = 130, min_stock = 80 WHERE item_id = 22;
 
 -- 일반 상품들 (stock 평균 약 400, min_stock = 200)
 UPDATE item SET stock = 420, min_stock = 200 WHERE item_id = 1;

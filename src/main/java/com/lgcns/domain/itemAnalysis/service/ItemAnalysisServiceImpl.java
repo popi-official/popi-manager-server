@@ -2,8 +2,8 @@ package com.lgcns.domain.itemAnalysis.service;
 
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.repository.ItemRepository;
+import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
 import com.lgcns.domain.itemAnalysis.domain.ItemSalesStats;
-import com.lgcns.domain.itemAnalysis.dto.response.ItemScoreResponse;
 import com.lgcns.domain.itemAnalysis.dto.response.ItemTrendingResponse;
 import com.lgcns.domain.itemAnalysis.dto.response.PopupEventResponse;
 import com.lgcns.domain.itemAnalysis.repository.DynamoDBRepository;
@@ -18,7 +18,6 @@ import com.lgcns.global.util.ManagerUtil;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
     private final ItemAnalysisRepository itemAnalysisRepository;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<ItemTrendingResponse> getTrendingItems(Long popupId) {
         final Manager currentManager = managerUtil.getCurrentManager();
         final Popup popup = findPopupById(popupId);
@@ -50,15 +49,26 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
 
         Map<Long, Integer> salesMap = getItemSalesVolumes(popupId);
 
-        saveItemAnalysis(topItems, popup);
+        Set<Long> allItemIds = new HashSet<>();
+        allItemIds.addAll(popularityMap.keySet());
+        allItemIds.addAll(salesMap.keySet());
+
+        if (allItemIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        updateItemAnalysis(allItemIds, popularityMap, salesMap);
 
         // 인기 상품 TOP 3 조회
-        List<ItemScoreResponse> topItems = findTopItems(popularityMap, salesMap);
+        List<ItemAnalysis> topItems = findTopItems(popupId);
+
         if (topItems.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return createTrendingResponses(topItems);
+        return topItems.stream()
+                .map(analysis -> ItemTrendingResponse.from(analysis.getItem()))
+                .collect(Collectors.toList());
     }
 
     private Popup findPopupById(Long popupId) {
@@ -113,59 +123,26 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
                                 (v1, v2) -> v1));
     }
 
-    private List<ItemScoreResponse> findTopItems(
-            Map<Long, Integer> popularityMap, Map<Long, Integer> salesMap) {
+    private void updateItemAnalysis(
+            Set<Long> itemIds, Map<Long, Integer> popularityMap, Map<Long, Integer> salesMap) {
+        for (Long itemId : itemIds) {
+            Item item = itemRepository.findById(itemId).orElse(null);
+            if (item == null) continue;
 
-        Set<Long> allItemIds = new HashSet<>();
-        allItemIds.addAll(popularityMap.keySet());
-        allItemIds.addAll(salesMap.keySet());
+            int popularityScore = popularityMap.getOrDefault(itemId, 0);
+            int salesVolume = salesMap.getOrDefault(itemId, 0);
 
-        if (allItemIds.isEmpty()) {
-            return Collections.emptyList();
+            ItemAnalysis analysis =
+                    itemAnalysisRepository
+                            .findByItemId(itemId)
+                            .orElse(ItemAnalysis.createItemAnalysis(item, 0, 0.0, 0));
+
+            analysis.updateScores(popularityScore, salesVolume);
+            itemAnalysisRepository.save(analysis);
         }
-
-        // 인기도 + 판매량을 기준으로 상위 3개 아이템 선정
-        return allItemIds.stream()
-                .map(
-                        itemId ->
-                                ItemScoreResponse.of(
-                                        itemId,
-                                        popularityMap.getOrDefault(itemId, 0),
-                                        salesMap.getOrDefault(itemId, 0)))
-                .sorted(
-                        Comparator.comparingInt(ItemScoreResponse::totalScore)
-                                .reversed()
-                                .thenComparingInt(ItemScoreResponse::salesVolume)
-                                .reversed())
-                .limit(3)
-                .collect(Collectors.toList());
     }
 
-    private List<ItemTrendingResponse> createTrendingResponses(List<ItemScoreResponse> topItems) {
-        if (topItems.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 상품 ID 목록 추출
-        List<Long> topItemIds =
-                topItems.stream().map(ItemScoreResponse::itemId).collect(Collectors.toList());
-
-        // 상품 정보 조회
-        Map<Long, Item> itemMap =
-                itemRepository.findAllById(topItemIds).stream()
-                        .collect(Collectors.toMap(Item::getId, Function.identity()));
-
-        // 원래 순서(점수 순)대로 응답 생성
-        return topItems.stream()
-                .map(
-                        scoreItem -> {
-                            Item item = itemMap.get(scoreItem.itemId());
-                            if (item == null) {
-                                return null;
-                            }
-                            return ItemTrendingResponse.from(item);
-                        })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    private List<ItemAnalysis> findTopItems(Long popupId) {
+        return itemAnalysisRepository.findTop3ItemsByPopupId(popupId);
     }
 }

@@ -12,10 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemAnalysis {
 
-    @Id private Long itemId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_analysis_id")
+    private Long id;
 
     @OneToOne
-    @MapsId
     @JoinColumn(name = "item_id")
     private Item item;
 
@@ -42,5 +44,10 @@ public class ItemAnalysis {
                 .preSurveyPopularity(preSurveyPopularity)
                 .salesVolume(salesVolume)
                 .build();
+    }
+
+    public void updateScores(int popularityScore, int salesVolume) {
+        this.popularityScore = popularityScore;
+        this.salesVolume = salesVolume;
     }
 }

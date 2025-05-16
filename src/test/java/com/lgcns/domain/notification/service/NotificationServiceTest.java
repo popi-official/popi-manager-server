@@ -93,7 +93,7 @@ public class NotificationServiceTest extends IntegrationTest {
             Notification notification =
                     notificationRepository.save(
                             Notification.createNotification(
-                                    managerId, popupId, itemId, "testItem", Popularity.HOT, 100));
+                                    managerId, popupId, itemId, "testItem", Popularity.hot, 100));
 
             // when
             List<NotificationResponse> notificationList =

@@ -26,8 +26,8 @@ public class CongestionStatsRepositoryImpl implements CongestionStatsRepositoryC
     public CongestionStatsResponse findDailyCongestionStats(
             Long popupId, LocalTime startTime, LocalTime endTime) {
 
-        List<Integer> ALL_HOURS = generateHourlyTimeList(startTime, endTime);
-        List<DayOfWeek> ALL_DAYS = Arrays.asList(DayOfWeek.values());
+        List<Integer> statsHours = generateHourlyTimeList(startTime, endTime);
+        List<DayOfWeek> statsDays = Arrays.asList(DayOfWeek.values());
 
         NumberExpression<Integer> dayOfWeekOrder =
                 new CaseBuilder()
@@ -70,30 +70,30 @@ public class CongestionStatsRepositoryImpl implements CongestionStatsRepositoryC
                                                 DailyCongestionStatsResponse::time,
                                                 Function.identity())));
 
-        Map<DayOfWeek, List<DailyCongestionStatsResponse>> completed = new LinkedHashMap<>();
+        Map<DayOfWeek, List<DailyCongestionStatsResponse>> responseMap = new LinkedHashMap<>();
 
-        for (DayOfWeek day : ALL_DAYS) {
+        for (DayOfWeek day : statsDays) {
             Map<Integer, DailyCongestionStatsResponse> timeMap =
                     statsMap.getOrDefault(day, Map.of());
             List<DailyCongestionStatsResponse> fullList = new ArrayList<>();
 
-            for (Integer hour : ALL_HOURS) {
+            for (Integer hour : statsHours) {
                 DailyCongestionStatsResponse data =
-                        timeMap.getOrDefault(hour, DailyCongestionStatsResponse.empty(day, hour));
+                        timeMap.getOrDefault(hour, DailyCongestionStatsResponse.of(day, hour, 0));
                 fullList.add(data);
             }
 
-            completed.put(day, fullList);
+            responseMap.put(day, fullList);
         }
 
         return new CongestionStatsResponse(
-                completed.get(DayOfWeek.MONDAY),
-                completed.get(DayOfWeek.TUESDAY),
-                completed.get(DayOfWeek.WEDNESDAY),
-                completed.get(DayOfWeek.THURSDAY),
-                completed.get(DayOfWeek.FRIDAY),
-                completed.get(DayOfWeek.SATURDAY),
-                completed.get(DayOfWeek.SUNDAY));
+                responseMap.get(DayOfWeek.MONDAY),
+                responseMap.get(DayOfWeek.TUESDAY),
+                responseMap.get(DayOfWeek.WEDNESDAY),
+                responseMap.get(DayOfWeek.THURSDAY),
+                responseMap.get(DayOfWeek.FRIDAY),
+                responseMap.get(DayOfWeek.SATURDAY),
+                responseMap.get(DayOfWeek.SUNDAY));
     }
 
     private List<Integer> generateHourlyTimeList(LocalTime startTime, LocalTime endTime) {

@@ -27,6 +27,7 @@ public class NotificationRepositoryImpl implements NotificationRepositoryCustom 
                                 notification.minStock,
                                 notification.createdAt))
                 .from(notification)
+                .where(notification.managerId.eq(managerId), notification.popupId.eq(popupId))
                 .fetch();
     }
 }

@@ -1,7 +1,7 @@
-package com.lgcns.domain.conversionStats.service;
+package com.lgcns.domain.conversionStats.repository;
 
 import com.lgcns.domain.conversionStats.dto.response.ConversionStatsResponse;
 
-public interface ConversionStatsService {
+public interface ConversionStatsRepositoryCustom {
     ConversionStatsResponse findTopAndLowConversionItems(Long popupId);
 }

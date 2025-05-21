@@ -23,6 +23,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,10 @@ public class PopupServiceImpl implements PopupService {
     private final SurveyRepository surveyRepository;
     private final ChoiceRepository choiceRepository;
     private final ReservationRepository reservationRepository;
+
+    @Qualifier("userRedisTemplate")
+    private final RedisTemplate<Long, Object> userRedisTemplate;
+
     private final ManagerUtil managerUtil;
 
     private final int MAX_SURVEY = 4;
@@ -48,6 +54,7 @@ public class PopupServiceImpl implements PopupService {
 
         createSurveyFromRequest(popup, popupWithChoicesCreateRequest.choiceCreateRequestList());
         createReservation(popup);
+        saveReservationCount(popup);
 
         return PopupCreateResponse.of(popup.getId());
     }
@@ -140,10 +147,20 @@ public class PopupServiceImpl implements PopupService {
                                                 .isBefore(popup.getReservationCloseDateTime())
                                         ? popup.getReservationCloseDateTime()
                                         : LocalDateTime.of(reservationDate, reservationTime));
+
                 reservationList.add(reservation);
             }
         }
 
         reservationRepository.bulkInsertReservations(reservationList);
+    }
+
+    private void saveReservationCount(Popup popup) {
+        List<Reservation> reservationList = reservationRepository.findAllByPopupId(popup.getId());
+        reservationList.forEach(
+                reservation ->
+                        userRedisTemplate
+                                .opsForValue()
+                                .set(reservation.getId(), reservation.getPossibleCount()));
     }
 }

@@ -27,6 +27,7 @@ public class UserRedisConfig {
         RedisStandaloneConfiguration userRedisStandaloneConfig =
                 new RedisStandaloneConfiguration(
                         userRedisProperties.host(), userRedisProperties.port());
+        userRedisStandaloneConfig.setDatabase(userRedisProperties.database());
         if (!userRedisProperties.password().isBlank()) {
             userRedisStandaloneConfig.setPassword(userRedisProperties.password());
         }

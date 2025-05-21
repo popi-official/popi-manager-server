@@ -2,6 +2,16 @@ spring:
   config:
     activate:
       on-profile: "test"
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:7379}
+      password: ${REDIS_PASSWORD:}
+    user-redis:
+      host: ${USER_REDIS_HOST:localhost}
+      port: ${USER_REDIS_PORT:6379}
+      password: ${USER_REDIS_PASSWORD:}
+      database: ${USER_REDIS_DATABASE:1}
   datasource:
     url: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false;MODE=MYSQL
   flyway:

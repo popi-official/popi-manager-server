@@ -98,11 +98,12 @@ public class PopupServiceImpl implements PopupService {
     }
 
     private void createChoiceFromRequest(Survey survey, ChoiceCreateRequest choiceCreateRequest) {
+        List<Choice> choiceList = new ArrayList<>();
         for (int i = 1; i <= choiceCreateRequest.optionList().size(); i++) {
             String option = choiceCreateRequest.optionList().get(i - 1);
-            Choice choice = Choice.createChoice(survey, option, i);
-            choiceRepository.save(choice);
+            choiceList.add(Choice.createChoice(survey, option, i));
         }
+        choiceRepository.saveAll(choiceList);
     }
 
     private void validatePopupOwnership(Manager manager, Popup popup) {

@@ -7,3 +7,7 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:7379}
       password: ${REDIS_PASSWORD:}
+    user-redis:
+      host: ${USER_REDIS_HOST:localhost}
+      port: ${USER_REDIS_PORT:6379}
+      password: ${USER_REDIS_PASSWORD:}

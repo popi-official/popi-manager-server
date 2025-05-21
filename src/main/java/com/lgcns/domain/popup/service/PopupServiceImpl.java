@@ -17,6 +17,7 @@ import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -158,9 +159,16 @@ public class PopupServiceImpl implements PopupService {
     private void saveReservationCount(Popup popup) {
         List<Reservation> reservationList = reservationRepository.findAllByPopupId(popup.getId());
         reservationList.forEach(
-                reservation ->
-                        userRedisTemplate
-                                .opsForValue()
-                                .set(reservation.getId(), reservation.getPossibleCount()));
+                reservation -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime closeTime = reservation.getReservationCloseDateTime();
+
+                    Duration duration = Duration.between(now, closeTime);
+
+                    if (duration.isNegative() || duration.isZero()) return;
+                    userRedisTemplate
+                            .opsForValue()
+                            .set(reservation.getId(), reservation.getPossibleCount(), duration);
+                });
     }
 }

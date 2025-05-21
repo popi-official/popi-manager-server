@@ -1,7 +1,14 @@
 version: "3.8"
 
 services:
-  redis:
+  user-redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    container_name: user-redis
+
+  manager-redis:
     image: "redis:alpine"
     ports:
       - "7379:6379"
+    container_name: manager-redis

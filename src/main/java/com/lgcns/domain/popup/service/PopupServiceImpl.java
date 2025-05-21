@@ -122,11 +122,11 @@ public class PopupServiceImpl implements PopupService {
         List<Reservation> reservationList = new ArrayList<>();
 
         for (LocalDate reservationDate = popup.getPopupStartDate();
-                reservationDate.isBefore(popup.getPopupEndDate());
+                reservationDate.isBefore(popup.getPopupEndDate().plusDays(1));
                 reservationDate = reservationDate.plusDays(1)) {
 
             for (LocalTime reservationTime = popup.getRunOpenTime();
-                    reservationTime.isBefore(popup.getRunCloseTime());
+                    reservationTime.isBefore(popup.getRunCloseTime().plusHours(1));
                     reservationTime = reservationTime.plusHours(1)) {
 
                 Reservation reservation =

@@ -8,6 +8,8 @@ import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.domain.reservation.domain.Reservation;
+import com.lgcns.domain.reservation.repository.ReservationRepository;
 import com.lgcns.domain.survey.domain.Choice;
 import com.lgcns.domain.survey.domain.Survey;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
@@ -15,6 +17,10 @@ import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +33,7 @@ public class PopupServiceImpl implements PopupService {
     private final PopupRepository popupRepository;
     private final SurveyRepository surveyRepository;
     private final ChoiceRepository choiceRepository;
+    private final ReservationRepository reservationRepository;
     private final ManagerUtil managerUtil;
 
     private final int MAX_SURVEY = 4;
@@ -40,6 +47,7 @@ public class PopupServiceImpl implements PopupService {
         popupRepository.save(popup);
 
         createSurveyFromRequest(popup, popupWithChoicesCreateRequest.choiceCreateRequestList());
+        createReservation(popup);
 
         return PopupCreateResponse.of(popup.getId());
     }
@@ -107,5 +115,34 @@ public class PopupServiceImpl implements PopupService {
         return popupRepository
                 .findById(popupId)
                 .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    }
+
+    private void createReservation(Popup popup) {
+        List<Reservation> reservationList = new ArrayList<>();
+
+        for (LocalDate reservationDate = popup.getPopupStartDate();
+                reservationDate.isBefore(popup.getPopupEndDate());
+                reservationDate = reservationDate.plusDays(1)) {
+
+            for (LocalTime reservationTime = popup.getRunOpenTime();
+                    reservationTime.isBefore(popup.getRunCloseTime());
+                    reservationTime = reservationTime.plusHours(1)) {
+
+                Reservation reservation =
+                        Reservation.createReservation(
+                                popup,
+                                reservationDate,
+                                reservationTime,
+                                popup.getTimeCapacity(),
+                                popup.getReservationOpenDateTime(),
+                                LocalDateTime.of(reservationDate, reservationTime)
+                                                .isBefore(popup.getReservationCloseDateTime())
+                                        ? popup.getReservationCloseDateTime()
+                                        : LocalDateTime.of(reservationDate, reservationTime));
+                reservationList.add(reservation);
+            }
+        }
+
+        reservationRepository.bulkInsertReservations(reservationList);
     }
 }

@@ -1,8 +1,18 @@
 package com.lgcns.domain.reservation.repository;
 
+import static com.lgcns.domain.reservation.domain.QReservation.reservation;
+
 import com.lgcns.domain.reservation.domain.Reservation;
+import com.lgcns.domain.reservation.dto.DailyReservation;
+import com.lgcns.domain.reservation.dto.TimeSlot;
+import com.querydsl.core.Tuple;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
 
     private final EntityManager em;
+    private final JPAQueryFactory queryFactory;
 
     @Override
     @Transactional
@@ -46,5 +57,47 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
         }
 
         em.createNativeQuery(sb.toString()).executeUpdate();
+    }
+
+    @Override
+    public List<DailyReservation> findReservationByIdAndDate(Long popupId, String date) {
+        YearMonth yearMonth = YearMonth.parse(date);
+
+        List<Tuple> results = fetchReservations(popupId, yearMonth);
+
+        return mapToDailyReservations(results);
+    }
+
+    private List<Tuple> fetchReservations(Long popupId, YearMonth yearMonth) {
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+
+        return queryFactory
+                .select(reservation.reservationDate, reservation.id, reservation.reservationTime)
+                .from(reservation)
+                .where(
+                        reservation.popup.id.eq(popupId),
+                        reservation.reservationDate.between(start, end),
+                        reservation.reservationDate.after(LocalDate.now().minusDays(1)))
+                .fetch();
+    }
+
+    private List<DailyReservation> mapToDailyReservations(List<Tuple> tuples) {
+        Map<LocalDate, List<TimeSlot>> grouped =
+                tuples.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        tuple -> tuple.get(reservation.reservationDate),
+                                        Collectors.mapping(
+                                                this::mapToTimeSlot, Collectors.toList())));
+
+        return grouped.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> DailyReservation.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    private TimeSlot mapToTimeSlot(Tuple tuple) {
+        return TimeSlot.of(tuple.get(reservation.id), tuple.get(reservation.reservationTime));
     }
 }

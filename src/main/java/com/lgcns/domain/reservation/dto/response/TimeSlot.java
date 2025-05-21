@@ -1,4 +1,4 @@
-package com.lgcns.domain.reservation.dto;
+package com.lgcns.domain.reservation.dto.response;
 
 import java.time.LocalTime;
 

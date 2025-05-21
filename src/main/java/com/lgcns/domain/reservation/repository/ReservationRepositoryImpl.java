@@ -3,8 +3,8 @@ package com.lgcns.domain.reservation.repository;
 import static com.lgcns.domain.reservation.domain.QReservation.reservation;
 
 import com.lgcns.domain.reservation.domain.Reservation;
-import com.lgcns.domain.reservation.dto.DailyReservation;
-import com.lgcns.domain.reservation.dto.TimeSlot;
+import com.lgcns.domain.reservation.dto.response.DailyReservation;
+import com.lgcns.domain.reservation.dto.response.TimeSlot;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

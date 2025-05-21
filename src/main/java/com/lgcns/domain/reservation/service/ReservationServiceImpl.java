@@ -3,8 +3,8 @@ package com.lgcns.domain.reservation.service;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
-import com.lgcns.domain.reservation.dto.DailyReservation;
-import com.lgcns.domain.reservation.dto.MonthlyReservationResponse;
+import com.lgcns.domain.reservation.dto.response.DailyReservation;
+import com.lgcns.domain.reservation.dto.response.MonthlyReservationDto;
 import com.lgcns.domain.reservation.repository.ReservationRepository;
 import com.lgcns.global.error.exception.CustomException;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional(readOnly = true)
-    public MonthlyReservationResponse findReservationByIdAndDate(Long popupId, String date) {
+    public MonthlyReservationDto findReservationByIdAndDate(Long popupId, String date) {
         Popup popup =
                 popupRepository
                         .findById(popupId)
@@ -31,7 +31,7 @@ public class ReservationServiceImpl implements ReservationService {
         List<DailyReservation> dailyReservationList =
                 reservationRepository.findReservationByIdAndDate(popupId, date);
 
-        return MonthlyReservationResponse.of(
+        return MonthlyReservationDto.of(
                 popup.getPopupStartDate(),
                 popup.getPopupEndDate(),
                 popup.getTimeCapacity(),

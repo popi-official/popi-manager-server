@@ -11,3 +11,4 @@ spring:
       host: ${USER_REDIS_HOST:localhost}
       port: ${USER_REDIS_PORT:6379}
       password: ${USER_REDIS_PASSWORD:}
+      database: ${USER_REDIS_DATABASE:1}

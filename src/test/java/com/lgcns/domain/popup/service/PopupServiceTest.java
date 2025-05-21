@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.lgcns.IntegrationTest;
-import com.lgcns.domain.item.repository.ItemRepository;
-import com.lgcns.domain.item.service.ItemService;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
@@ -15,6 +13,8 @@ import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.domain.reservation.domain.Reservation;
+import com.lgcns.domain.reservation.repository.ReservationRepository;
 import com.lgcns.domain.survey.domain.Choice;
 import com.lgcns.domain.survey.domain.Survey;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
@@ -34,13 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class PopupServiceTest extends IntegrationTest {
     @Autowired private PopupService popupService;
-    @Autowired private ItemService itemService;
     @Autowired private PopupRepository popupRepository;
     @Autowired private SurveyRepository surveyRepository;
 
     @Autowired private ManagerRepository managerRepository;
     @Autowired private ChoiceRepository choiceRepository;
-    @Autowired private ItemRepository itemRepository;
+    @Autowired private ReservationRepository reservationRepository;
 
     private Manager ownerManager;
     private Manager otherManager;
@@ -70,6 +69,10 @@ public class PopupServiceTest extends IntegrationTest {
 
             // then
             Popup savedPopup = popupRepository.findById(response.popupId()).orElseThrow();
+            List<Survey> surveyList = surveyRepository.findAll();
+            List<Choice> choiceList = choiceRepository.findAll();
+            List<Reservation> reservationList = reservationRepository.findAll();
+
             Assertions.assertAll(
                     () -> assertThat(response.popupId()).isEqualTo(savedPopup.getId()),
                     () -> assertThat(savedPopup.getName()).isEqualTo("popup1"),
@@ -79,13 +82,10 @@ public class PopupServiceTest extends IntegrationTest {
                                     .isEqualTo(LocalDate.parse("2025-01-01")),
                     () ->
                             assertThat(savedPopup.getPopupEndDate())
-                                    .isEqualTo(LocalDate.parse("2025-01-31")));
-
-            List<Survey> surveyList = surveyRepository.findAll();
-            assertThat(surveyList).hasSize(4); // 기존 팝업 + 새로 생성된 팝업의 설문들
-
-            List<Choice> choiceList = choiceRepository.findAll();
-            assertThat(choiceList).hasSize(16);
+                                    .isEqualTo(LocalDate.parse("2025-01-31")),
+                    () -> assertThat(surveyList).hasSize(4),
+                    () -> assertThat(choiceList).hasSize(16),
+                    () -> assertThat(reservationList).hasSize(31 * 11));
         }
     }
 

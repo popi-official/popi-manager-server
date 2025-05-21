@@ -21,6 +21,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final PopupRepository popupRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public MonthlyReservationResponse findReservationByIdAndDate(Long popupId, String date) {
         Popup popup =
                 popupRepository

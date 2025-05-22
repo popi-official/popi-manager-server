@@ -1,4 +1,4 @@
-package com.lgcns.domain.reservationStats.controller;
+package com.lgcns.domain.reservationStats.externalApi;
 
 import com.lgcns.domain.reservationStats.dto.response.ReservationStatsResponse;
 import com.lgcns.domain.reservationStats.service.ReservationStatsService;

@@ -1,4 +1,4 @@
-package com.lgcns.domain.item.controller;
+package com.lgcns.domain.item.externalApi;
 
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;

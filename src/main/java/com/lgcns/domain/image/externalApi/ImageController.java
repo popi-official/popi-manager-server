@@ -1,4 +1,4 @@
-package com.lgcns.domain.image.controller;
+package com.lgcns.domain.image.externalApi;
 
 import com.lgcns.domain.image.dto.request.ImageUploadRequest;
 import com.lgcns.domain.image.dto.response.PresignedUrlResponse;

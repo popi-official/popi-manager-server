@@ -1,4 +1,4 @@
-package com.lgcns.domain.survey.controller;
+package com.lgcns.domain.survey.externalApi;
 
 import com.lgcns.domain.survey.dto.response.SurveyAnalysisResponse;
 import com.lgcns.domain.survey.service.SurveyService;

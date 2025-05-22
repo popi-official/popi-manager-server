@@ -1,4 +1,4 @@
-package com.lgcns.domain.itemAnalysis.controller;
+package com.lgcns.domain.itemAnalysis.externalApi;
 
 import com.lgcns.domain.itemAnalysis.dto.response.ItemTrendingResponse;
 import com.lgcns.domain.itemAnalysis.service.ItemAnalysisService;

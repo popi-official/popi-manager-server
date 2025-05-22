@@ -1,4 +1,4 @@
-package com.lgcns.domain.congestionStats.controller;
+package com.lgcns.domain.congestionStats.externalApi;
 
 import com.lgcns.domain.congestionStats.dto.response.CongestionStatsResponse;
 import com.lgcns.domain.congestionStats.service.CongestionStatsService;

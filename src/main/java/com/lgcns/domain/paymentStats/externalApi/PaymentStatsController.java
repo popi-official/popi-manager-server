@@ -1,4 +1,4 @@
-package com.lgcns.domain.paymentStats.controller;
+package com.lgcns.domain.paymentStats.externalApi;
 
 import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
 import com.lgcns.domain.paymentStats.service.PaymentStatsService;

@@ -1,4 +1,4 @@
-package com.lgcns.domain.entrance.controller;
+package com.lgcns.domain.entrance.externalApi;
 
 import com.lgcns.domain.entrance.dto.request.EntranceCreateRequest;
 import com.lgcns.domain.entrance.service.EntranceService;

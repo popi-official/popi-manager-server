@@ -1,4 +1,4 @@
-package com.lgcns.domain.manager.controller;
+package com.lgcns.domain.manager.externalApi;
 
 import com.lgcns.domain.manager.dto.request.ManagerCreateRequest;
 import com.lgcns.domain.manager.service.ManagerService;

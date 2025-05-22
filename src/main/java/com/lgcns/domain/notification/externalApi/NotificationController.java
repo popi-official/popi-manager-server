@@ -1,4 +1,4 @@
-package com.lgcns.domain.notification.controller;
+package com.lgcns.domain.notification.externalApi;
 
 import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.service.NotificationService;

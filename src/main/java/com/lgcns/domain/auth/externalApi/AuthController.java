@@ -1,4 +1,4 @@
-package com.lgcns.domain.auth.controller;
+package com.lgcns.domain.auth.externalApi;
 
 import static com.lgcns.global.common.constants.SecurityConstants.REFRESH_TOKEN_COOKIE_NAME;
 

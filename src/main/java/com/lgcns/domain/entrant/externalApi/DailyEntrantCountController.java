@@ -1,4 +1,4 @@
-package com.lgcns.domain.entrant.controller;
+package com.lgcns.domain.entrant.externalApi;
 
 import com.lgcns.domain.entrant.dto.response.DailyEntrantCountResponse;
 import com.lgcns.domain.entrant.service.DailyEntrantCountService;

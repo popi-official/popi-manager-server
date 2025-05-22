@@ -1,4 +1,4 @@
-package com.lgcns.domain.popup.controller;
+package com.lgcns.domain.popup.externalApi;
 
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;

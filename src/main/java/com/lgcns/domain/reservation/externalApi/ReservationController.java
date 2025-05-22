@@ -1,4 +1,4 @@
-package com.lgcns.domain.reservation.controller;
+package com.lgcns.domain.reservation.externalApi;
 
 import com.lgcns.domain.reservation.dto.response.MonthlyReservationDto;
 import com.lgcns.domain.reservation.service.ReservationService;

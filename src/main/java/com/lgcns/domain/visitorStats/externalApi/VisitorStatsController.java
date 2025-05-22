@@ -1,4 +1,4 @@
-package com.lgcns.domain.visitorStats.controller;
+package com.lgcns.domain.visitorStats.externalApi;
 
 import com.lgcns.domain.visitorStats.dto.response.VisitorAnalysisResponse;
 import com.lgcns.domain.visitorStats.service.VisitorStatsService;

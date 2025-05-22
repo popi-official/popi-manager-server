@@ -66,6 +66,8 @@ public class WebSecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/reservations/**")
                                 .permitAll()
+                                .requestMatchers("/internal/**")
+                                .permitAll()
                                 .anyRequest()
                                 .authenticated());
 

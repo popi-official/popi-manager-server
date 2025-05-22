@@ -1,5 +1,6 @@
 package com.lgcns.domain.item.service;
 
+import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
@@ -12,9 +13,9 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.global.common.response.SliceResponse;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
-import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,7 +28,9 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -136,6 +139,16 @@ public class ItemServiceImpl implements ItemService {
         validateItemBelongsToPopup(item, popupId);
 
         itemRepository.delete(item);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SliceResponse<ItemInfoResponse> findAllItemsByPagination(
+            Long popupId, Long lastItemId, int size) {
+        Slice<ItemInfoResponse> itemInfoResponses =
+                itemRepository.findItemsWithPagination(popupId, lastItemId, size);
+
+        return new SliceResponse<>(itemInfoResponses.getContent(), itemInfoResponses.isLast());
     }
 
     private Popup findPopupById(Long popupId) {

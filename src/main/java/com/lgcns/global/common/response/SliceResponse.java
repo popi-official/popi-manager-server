@@ -1,6 +1,7 @@
 package com.lgcns.global.common.response;
 
 import java.util.List;
+
 import org.springframework.data.domain.Slice;
 
 public record SliceResponse<T>(List<T> content, boolean isLast) {

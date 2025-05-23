@@ -47,8 +47,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     }
 
     @Override
-    public Slice<ItemInfoResponse> findItemsWithPagination(
-            Long popupId, Long lastItemId, int size) {
+    public Slice<ItemInfoResponse> findItemsByNameWithPagination(
+            Long popupId, String searchName, Long lastItemId, int size) {
         List<ItemInfoResponse> responses =
                 queryFactory
                         .select(
@@ -59,12 +59,19 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                                         item.imageUrl,
                                         item.price))
                         .from(item)
-                        .where(item.popup.id.eq(popupId), lastItemCondition(lastItemId))
+                        .where(
+                                checkItemSearchName(searchName),
+                                item.popup.id.eq(popupId),
+                                lastItemCondition(lastItemId))
                         .orderBy(item.id.desc())
                         .limit(size + 1L)
                         .fetch();
 
         return checkLastPage(size, responses);
+    }
+
+    private BooleanExpression checkItemSearchName(String searchName) {
+        return searchName == null || searchName.isEmpty() ? null : item.name.contains(searchName);
     }
 
     private BooleanExpression lastItemCondition(Long itemId) {

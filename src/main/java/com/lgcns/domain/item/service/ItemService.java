@@ -26,6 +26,6 @@ public interface ItemService {
     ItemDetailResponse updateItemMinStock(
             Long popupId, Long itemId, ItemMinStockUpdateRequest request);
 
-    SliceResponse<ItemInfoResponse> findAllItemsByPagination(
-            Long popupId, Long lastItemId, int size);
+    SliceResponse<ItemInfoResponse> findItemsByNameWithPagination(
+            Long popupId, String searchName, Long lastItemId, int size);
 }

@@ -61,7 +61,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                         .from(item)
                         .where(item.popup.id.eq(popupId), lastItemCondition(lastItemId))
                         .orderBy(item.id.desc())
-                        .limit(size + 1)
+                        .limit(size + 1L)
                         .fetch();
 
         return checkLastPage(size, responses);

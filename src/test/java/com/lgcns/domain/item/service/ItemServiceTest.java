@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.lgcns.IntegrationTest;
+import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
@@ -16,6 +17,7 @@ import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.global.common.response.SliceResponse;
 import com.lgcns.global.error.exception.CustomException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -570,6 +572,81 @@ class ItemServiceTest extends IntegrationTest {
                                             popupId, savedItem.getId(), request))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.MIN_STOCK_EXCEEDED);
+        }
+    }
+
+    @Nested
+    class 내부용_상품_목록_조회 {
+        @Test
+        @Transactional
+        void 내부용_상품_목록_조회에_성공한다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+
+            // when
+            SliceResponse<ItemInfoResponse> result =
+                    itemService.findAllItemsByPagination(popupId, 4L, 2);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () ->
+                            assertThat(result.content())
+                                    .hasSize(2), // lastItemId = 4 기준으로 id < 4 인 두 개만 조회된다고 가정
+
+                    // 각 항목의 필드 검증 (정렬: id desc)
+                    () -> assertThat(result.content().get(0).itemId()).isEqualTo(item3.getId()),
+                    () -> assertThat(result.content().get(1).itemId()).isEqualTo(item2.getId()),
+                    () -> assertThat(result.isLast()).isFalse() // isLast=false 검증
+                    );
+        }
+
+        @Test
+        @Transactional
+        void 마지막_상품까지_조회하면_is_last가_true를_반환한다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+
+            // when
+            SliceResponse<ItemInfoResponse> result =
+                    itemService.findAllItemsByPagination(popupId, 4L, 3);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () ->
+                            assertThat(result.content())
+                                    .hasSize(3), // lastItemId = 4 기준으로 id < 4 인 세 개만 조회된다고 가정
+                    () -> assertThat(result.isLast()).isTrue() // isLast=true 검증
+                    );
         }
     }
 }

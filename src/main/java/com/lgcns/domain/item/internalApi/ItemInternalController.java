@@ -1,4 +1,4 @@
-package com.lgcns.domain.item.externalApi;
+package com.lgcns.domain.item.internalApi;
 
 import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.service.ItemService;

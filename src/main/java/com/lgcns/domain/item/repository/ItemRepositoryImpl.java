@@ -59,7 +59,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                                         item.imageUrl,
                                         item.price))
                         .from(item)
-                        .where(lastItemCondition(lastItemId))
+                        .where(item.popup.id.eq(popupId), lastItemCondition(lastItemId))
                         .orderBy(item.id.desc())
                         .limit(size + 1)
                         .fetch();

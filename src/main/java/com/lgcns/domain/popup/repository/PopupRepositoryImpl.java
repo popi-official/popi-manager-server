@@ -53,7 +53,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                         .from(popup)
                         .where(popup.popupEndDate.goe(LocalDate.now()), lastPopupId(lastPopupId))
                         .orderBy(popup.createdAt.desc())
-                        .limit(size + 1)
+                        .limit(size + 1L)
                         .fetch();
 
         return checkLastPage(size, results);

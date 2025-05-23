@@ -12,7 +12,7 @@ import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.popup.service.PopupService;
-import com.lgcns.domain.reservation.dto.response.MonthlyReservationDto;
+import com.lgcns.domain.reservation.dto.response.MonthlyReservationResponse;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
 import com.lgcns.global.error.exception.CustomException;
 import java.time.LocalDate;
@@ -53,37 +53,37 @@ public class reservationServiceTest extends IntegrationTest {
             Long popupId = popup.getId();
 
             // when
-            MonthlyReservationDto monthlyReservationDto =
+            MonthlyReservationResponse monthlyReservationResponse =
                     reservationService.findReservationByIdAndDate(
                             popupId, YearMonth.from(popup.getPopupStartDate()).toString());
 
             // then
             Assertions.assertAll(
                     () ->
-                            assertThat(monthlyReservationDto.popupOpenDate())
+                            assertThat(monthlyReservationResponse.popupOpenDate())
                                     .isEqualTo(popup.getPopupStartDate()),
                     () ->
-                            assertThat(monthlyReservationDto.popupCloseDate())
+                            assertThat(monthlyReservationResponse.popupCloseDate())
                                     .isEqualTo(popup.getPopupEndDate()),
                     () ->
-                            assertThat(monthlyReservationDto.timeCapacity())
+                            assertThat(monthlyReservationResponse.timeCapacity())
                                     .isEqualTo(popup.getTimeCapacity()),
                     () ->
-                            assertThat(monthlyReservationDto.dailyReservations().size())
+                            assertThat(monthlyReservationResponse.dailyReservations().size())
                                     .isEqualTo(
                                             popup.getPopupEndDate()
                                                             .compareTo(popup.getPopupStartDate())
                                                     + 1),
                     () ->
                             assertThat(
-                                            monthlyReservationDto
+                                            monthlyReservationResponse
                                                     .dailyReservations()
                                                     .get(0)
                                                     .reservationDate())
                                     .isEqualTo(popup.getPopupStartDate()),
                     () ->
                             assertThat(
-                                            monthlyReservationDto
+                                            monthlyReservationResponse
                                                     .dailyReservations()
                                                     .get(0)
                                                     .timeSlots()

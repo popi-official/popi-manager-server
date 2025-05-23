@@ -1,8 +1,8 @@
 package com.lgcns.domain.reservation.service;
 
-import com.lgcns.domain.reservation.dto.response.MonthlyReservationDto;
+import com.lgcns.domain.reservation.dto.response.MonthlyReservationResponse;
 
 public interface ReservationService {
 
-    MonthlyReservationDto findReservationByIdAndDate(Long popupId, String date);
+    MonthlyReservationResponse findReservationByIdAndDate(Long popupId, String date);
 }

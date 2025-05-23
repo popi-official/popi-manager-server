@@ -10,6 +10,7 @@ import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
+import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
@@ -20,6 +21,7 @@ import com.lgcns.domain.survey.domain.Survey;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
 import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
+import com.lgcns.global.common.response.SliceResponse;
 import com.lgcns.global.error.exception.CustomException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -149,6 +151,153 @@ public class PopupServiceTest extends IntegrationTest {
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
         }
+    }
+
+    @Nested
+    class 운영중인_팝업_리스트_조회_openfeign {
+        @Test
+        @Transactional
+        void 운영중인_팝업의_리스트를_반환한다() {
+            LocalDate now = LocalDate.now();
+
+            Long activePopup1 = createPopupWithDates("운영중인팝업1", now.minusDays(5), now.plusDays(10));
+            Long activePopup2 = createPopupWithDates("운영중인팝업2", now.minusDays(1), now.plusDays(5));
+            Long activePopup3 = createPopupWithDates("운영중인팝업3", now, now.plusDays(15));
+
+            createPopupWithDates("종료된팝업1", now.minusDays(20), now.minusDays(1));
+
+            Long activePopup4 = createPopupWithDates("예정팝업1", now.plusDays(10), now.plusDays(20));
+
+            // when
+            SliceResponse<PopupInfoResponse> response = popupService.findAllActivePopups(null, 10);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(response.content()).hasSize(4),
+                    () ->
+                            assertThat(response.content())
+                                    .extracting("popupId")
+                                    .containsExactlyInAnyOrder(
+                                            activePopup1, activePopup2, activePopup3, activePopup4),
+                    () -> assertThat(response.isLast()).isTrue());
+        }
+
+        @Test
+        @Transactional
+        void 운영중인_팝업이_없으면_빈_리스트를_반환한다() {
+            // given
+            LocalDate now = LocalDate.now();
+
+            // 운영 종료된 팝업들만 생성
+            createPopupWithDates("종료된팝업1", now.minusDays(30), now.minusDays(10));
+            createPopupWithDates("종료된팝업2", now.minusDays(20), now.minusDays(5));
+
+            // when
+            SliceResponse<PopupInfoResponse> response = popupService.findAllActivePopups(null, 10);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(response.content()).isEmpty(),
+                    () -> assertThat(response.isLast()).isTrue());
+        }
+
+        @Test
+        @Transactional
+        void 페이징_처리가_정상적으로_동작한다() {
+            // given
+            LocalDate now = LocalDate.now();
+
+            // 운영중인 팝업 5개 생성
+            for (int i = 1; i <= 5; i++) {
+                createPopupWithDates("운영중인팝업" + i, now.minusDays(1), now.plusDays(10));
+            }
+
+            // when - 첫 번째 페이지 (size=3)
+            SliceResponse<PopupInfoResponse> firstPage = popupService.findAllActivePopups(null, 3);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(firstPage.content()).hasSize(3),
+                    () -> assertThat(firstPage.isLast()).isFalse());
+
+            // when - 두 번째 페이지
+            Long lastPopupId = firstPage.content().get(firstPage.content().size() - 1).popupId();
+            SliceResponse<PopupInfoResponse> secondPage =
+                    popupService.findAllActivePopups(lastPopupId, 3);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(secondPage.content()).hasSize(2),
+                    () -> assertThat(secondPage.isLast()).isTrue());
+        }
+    }
+
+    private Long createPopupWithAllParams(
+            String name,
+            String imageUrl,
+            LocalDate popupStartDate,
+            LocalDate popupEndDate,
+            LocalDateTime reservationOpenDateTime,
+            LocalDateTime reservationCloseDateTime,
+            LocalTime runOpenTime,
+            LocalTime runCloseTime,
+            int totalCapacity,
+            int timeCapacity,
+            String roadAddress,
+            String detailAddress,
+            Double latitude,
+            Double longitude,
+            List<ChoiceCreateRequest> choices) {
+
+        PopupCreateRequest popupCreateRequest =
+                new PopupCreateRequest(
+                        name,
+                        imageUrl,
+                        popupStartDate,
+                        popupEndDate,
+                        reservationOpenDateTime,
+                        reservationCloseDateTime,
+                        runOpenTime,
+                        runCloseTime,
+                        totalCapacity,
+                        timeCapacity,
+                        roadAddress,
+                        detailAddress,
+                        latitude,
+                        longitude);
+
+        PopupWithChoicesCreateRequest request =
+                new PopupWithChoicesCreateRequest(popupCreateRequest, choices);
+
+        PopupCreateResponse response = popupService.createPopup(request);
+        return response.popupId();
+    }
+
+    private Long createPopupWithDates(String name, LocalDate startDate, LocalDate endDate) {
+        return createPopupWithAllParams(
+                name,
+                "https://bucket/image.jpg",
+                startDate,
+                endDate,
+                LocalDateTime.of(startDate, LocalTime.of(10, 0)),
+                LocalDateTime.of(endDate, LocalTime.of(20, 0)),
+                LocalTime.of(10, 0),
+                LocalTime.of(20, 0),
+                100,
+                20,
+                "서울특별시 강남구 테헤란로 123",
+                "3층 A호",
+                37.123456,
+                127.123456,
+                createDefaultChoices());
+    }
+
+    private List<ChoiceCreateRequest> createDefaultChoices() {
+        return List.of(
+                new ChoiceCreateRequest(List.of("choice1", "choice2", "choice3", "choice4")),
+                new ChoiceCreateRequest(List.of("choice1", "choice2", "choice3", "choice4")),
+                new ChoiceCreateRequest(List.of("choice1", "choice2", "choice3", "choice4")),
+                new ChoiceCreateRequest(List.of("choice1", "choice2", "choice3", "choice4")));
     }
 
     private PopupWithChoicesCreateRequest createPopupWithChoicesCreateRequest() {

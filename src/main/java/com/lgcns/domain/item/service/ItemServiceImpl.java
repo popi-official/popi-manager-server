@@ -148,7 +148,7 @@ public class ItemServiceImpl implements ItemService {
         Slice<ItemInfoResponse> itemInfoResponses =
                 itemRepository.findItemsWithPagination(popupId, lastItemId, size);
 
-        return new SliceResponse<>(itemInfoResponses.getContent(), itemInfoResponses.isLast());
+        return SliceResponse.from(itemInfoResponses);
     }
 
     private Popup findPopupById(Long popupId) {

@@ -2,13 +2,18 @@ package com.lgcns.domain.item.repository;
 
 import static com.lgcns.domain.item.domain.QItem.item;
 
+import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -39,5 +44,41 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .from(item)
                 .where(item.popup.id.eq(popupId))
                 .fetch();
+    }
+
+    @Override
+    public Slice<ItemInfoResponse> findItemsWithPagination(
+            Long popupId, Long lastItemId, int size) {
+        List<ItemInfoResponse> responses =
+                queryFactory
+                        .select(
+                                Projections.constructor(
+                                        ItemInfoResponse.class,
+                                        item.id,
+                                        item.name,
+                                        item.imageUrl,
+                                        item.price))
+                        .from(item)
+                        .where(item.popup.id.eq(popupId), lastItemCondition(lastItemId))
+                        .orderBy(item.id.desc())
+                        .limit(size + 1L)
+                        .fetch();
+
+        return checkLastPage(size, responses);
+    }
+
+    private BooleanExpression lastItemCondition(Long itemId) {
+        return (itemId == null) ? null : item.id.lt(itemId);
+    }
+
+    private Slice<ItemInfoResponse> checkLastPage(int pageSize, List<ItemInfoResponse> results) {
+        boolean hasNext = false;
+
+        if (results.size() > pageSize) {
+            hasNext = true;
+            results.remove(pageSize);
+        }
+
+        return new SliceImpl<>(results, PageRequest.of(0, pageSize), hasNext);
     }
 }

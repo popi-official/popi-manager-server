@@ -1,9 +1,11 @@
 package com.lgcns.domain.item.service;
 
+import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
 import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
+import com.lgcns.global.common.response.SliceResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -23,4 +25,7 @@ public interface ItemService {
 
     ItemDetailResponse updateItemMinStock(
             Long popupId, Long itemId, ItemMinStockUpdateRequest request);
+
+    SliceResponse<ItemInfoResponse> findAllItemsByPagination(
+            Long popupId, Long lastItemId, int size);
 }

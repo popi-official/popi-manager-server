@@ -64,8 +64,6 @@ public class WebSecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/entrances")
                                 .permitAll()
-                                .requestMatchers("/reservations/**")
-                                .permitAll()
                                 .requestMatchers("/internal/**")
                                 .permitAll()
                                 .anyRequest()

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/internal/popups/{popupId}/items")
 @RequiredArgsConstructor
-@Tag(name = "4-2. Internal 상품 API", description = "상품 관련 Internal API 입니다.")
+@Tag(name = "4-2. 상품 Internal API", description = "상품 관련 Internal API 입니다.")
 public class ItemInternalController {
 
     private final ItemService itemService;

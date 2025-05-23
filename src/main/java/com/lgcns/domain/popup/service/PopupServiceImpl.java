@@ -5,6 +5,7 @@ import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
+import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
@@ -15,6 +16,7 @@ import com.lgcns.domain.survey.domain.Survey;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
 import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
+import com.lgcns.global.common.response.SliceResponse;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.time.Duration;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +78,13 @@ public class PopupServiceImpl implements PopupService {
         validatePopupOwnership(currentManager, popup);
 
         popupRepository.delete(popup);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SliceResponse<PopupInfoResponse> findAllActivePopups(Long lastPopupId, int size) {
+        Slice<PopupInfoResponse> slice = popupRepository.findAllActivePopups(lastPopupId, size);
+        return SliceResponse.from(slice);
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

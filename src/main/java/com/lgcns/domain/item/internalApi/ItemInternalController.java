@@ -21,7 +21,7 @@ public class ItemInternalController {
     public SliceResponse<ItemInfoResponse> userItemFindAll(
             @PathVariable(name = "popupId") Long popupId,
             @RequestParam(name = "lastItemId", required = false) Long lastItemId,
-            @RequestParam(name = "size", defaultValue = "4") int size) {
+            @RequestParam(name = "size", defaultValue = "8") int size) {
         return itemService.findAllItemsByPagination(popupId, lastItemId, size);
     }
 }

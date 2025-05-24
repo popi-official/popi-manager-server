@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 @RequiredArgsConstructor
@@ -71,11 +72,11 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     }
 
     private BooleanExpression checkItemSearchName(String searchName) {
-        return searchName == null || searchName.isEmpty() ? null : item.name.contains(searchName);
+        return StringUtils.hasText(searchName) ? item.name.contains(searchName) : null;
     }
 
     private BooleanExpression lastItemCondition(Long itemId) {
-        return (itemId == null) ? null : item.id.lt(itemId);
+        return (itemId != null) ? item.id.lt(itemId) : null;
     }
 
     private Slice<ItemInfoResponse> checkLastPage(int pageSize, List<ItemInfoResponse> results) {

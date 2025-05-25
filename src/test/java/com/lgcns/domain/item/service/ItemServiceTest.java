@@ -576,10 +576,10 @@ class ItemServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 내부용_상품_목록_조회 {
+    class 내부용_상품_목록을_조회할_때 {
         @Test
         @Transactional
-        void 내부용_상품_목록_조회에_성공한다() {
+        void 데이터가_존재하면_상품_목록_조회에_성공한다() {
             // given
             final Long popupId = popup.getId();
 
@@ -651,7 +651,7 @@ class ItemServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        void 내부용_상품_검색에_성공한다() {
+        void 검색어에_대해_결과가_존재하면_상품_검색에_성공한다() {
             // given
             final Long popupId = popup.getId();
 
@@ -689,7 +689,7 @@ class ItemServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        void 내부용_상품_검색_결과가_없으면_빈_리스트를_반환한다() {
+        void 검색어에_대해_결과가_없으면_빈_리스트를_반환한다() {
             // given
             final Long popupId = popup.getId();
 

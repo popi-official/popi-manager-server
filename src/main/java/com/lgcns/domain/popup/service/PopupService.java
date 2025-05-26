@@ -15,7 +15,8 @@ public interface PopupService {
 
     void deletePopup(Long popupId);
 
-    SliceResponse<PopupInfoResponse> findAllActivePopups(Long lastPopupId, int size);
-
     List<SurveyChoiceResponse> findAllChoicesByPopupId(Long popupId);
+
+    SliceResponse<PopupInfoResponse> findPopupsByNameWithPagination(
+            String searchName, Long lastPopupId, int size);
 }

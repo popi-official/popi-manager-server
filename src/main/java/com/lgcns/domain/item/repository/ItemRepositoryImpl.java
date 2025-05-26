@@ -1,12 +1,12 @@
 package com.lgcns.domain.item.repository;
 
 import static com.lgcns.domain.item.domain.QItem.item;
+import static com.querydsl.core.types.dsl.Expressions.*;
 
 import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -25,10 +25,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
     @Override
     public List<ItemLocationResponse> findItemsWithSplitLocation(Long popupId) {
-        StringExpression firstLetter =
-                Expressions.stringTemplate("SUBSTRING({0}, 1, 1)", item.location);
-        StringExpression lastLetter =
-                Expressions.stringTemplate("SUBSTRING({0}, 2)", item.location);
+        StringExpression firstLetter = stringTemplate("SUBSTRING({0}, 1, 1)", item.location);
+        StringExpression lastLetter = stringTemplate("SUBSTRING({0}, 2)", item.location);
 
         return queryFactory
                 .select(
@@ -71,8 +69,25 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return checkLastPage(size, responses);
     }
 
-    private BooleanExpression checkItemSearchName(String keyword) {
-        return StringUtils.hasText(keyword) ? item.name.contains(keyword) : null;
+    @Override
+    public List<ItemInfoResponse> findRandomItems(Long popupId) {
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                ItemInfoResponse.class,
+                                item.id,
+                                item.name,
+                                item.imageUrl,
+                                item.price))
+                .from(item)
+                .where(item.popup.id.eq(popupId))
+                .orderBy(numberTemplate(Double.class, "RAND()").asc())
+                .limit(4)
+                .fetch();
+    }
+
+    private BooleanExpression checkItemSearchName(String searchName) {
+        return StringUtils.hasText(searchName) ? item.name.contains(searchName) : null;
     }
 
     private BooleanExpression lastItemCondition(Long itemId) {

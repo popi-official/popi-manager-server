@@ -28,4 +28,6 @@ public interface ItemService {
 
     SliceResponse<ItemInfoResponse> findItemsByNameWithPagination(
             Long popupId, String keyword, Long lastItemId, int size);
+
+    List<ItemInfoResponse> findRandomItems(Long popupId);
 }

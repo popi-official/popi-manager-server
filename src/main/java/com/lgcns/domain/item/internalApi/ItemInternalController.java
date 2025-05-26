@@ -6,6 +6,7 @@ import com.lgcns.global.common.response.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,5 +37,13 @@ public class ItemInternalController {
                     @RequestParam(name = "size", defaultValue = "8")
                     int size) {
         return itemService.findItemsByNameWithPagination(popupId, keyword, lastItemId, size);
+    }
+
+    @GetMapping("/default")
+    @Operation(summary = "기본 상품 목록 조회", description = "4개의 상품을 랜덤하게 조회합니다.")
+    public List<ItemInfoResponse> useItemFindDefault(
+            @Parameter(description = "팝업 ID", example = "1") @PathVariable(name = "popupId")
+                    Long popupId) {
+        return itemService.findRandomItems(popupId);
     }
 }

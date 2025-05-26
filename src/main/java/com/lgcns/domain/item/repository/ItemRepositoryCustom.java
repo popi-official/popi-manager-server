@@ -10,4 +10,6 @@ public interface ItemRepositoryCustom {
 
     Slice<ItemInfoResponse> findItemsByNameWithPagination(
             Long popupId, String keyword, Long lastItemId, int size);
+
+    List<ItemInfoResponse> findRandomItems(Long popupId);
 }

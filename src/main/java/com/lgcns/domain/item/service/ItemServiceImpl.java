@@ -151,6 +151,12 @@ public class ItemServiceImpl implements ItemService {
         return SliceResponse.from(itemInfoResponses);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ItemInfoResponse> findRandomItems(Long popupId) {
+        return itemRepository.findRandomItems(popupId);
+    }
+
     private Popup findPopupById(Long popupId) {
         return popupRepository
                 .findById(popupId)

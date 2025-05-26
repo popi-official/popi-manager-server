@@ -2,6 +2,10 @@ spring:
   config:
     activate:
       on-profile: "local"
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
   jpa:
     hibernate:
       ddl-auto: validate

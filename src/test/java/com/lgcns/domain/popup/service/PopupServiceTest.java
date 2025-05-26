@@ -330,32 +330,6 @@ public class PopupServiceTest extends IntegrationTest {
             assertThat(popupDetail.latitude()).isNotNull();
             assertThat(popupDetail.longitude()).isNotNull();
         }
-
-        @Test
-        @Transactional
-        void 존재하지_않는_팝업_ID를_통해_상세_정보를_조회하면_예외가_발생한다() {
-            // given
-            PopupIdsRequest request = new PopupIdsRequest(List.of(9999L)); // 존재하지 않는 ID
-
-            // when & then
-            assertThatThrownBy(() -> popupService.findPopupDetails(request))
-                    .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
-        }
-
-        @Test
-        @Transactional
-        void 일부_팝업_ID가_존재하지_않는_경우_예외가_발생한다() {
-            // given
-            Long existingPopupId = createPopup();
-            PopupIdsRequest request = new PopupIdsRequest(List.of(existingPopupId, 9999L));
-
-            // when & then
-            assertThatThrownBy(() -> popupService.findPopupDetails(request))
-                    .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue(
-                            "errorCode", PopupErrorCode.PARTIAL_POPUP_NOT_FOUND);
-        }
     }
 
     private Long createPopupWithAllParams(

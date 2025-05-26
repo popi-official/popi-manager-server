@@ -89,6 +89,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                 .select(
                         Projections.constructor(
                                 PopupDetailResponse.class,
+                                popup.id,
                                 popup.name,
                                 stringTemplate(
                                         "CONCAT({0}, ' ', {1})",

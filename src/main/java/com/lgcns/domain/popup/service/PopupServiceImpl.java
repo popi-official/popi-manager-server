@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
+import com.lgcns.domain.popup.dto.request.PopupIdsRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -116,6 +117,11 @@ public class PopupServiceImpl implements PopupService {
     @Override
     public PopupDetailsResponse findPopupDetailsById(Long popupId) {
         return popupRepository.findPopupDetailsById(popupId);
+    }
+
+    @Override
+    public List<ReservationPopupInfoResponse> findReservedPopupInfo(PopupIdsRequest request) {
+        return popupRepository.findReservedPopupInfo(request.popupIds());
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

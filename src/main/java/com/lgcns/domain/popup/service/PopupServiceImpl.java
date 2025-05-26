@@ -116,7 +116,18 @@ public class PopupServiceImpl implements PopupService {
 
     @Override
     public List<PopupDetailResponse> findPopupDetails(PopupIdsRequest request) {
-        return popupRepository.findPopupDetails(request.popupIds());
+        List<PopupDetailResponse> popupDetails =
+                popupRepository.findPopupDetails(request.popupIds());
+
+        if (popupDetails.isEmpty()) {
+            throw new CustomException(PopupErrorCode.POPUP_NOT_FOUND);
+        }
+
+        if (popupDetails.size() != request.popupIds().size()) {
+            throw new CustomException(PopupErrorCode.PARTIAL_POPUP_NOT_FOUND);
+        }
+
+        return popupDetails;
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

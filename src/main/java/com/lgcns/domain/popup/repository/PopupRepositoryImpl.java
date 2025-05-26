@@ -5,13 +5,16 @@ import static com.lgcns.domain.survey.domain.QChoice.choice;
 import static com.lgcns.domain.survey.domain.QSurvey.survey;
 
 import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
+import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -51,10 +54,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                                         popup.imageUrl,
                                         popup.popupStartDate.stringValue(),
                                         popup.popupEndDate.stringValue(),
-                                        popup.address
-                                                .roadAddress
-                                                .concat(", ")
-                                                .concat(popup.address.detailAddress)))
+                                        getFullAddress()))
                         .from(popup)
                         .where(
                                 popup.popupEndDate.goe(LocalDate.now()),
@@ -81,6 +81,32 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public Optional<PopupDetailsResponse> findPopupDetailsById(Long popupId) {
+        PopupDetailsResponse result =
+                jpaQueryFactory
+                        .select(
+                                Projections.constructor(
+                                        PopupDetailsResponse.class,
+                                        popup.id,
+                                        popup.name,
+                                        popup.imageUrl,
+                                        popup.popupStartDate.stringValue(),
+                                        popup.popupEndDate.stringValue(),
+                                        popup.reservationOpenDateTime.stringValue(),
+                                        popup.reservationCloseDateTime.stringValue(),
+                                        getFullAddress(),
+                                        popup.runOpenTime.stringValue(),
+                                        popup.runCloseTime.stringValue(),
+                                        popup.address.latitude,
+                                        popup.address.longitude))
+                        .from(popup)
+                        .where(popup.id.eq(popupId))
+                        .fetchOne();
+
+        return Optional.ofNullable(result);
+    }
+
     private BooleanExpression checkPopupSearchName(String searchName) {
         return StringUtils.hasText(searchName) ? popup.name.contains(searchName.trim()) : null;
     }
@@ -98,5 +124,9 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
         }
 
         return new SliceImpl<>(results, PageRequest.of(0, pageSize), hasNext);
+    }
+
+    private StringExpression getFullAddress() {
+        return popup.address.roadAddress.concat(", ").concat(popup.address.detailAddress);
     }
 }

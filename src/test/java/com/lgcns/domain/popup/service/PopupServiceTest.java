@@ -309,7 +309,7 @@ public class PopupServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 팝업_상세_조회할_때 {
+    class 예악된_팝업_상세_조회할_때 {
 
         @Test
         @Transactional
@@ -319,12 +319,13 @@ public class PopupServiceTest extends IntegrationTest {
             PopupIdsRequest request = new PopupIdsRequest(List.of(popupId));
 
             // when
-            List<PopupDetailResponse> popupDetails = popupService.findPopupDetails(request);
+            List<MemberReservationDetailResponse> memberReservationDetails =
+                    popupService.findPopupDetails(request);
 
             // then
-            assertThat(popupDetails).hasSize(1);
+            assertThat(memberReservationDetails).hasSize(1);
 
-            PopupDetailResponse popupDetail = popupDetails.get(0);
+            MemberReservationDetailResponse popupDetail = memberReservationDetails.get(0);
             assertThat(popupDetail.popupName()).isNotEmpty();
             assertThat(popupDetail.address()).isNotEmpty();
             assertThat(popupDetail.latitude()).isNotNull();

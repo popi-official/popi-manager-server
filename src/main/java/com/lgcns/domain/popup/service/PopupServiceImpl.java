@@ -115,7 +115,7 @@ public class PopupServiceImpl implements PopupService {
     }
 
     @Override
-    public List<PopupDetailResponse> findPopupDetails(PopupIdsRequest request) {
+    public List<MemberReservationDetailResponse> findPopupDetails(PopupIdsRequest request) {
         return popupRepository.findPopupDetails(request.popupIds());
     }
 

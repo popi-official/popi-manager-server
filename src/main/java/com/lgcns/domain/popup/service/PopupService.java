@@ -18,5 +18,5 @@ public interface PopupService {
     SliceResponse<PopupInfoResponse> findPopupsByNameWithPagination(
             String searchName, Long lastPopupId, int size);
 
-    List<PopupDetailResponse> findPopupDetails(PopupIdsRequest request);
+    List<MemberReservationDetailResponse> findPopupDetails(PopupIdsRequest request);
 }

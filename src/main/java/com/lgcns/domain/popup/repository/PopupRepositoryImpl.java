@@ -6,7 +6,7 @@ import static com.lgcns.domain.survey.domain.QSurvey.survey;
 import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 
 import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
-import com.lgcns.domain.popup.dto.response.PopupDetailResponse;
+import com.lgcns.domain.popup.dto.response.MemberReservationDetailResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.querydsl.core.types.Projections;
@@ -84,11 +84,11 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     @Override
-    public List<PopupDetailResponse> findPopupDetails(List<Long> popupIds) {
+    public List<MemberReservationDetailResponse> findPopupDetails(List<Long> popupIds) {
         return queryFactory
                 .select(
                         Projections.constructor(
-                                PopupDetailResponse.class,
+                                MemberReservationDetailResponse.class,
                                 popup.id,
                                 popup.name,
                                 stringTemplate(

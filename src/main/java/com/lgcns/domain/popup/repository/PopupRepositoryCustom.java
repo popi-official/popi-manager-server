@@ -8,7 +8,7 @@ public interface PopupRepositoryCustom {
 
     List<PopupPreviewResponse> findAllPopupsByManagerId(Long managerId);
 
-    Slice<PopupInfoResponse> findAllActivePopups(Long lastPopupId, int size);
-
     List<ChoiceInfoResponse> findAllChoices(Long popupId);
+
+    Slice<PopupInfoResponse> findPopupsByNameWithPagination(String searchName, Long lastPopupId, int size);
 }

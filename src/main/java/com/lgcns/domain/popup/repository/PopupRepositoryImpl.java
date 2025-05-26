@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 @RequiredArgsConstructor
@@ -38,7 +39,8 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     @Override
-    public Slice<PopupInfoResponse> findAllActivePopups(Long lastPopupId, int size) {
+    public Slice<PopupInfoResponse> findPopupsByNameWithPagination(
+            String searchName, Long lastPopupId, int size) {
         List<PopupInfoResponse> results =
                 jpaQueryFactory
                         .select(
@@ -54,7 +56,10 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                                                 .concat(", ")
                                                 .concat(popup.address.detailAddress)))
                         .from(popup)
-                        .where(popup.popupEndDate.goe(LocalDate.now()), lastPopupId(lastPopupId))
+                        .where(
+                                popup.popupEndDate.goe(LocalDate.now()),
+                                checkPopupSearchName(searchName),
+                                lastPopupCondition(lastPopupId))
                         .orderBy(popup.createdAt.desc())
                         .limit(size + 1L)
                         .fetch();
@@ -76,11 +81,12 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                 .fetch();
     }
 
-    private BooleanExpression lastPopupId(Long popupId) {
-        if (popupId == null) {
-            return null;
-        }
-        return popup.id.gt(popupId);
+    private BooleanExpression checkPopupSearchName(String searchName) {
+        return StringUtils.hasText(searchName) ? popup.name.contains(searchName) : null;
+    }
+
+    private BooleanExpression lastPopupCondition(Long popupId) {
+        return (popupId != null) ? popup.id.gt(popupId) : null;
     }
 
     private <T> Slice<T> checkLastPage(int pageSize, List<T> results) {

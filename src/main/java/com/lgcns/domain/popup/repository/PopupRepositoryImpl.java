@@ -82,7 +82,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     private BooleanExpression checkPopupSearchName(String searchName) {
-        return StringUtils.hasText(searchName) ? popup.name.contains(searchName) : null;
+        return StringUtils.hasText(searchName) ? popup.name.contains(searchName.trim()) : null;
     }
 
     private BooleanExpression lastPopupCondition(Long popupId) {

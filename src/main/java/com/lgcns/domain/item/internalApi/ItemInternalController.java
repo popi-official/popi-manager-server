@@ -40,7 +40,7 @@ public class ItemInternalController {
     }
 
     @GetMapping("/default")
-    @Operation(summary = "기본 상품 목록 조회", description = "4개의 상품을 랜덤하게 조회합니다.")
+    @Operation(summary = "기본 상품 목록 조회", description = "무작위하게 선택된 4개의 상품을 조회합니다.")
     public List<ItemInfoResponse> useItemFindDefault(
             @Parameter(description = "팝업 ID", example = "1") @PathVariable(name = "popupId")
                     Long popupId) {

@@ -155,10 +155,10 @@ public class PopupServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 운영중인_팝업_리스트_조회_openfeign {
+    class 내부용_팝업_목록을_조회할_때 {
         @Test
         @Transactional
-        void 운영중인_팝업의_리스트를_반환한다() {
+        void 운영중인_팝업이_존재하면_리스트를_반환한다() {
             LocalDate now = LocalDate.now();
 
             Long activePopup1 = createPopupWithDates("운영중인팝업1", now.minusDays(5), now.plusDays(10));
@@ -170,7 +170,8 @@ public class PopupServiceTest extends IntegrationTest {
             Long activePopup4 = createPopupWithDates("예정팝업1", now.plusDays(10), now.plusDays(20));
 
             // when
-            SliceResponse<PopupInfoResponse> response = popupService.findAllActivePopups(null, 10);
+            SliceResponse<PopupInfoResponse> response =
+                    popupService.findPopupsByNameWithPagination(null, null, 10);
 
             // then
             Assertions.assertAll(
@@ -194,7 +195,8 @@ public class PopupServiceTest extends IntegrationTest {
             createPopupWithDates("종료된팝업2", now.minusDays(20), now.minusDays(5));
 
             // when
-            SliceResponse<PopupInfoResponse> response = popupService.findAllActivePopups(null, 10);
+            SliceResponse<PopupInfoResponse> response =
+                    popupService.findPopupsByNameWithPagination(null, null, 10);
 
             // then
             Assertions.assertAll(
@@ -214,7 +216,8 @@ public class PopupServiceTest extends IntegrationTest {
             }
 
             // when - 첫 번째 페이지 (size=3)
-            SliceResponse<PopupInfoResponse> firstPage = popupService.findAllActivePopups(null, 3);
+            SliceResponse<PopupInfoResponse> firstPage =
+                    popupService.findPopupsByNameWithPagination(null, null, 3);
 
             // then
             Assertions.assertAll(
@@ -224,12 +227,64 @@ public class PopupServiceTest extends IntegrationTest {
             // when - 두 번째 페이지
             Long lastPopupId = firstPage.content().get(firstPage.content().size() - 1).popupId();
             SliceResponse<PopupInfoResponse> secondPage =
-                    popupService.findAllActivePopups(lastPopupId, 3);
+                    popupService.findPopupsByNameWithPagination(null, lastPopupId, 3);
 
             // then
             Assertions.assertAll(
                     () -> assertThat(secondPage.content()).hasSize(2),
                     () -> assertThat(secondPage.isLast()).isTrue());
+        }
+
+        @Test
+        @Transactional
+        void 검색어에_대한_결과가_존재하면_결과_리스트를_반환한다() {
+            // given
+            LocalDate now = LocalDate.now();
+
+            Long blackpinkPopup1 =
+                    createPopupWithDates("블랙핑크 팝업스토어", now.minusDays(5), now.plusDays(10));
+            Long blackpinkPopup2 =
+                    createPopupWithDates("BLACKPINK 굿즈샵", now.minusDays(1), now.plusDays(5));
+            createPopupWithDates("아이유 팝업", now.minusDays(1), now.plusDays(5));
+            createPopupWithDates("BTS 콘서트", now, now.plusDays(15));
+            createPopupWithDates("블랙핑크 종료팝업", now.minusDays(20), now.minusDays(1));
+
+            // when
+            SliceResponse<PopupInfoResponse> response =
+                    popupService.findPopupsByNameWithPagination("블랙핑크", null, 10);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(response.content()).hasSize(1), // trim() 적용시 "블랙핑크"만 매칭
+                    () ->
+                            assertThat(response.content().get(0).popupId())
+                                    .isEqualTo(blackpinkPopup1),
+                    () -> assertThat(response.content().get(0).popupName()).contains("블랙핑크"),
+                    () -> assertThat(response.content().get(0).popupOpenDate()).isNotEmpty(),
+                    () -> assertThat(response.content().get(0).popupCloseDate()).isNotEmpty(),
+                    () -> assertThat(response.content().get(0).address()).isNotEmpty(),
+                    () -> assertThat(response.isLast()).isTrue());
+        }
+
+        @Test
+        @Transactional
+        void 검색어에_대해_결과가_없으면_빈_리스트를_반환한다() {
+            // given
+            LocalDate now = LocalDate.now();
+
+            createPopupWithDates("블랙핑크 팝업", now.minusDays(5), now.plusDays(10));
+            createPopupWithDates("아이유 팝업", now.minusDays(1), now.plusDays(5));
+            createPopupWithDates("BTS 콘서트", now, now.plusDays(15));
+
+            // when
+            SliceResponse<PopupInfoResponse> response =
+                    popupService.findPopupsByNameWithPagination("존재하지않는팝업", null, 10);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(response.content()).isEmpty(),
+                    () -> assertThat(response.content()).hasSize(0),
+                    () -> assertThat(response.isLast()).isTrue());
         }
     }
 

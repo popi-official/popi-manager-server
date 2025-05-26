@@ -113,6 +113,13 @@ public class PopupServiceImpl implements PopupService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public PopupDetailsResponse findPopupDetailsById(Long popupId) {
+        return popupRepository
+                .findPopupDetailsById(popupId)
+                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    }
+
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {
 
         return Popup.createPopup(

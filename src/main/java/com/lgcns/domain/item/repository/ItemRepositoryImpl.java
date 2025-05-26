@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 @RequiredArgsConstructor
@@ -47,8 +48,8 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     }
 
     @Override
-    public Slice<ItemInfoResponse> findItemsWithPagination(
-            Long popupId, Long lastItemId, int size) {
+    public Slice<ItemInfoResponse> findItemsByNameWithPagination(
+            Long popupId, String searchName, Long lastItemId, int size) {
         List<ItemInfoResponse> responses =
                 queryFactory
                         .select(
@@ -59,7 +60,10 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                                         item.imageUrl,
                                         item.price))
                         .from(item)
-                        .where(item.popup.id.eq(popupId), lastItemCondition(lastItemId))
+                        .where(
+                                checkItemSearchName(searchName),
+                                item.popup.id.eq(popupId),
+                                lastItemCondition(lastItemId))
                         .orderBy(item.id.desc())
                         .limit(size + 1L)
                         .fetch();
@@ -67,8 +71,12 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return checkLastPage(size, responses);
     }
 
+    private BooleanExpression checkItemSearchName(String searchName) {
+        return StringUtils.hasText(searchName) ? item.name.contains(searchName) : null;
+    }
+
     private BooleanExpression lastItemCondition(Long itemId) {
-        return (itemId == null) ? null : item.id.lt(itemId);
+        return (itemId != null) ? item.id.lt(itemId) : null;
     }
 
     private Slice<ItemInfoResponse> checkLastPage(int pageSize, List<ItemInfoResponse> results) {

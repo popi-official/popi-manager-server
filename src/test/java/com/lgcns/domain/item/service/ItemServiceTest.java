@@ -576,10 +576,10 @@ class ItemServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 내부용_상품_목록_조회 {
+    class 내부용_상품_목록을_조회할_때 {
         @Test
         @Transactional
-        void 내부용_상품_목록_조회에_성공한다() {
+        void 데이터가_존재하면_상품_목록_조회에_성공한다() {
             // given
             final Long popupId = popup.getId();
 
@@ -599,7 +599,7 @@ class ItemServiceTest extends IntegrationTest {
 
             // when
             SliceResponse<ItemInfoResponse> result =
-                    itemService.findAllItemsByPagination(popupId, 4L, 2);
+                    itemService.findItemsByNameWithPagination(popupId, null, 4L, 2);
 
             // then
             Assertions.assertAll(
@@ -637,7 +637,7 @@ class ItemServiceTest extends IntegrationTest {
 
             // when
             SliceResponse<ItemInfoResponse> result =
-                    itemService.findAllItemsByPagination(popupId, 4L, 3);
+                    itemService.findItemsByNameWithPagination(popupId, null, 4L, 3);
 
             // then
             Assertions.assertAll(
@@ -647,6 +647,67 @@ class ItemServiceTest extends IntegrationTest {
                                     .hasSize(3), // lastItemId = 4 기준으로 id < 4 인 세 개만 조회된다고 가정
                     () -> assertThat(result.isLast()).isTrue() // isLast=true 검증
                     );
+        }
+
+        @Test
+        @Transactional
+        void 검색어에_대해_결과가_존재하면_상품_검색에_성공한다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+
+            // when
+            SliceResponse<ItemInfoResponse> result =
+                    itemService.findItemsByNameWithPagination(popupId, "포토카드", 4L, 3);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result.content()).hasSize(3),
+                    () -> assertThat(result.isLast()).isTrue(),
+                    () ->
+                            assertThat(result.content())
+                                    .allSatisfy(
+                                            item ->
+                                                    assertThat(item.name())
+                                                            .contains("포토카드")) // 검색 결과 검증
+                    );
+        }
+
+        @Test
+        @Transactional
+        void 검색어에_대해_결과가_없으면_빈_리스트를_반환한다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+
+            itemRepository.save(item1);
+
+            // when
+            SliceResponse<ItemInfoResponse> result =
+                    itemService.findItemsByNameWithPagination(popupId, "키링", null, 3);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result.content()).isEmpty(), // 빈 리스트 검증
+                    () -> assertThat(result.isLast()).isTrue());
         }
     }
 }

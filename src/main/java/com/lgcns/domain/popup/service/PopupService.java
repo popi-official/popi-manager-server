@@ -15,7 +15,7 @@ public interface PopupService {
     List<SurveyChoiceResponse> findAllChoicesByPopupId(Long popupId);
 
     SliceResponse<PopupInfoResponse> findPopupsByNameWithPagination(
-            String searchName, Long lastPopupId, int size);
+            String keyword, Long lastPopupId, int size);
 
     PopupDetailsResponse findPopupDetailsById(Long popupId);
 }

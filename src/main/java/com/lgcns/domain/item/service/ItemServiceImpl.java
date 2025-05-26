@@ -144,9 +144,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public SliceResponse<ItemInfoResponse> findItemsByNameWithPagination(
-            Long popupId, String searchName, Long lastItemId, int size) {
+            Long popupId, String keyword, Long lastItemId, int size) {
         Slice<ItemInfoResponse> itemInfoResponses =
-                itemRepository.findItemsByNameWithPagination(popupId, searchName, lastItemId, size);
+                itemRepository.findItemsByNameWithPagination(popupId, keyword, lastItemId, size);
 
         return SliceResponse.from(itemInfoResponses);
     }

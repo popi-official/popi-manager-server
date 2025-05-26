@@ -85,9 +85,9 @@ public class PopupServiceImpl implements PopupService {
     @Override
     @Transactional(readOnly = true)
     public SliceResponse<PopupInfoResponse> findPopupsByNameWithPagination(
-            String searchName, Long lastPopupId, int size) {
+            String keyword, Long lastPopupId, int size) {
         Slice<PopupInfoResponse> slice =
-                popupRepository.findPopupsByNameWithPagination(searchName, lastPopupId, size);
+                popupRepository.findPopupsByNameWithPagination(keyword, lastPopupId, size);
         return SliceResponse.from(slice);
     }
 

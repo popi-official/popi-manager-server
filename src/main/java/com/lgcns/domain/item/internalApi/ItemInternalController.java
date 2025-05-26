@@ -21,20 +21,20 @@ public class ItemInternalController {
     @Operation(
             summary = "상품 목록 조회",
             description =
-                    "searchName을 포함하지 않으면 현재 팝업의 모든 상품을 무한 스크롤을 위하여 페이징 처리한 뒤 반환합니다.</br>"
-                            + "searchName을 포함하여 호출하면 상품명에 searchName이 포함된 모든 상품을 페이징 처리한 뒤 반환합니다.")
+                    "keyword를 포함하지 않으면 현재 팝업의 모든 상품을 무한 스크롤을 위하여 페이징 처리한 뒤 반환합니다.</br>"
+                            + "keyword를 포함하여 호출하면 상품명에 keyword가 포함된 모든 상품을 페이징 처리한 뒤 반환합니다.")
     public SliceResponse<ItemInfoResponse> userItemFindAll(
             @Parameter(description = "팝업 ID", example = "1") @PathVariable(name = "popupId")
                     Long popupId,
             @Parameter(description = "검색할 상품 이름 (비워두면 모든 상품을 반환합니다.)", example = "블랙핑크")
-                    @RequestParam(name = "searchName", required = false)
-                    String searchName,
+                    @RequestParam(name = "keyword", required = false)
+                    String keyword,
             @Parameter(description = "이전 페이지의 마지막 ID (첫 요청 시 비워두세요.)", example = "2")
                     @RequestParam(name = "lastItemId", required = false)
                     Long lastItemId,
             @Parameter(description = "페이지 크기 (기본 8)", example = "8")
                     @RequestParam(name = "size", defaultValue = "8")
                     int size) {
-        return itemService.findItemsByNameWithPagination(popupId, searchName, lastItemId, size);
+        return itemService.findItemsByNameWithPagination(popupId, keyword, lastItemId, size);
     }
 }

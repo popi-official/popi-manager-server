@@ -44,7 +44,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
 
     @Override
     public Slice<PopupInfoResponse> findPopupsByNameWithPagination(
-            String searchName, Long lastPopupId, int size) {
+            String keyword, Long lastPopupId, int size) {
         List<PopupInfoResponse> results =
                 jpaQueryFactory
                         .select(
@@ -59,7 +59,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                         .from(popup)
                         .where(
                                 popup.popupEndDate.goe(LocalDate.now()),
-                                checkPopupSearchName(searchName),
+                                checkPopupSearchName(keyword),
                                 lastPopupCondition(lastPopupId))
                         .orderBy(popup.createdAt.desc())
                         .limit(size + 1L)
@@ -112,8 +112,8 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
         return result;
     }
 
-    private BooleanExpression checkPopupSearchName(String searchName) {
-        return StringUtils.hasText(searchName) ? popup.name.contains(searchName.trim()) : null;
+    private BooleanExpression checkPopupSearchName(String keyword) {
+        return StringUtils.hasText(keyword) ? popup.name.contains(keyword.trim()) : null;
     }
 
     private BooleanExpression lastPopupCondition(Long popupId) {

@@ -27,5 +27,5 @@ public interface ItemService {
             Long popupId, Long itemId, ItemMinStockUpdateRequest request);
 
     SliceResponse<ItemInfoResponse> findItemsByNameWithPagination(
-            Long popupId, String searchName, Long lastItemId, int size);
+            Long popupId, String keyword, Long lastItemId, int size);
 }

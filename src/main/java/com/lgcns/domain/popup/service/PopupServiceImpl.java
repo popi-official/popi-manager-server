@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
+import com.lgcns.domain.popup.dto.request.PopupIdsRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -111,6 +112,11 @@ public class PopupServiceImpl implements PopupService {
         return choices.entrySet().stream()
                 .map(choice -> SurveyChoiceResponse.of(choice.getKey(), choice.getValue()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PopupDetailResponse> findPopupDetails(PopupIdsRequest request) {
+        return popupRepository.findPopupDetails(request.popupIds());
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

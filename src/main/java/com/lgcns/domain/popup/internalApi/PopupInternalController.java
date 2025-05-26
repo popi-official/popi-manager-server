@@ -1,5 +1,7 @@
 package com.lgcns.domain.popup.internalApi;
 
+import com.lgcns.domain.popup.dto.request.PopupIdsRequest;
+import com.lgcns.domain.popup.dto.response.PopupDetailResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.SurveyChoiceResponse;
 import com.lgcns.domain.popup.service.PopupService;
@@ -42,5 +44,11 @@ public class PopupInternalController {
     @Operation(summary = "팝업에 등록된 설문지 목록 조회", description = "팝업 ID를 통해 등록된 설문지 목록을 조회합니다.")
     public List<SurveyChoiceResponse> choiceListByPopupIdFind(@PathVariable Long popupId) {
         return popupService.findAllChoicesByPopupId(popupId);
+    }
+
+    @PostMapping("/reservations")
+    @Operation(summary = "팝업 예약 목록 상세 조회", description = "사용자가 예약한 팝업들을 상세 조회합니다.")
+    public List<PopupDetailResponse> popupDetailsFind(@RequestBody PopupIdsRequest request) {
+        return popupService.findPopupDetails(request);
     }
 }

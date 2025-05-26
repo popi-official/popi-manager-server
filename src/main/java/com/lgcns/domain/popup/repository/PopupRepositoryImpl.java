@@ -3,8 +3,10 @@ package com.lgcns.domain.popup.repository;
 import static com.lgcns.domain.popup.domain.QPopup.popup;
 import static com.lgcns.domain.survey.domain.QChoice.choice;
 import static com.lgcns.domain.survey.domain.QSurvey.survey;
+import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 
 import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
+import com.lgcns.domain.popup.dto.response.PopupDetailResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.querydsl.core.types.Projections;
@@ -78,6 +80,23 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                 .join(survey.choiceList, choice)
                 .where(popup.id.eq(popupId))
                 .orderBy(survey.id.asc(), choice.number.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<PopupDetailResponse> findPopupDetails(List<Long> popupIds) {
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                PopupDetailResponse.class,
+                                popup.name,
+                                stringTemplate(
+                                        "CONCAT({0}, ' ', {1})",
+                                        popup.address.roadAddress, popup.address.detailAddress),
+                                popup.address.latitude,
+                                popup.address.longitude))
+                .from(popup)
+                .where(popup.id.in(popupIds))
                 .fetch();
     }
 

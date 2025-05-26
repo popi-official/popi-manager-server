@@ -5,10 +5,14 @@ import static com.lgcns.domain.survey.domain.QChoice.choice;
 import static com.lgcns.domain.survey.domain.QSurvey.survey;
 
 import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
+import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
+import com.lgcns.domain.popup.exception.PopupErrorCode;
+import com.lgcns.global.error.exception.CustomException;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +44,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
 
     @Override
     public Slice<PopupInfoResponse> findPopupsByNameWithPagination(
-            String searchName, Long lastPopupId, int size) {
+            String keyword, Long lastPopupId, int size) {
         List<PopupInfoResponse> results =
                 jpaQueryFactory
                         .select(
@@ -51,14 +55,11 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                                         popup.imageUrl,
                                         popup.popupStartDate.stringValue(),
                                         popup.popupEndDate.stringValue(),
-                                        popup.address
-                                                .roadAddress
-                                                .concat(", ")
-                                                .concat(popup.address.detailAddress)))
+                                        getFullAddress()))
                         .from(popup)
                         .where(
                                 popup.popupEndDate.goe(LocalDate.now()),
-                                checkPopupSearchName(searchName),
+                                checkPopupSearchName(keyword),
                                 lastPopupCondition(lastPopupId))
                         .orderBy(popup.createdAt.desc())
                         .limit(size + 1L)
@@ -81,8 +82,38 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                 .fetch();
     }
 
-    private BooleanExpression checkPopupSearchName(String searchName) {
-        return StringUtils.hasText(searchName) ? popup.name.contains(searchName.trim()) : null;
+    @Override
+    public PopupDetailsResponse findPopupDetailsById(Long popupId) {
+        PopupDetailsResponse result =
+                jpaQueryFactory
+                        .select(
+                                Projections.constructor(
+                                        PopupDetailsResponse.class,
+                                        popup.id,
+                                        popup.name,
+                                        popup.imageUrl,
+                                        popup.popupStartDate.stringValue(),
+                                        popup.popupEndDate.stringValue(),
+                                        popup.reservationOpenDateTime.stringValue(),
+                                        popup.reservationCloseDateTime.stringValue(),
+                                        getFullAddress(),
+                                        popup.runOpenTime.stringValue(),
+                                        popup.runCloseTime.stringValue(),
+                                        popup.address.latitude,
+                                        popup.address.longitude))
+                        .from(popup)
+                        .where(popup.id.eq(popupId))
+                        .fetchOne();
+
+        if (result == null) {
+            throw new CustomException(PopupErrorCode.POPUP_NOT_FOUND);
+        }
+
+        return result;
+    }
+
+    private BooleanExpression checkPopupSearchName(String keyword) {
+        return StringUtils.hasText(keyword) ? popup.name.contains(keyword.trim()) : null;
     }
 
     private BooleanExpression lastPopupCondition(Long popupId) {
@@ -98,5 +129,9 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
         }
 
         return new SliceImpl<>(results, PageRequest.of(0, pageSize), hasNext);
+    }
+
+    private StringExpression getFullAddress() {
+        return popup.address.roadAddress.concat(", ").concat(popup.address.detailAddress);
     }
 }

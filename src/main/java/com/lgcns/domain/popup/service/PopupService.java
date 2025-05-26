@@ -1,10 +1,7 @@
 package com.lgcns.domain.popup.service;
 
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
-import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
-import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
-import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
-import com.lgcns.domain.popup.dto.response.SurveyChoiceResponse;
+import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.global.common.response.SliceResponse;
 import java.util.List;
 
@@ -18,5 +15,7 @@ public interface PopupService {
     List<SurveyChoiceResponse> findAllChoicesByPopupId(Long popupId);
 
     SliceResponse<PopupInfoResponse> findPopupsByNameWithPagination(
-            String searchName, Long lastPopupId, int size);
+            String keyword, Long lastPopupId, int size);
+
+    PopupDetailsResponse findPopupDetailsById(Long popupId);
 }

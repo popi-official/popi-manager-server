@@ -9,5 +9,5 @@ public interface ItemRepositoryCustom {
     List<ItemLocationResponse> findItemsWithSplitLocation(Long popupId);
 
     Slice<ItemInfoResponse> findItemsByNameWithPagination(
-            Long popupId, String searchName, Long lastItemId, int size);
+            Long popupId, String keyword, Long lastItemId, int size);
 }

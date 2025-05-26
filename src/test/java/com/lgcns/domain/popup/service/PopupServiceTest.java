@@ -9,10 +9,7 @@ import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
-import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
-import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
-import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
-import com.lgcns.domain.popup.dto.response.SurveyChoiceResponse;
+import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.reservation.domain.Reservation;
@@ -307,6 +304,51 @@ public class PopupServiceTest extends IntegrationTest {
                 assertThat(choice.surveyId()).isNotNull();
                 assertThat(choice.options()).hasSize(4);
             }
+        }
+    }
+
+    @Nested
+    class 내부용_팝업_상세_정보를_조회할_떼 {
+
+        @Test
+        @Transactional
+        void 존재하는_팝업_아이디로_상세_조회에_성공한다() {
+            // given
+            Long popupId = createPopup();
+
+            // when
+            PopupDetailsResponse response = popupService.findPopupDetailsById(popupId);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(response.popupId()).isEqualTo(popupId),
+                    () -> assertThat(response.popupName()).isEqualTo("popup1"),
+                    () -> assertThat(response.imageUrl()).isEqualTo("https://bucket/asdf"),
+                    () -> assertThat(response.popupOpenDate()).isEqualTo("2025-01-01"),
+                    () -> assertThat(response.popupCloseDate()).isEqualTo("2025-01-31"),
+                    () ->
+                            assertThat(response.reservationOpenDateTime())
+                                    .isEqualTo("2025-01-01 10:00:00"),
+                    () ->
+                            assertThat(response.reservationCloseDateTime())
+                                    .isEqualTo("2025-01-31 20:00:00"),
+                    () -> assertThat(response.address()).isEqualTo("서울특별시 강남구 테헤란로 123, 3층 A호"),
+                    () -> assertThat(response.runOpenTime()).isEqualTo("10:00:00"),
+                    () -> assertThat(response.runCloseTime()).isEqualTo("20:00:00"),
+                    () -> assertThat(response.latitude()).isEqualTo(37.123456),
+                    () -> assertThat(response.longitude()).isEqualTo(127.123456));
+        }
+
+        @Test
+        @Transactional
+        void 존재하지_않는_팝업_아이디로_조회하면_예외를_발생시킨다() {
+            // given
+            final Long nonExistentPopupId = 999L;
+
+            // when & then
+            assertThatThrownBy(() -> popupService.findPopupDetailsById(nonExistentPopupId))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }
     }
 

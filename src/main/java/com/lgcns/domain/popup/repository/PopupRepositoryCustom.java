@@ -11,5 +11,7 @@ public interface PopupRepositoryCustom {
     List<ChoiceInfoResponse> findAllChoices(Long popupId);
 
     Slice<PopupInfoResponse> findPopupsByNameWithPagination(
-            String searchName, Long lastPopupId, int size);
+            String keyword, Long lastPopupId, int size);
+
+    PopupDetailsResponse findPopupDetailsById(Long popupId);
 }

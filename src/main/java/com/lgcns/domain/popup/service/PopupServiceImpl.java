@@ -85,9 +85,9 @@ public class PopupServiceImpl implements PopupService {
     @Override
     @Transactional(readOnly = true)
     public SliceResponse<PopupInfoResponse> findPopupsByNameWithPagination(
-            String searchName, Long lastPopupId, int size) {
+            String keyword, Long lastPopupId, int size) {
         Slice<PopupInfoResponse> slice =
-                popupRepository.findPopupsByNameWithPagination(searchName, lastPopupId, size);
+                popupRepository.findPopupsByNameWithPagination(keyword, lastPopupId, size);
         return SliceResponse.from(slice);
     }
 
@@ -111,6 +111,11 @@ public class PopupServiceImpl implements PopupService {
         return choices.entrySet().stream()
                 .map(choice -> SurveyChoiceResponse.of(choice.getKey(), choice.getValue()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PopupDetailsResponse findPopupDetailsById(Long popupId) {
+        return popupRepository.findPopupDetailsById(popupId);
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

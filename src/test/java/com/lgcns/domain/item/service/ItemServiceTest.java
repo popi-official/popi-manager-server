@@ -738,13 +738,13 @@ class ItemServiceTest extends IntegrationTest {
             itemRepository.save(item4);
 
             // when
-            List<ItemInfoResponse> result1 = itemService.findRandomItems(popupId);
+            List<ItemInfoResponse> result = itemService.findRandomItems(popupId);
 
             // then
             Assertions.assertAll(
-                    () -> assertThat(result1).isNotNull(),
-                    () -> assertThat(result1).hasSize(4),
-                    () -> assertThat(new HashSet<>(result1)).hasSize(result1.size()));
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result).hasSize(4),
+                    () -> assertThat(new HashSet<>(result)).hasSize(result.size()));
         }
 
         @Test
@@ -768,13 +768,13 @@ class ItemServiceTest extends IntegrationTest {
             itemRepository.save(item3);
 
             // when
-            List<ItemInfoResponse> result1 = itemService.findRandomItems(popupId);
+            List<ItemInfoResponse> result = itemService.findRandomItems(popupId);
 
             // then
             Assertions.assertAll(
-                    () -> assertThat(result1).isNotNull(),
-                    () -> assertThat(result1).hasSize(3),
-                    () -> assertThat(new HashSet<>(result1)).hasSize(result1.size()));
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result).hasSize(3),
+                    () -> assertThat(new HashSet<>(result)).hasSize(result.size()));
         }
     }
 }

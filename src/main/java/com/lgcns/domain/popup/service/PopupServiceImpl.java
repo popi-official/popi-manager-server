@@ -115,9 +115,7 @@ public class PopupServiceImpl implements PopupService {
 
     @Override
     public PopupDetailsResponse findPopupDetailsById(Long popupId) {
-        return popupRepository
-                .findPopupDetailsById(popupId)
-                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+        return popupRepository.findPopupDetailsById(popupId);
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

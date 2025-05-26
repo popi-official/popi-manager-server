@@ -8,13 +8,14 @@ import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
+import com.lgcns.domain.popup.exception.PopupErrorCode;
+import com.lgcns.global.error.exception.CustomException;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -82,7 +83,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     @Override
-    public Optional<PopupDetailsResponse> findPopupDetailsById(Long popupId) {
+    public PopupDetailsResponse findPopupDetailsById(Long popupId) {
         PopupDetailsResponse result =
                 jpaQueryFactory
                         .select(
@@ -104,7 +105,11 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                         .where(popup.id.eq(popupId))
                         .fetchOne();
 
-        return Optional.ofNullable(result);
+        if (result == null) {
+            throw new CustomException(PopupErrorCode.POPUP_NOT_FOUND);
+        }
+
+        return result;
     }
 
     private BooleanExpression checkPopupSearchName(String searchName) {

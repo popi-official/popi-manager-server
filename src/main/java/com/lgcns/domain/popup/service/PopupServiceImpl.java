@@ -1,12 +1,12 @@
 package com.lgcns.domain.popup.service;
 
+import static java.util.stream.Collectors.toList;
+
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
-import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
-import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
-import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
+import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.reservation.domain.Reservation;
@@ -25,6 +25,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Slice;
@@ -85,6 +87,28 @@ public class PopupServiceImpl implements PopupService {
     public SliceResponse<PopupInfoResponse> findAllActivePopups(Long lastPopupId, int size) {
         Slice<PopupInfoResponse> slice = popupRepository.findAllActivePopups(lastPopupId, size);
         return SliceResponse.from(slice);
+    }
+
+    @Override
+    public List<SurveyChoiceResponse> findAllChoicesByPopupId(Long popupId) {
+
+        List<ChoiceInfoResponse> choiceInfoList = popupRepository.findAllChoices(popupId);
+
+        Map<Long, List<SurveyOption>> choices =
+                choiceInfoList.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        ChoiceInfoResponse::surveyId,
+                                        Collectors.mapping(
+                                                choiceInfo ->
+                                                        SurveyOption.of(
+                                                                choiceInfo.choiceId(),
+                                                                choiceInfo.content()),
+                                                toList())));
+
+        return choices.entrySet().stream()
+                .map(choice -> SurveyChoiceResponse.of(choice.getKey(), choice.getValue()))
+                .collect(Collectors.toList());
     }
 
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {

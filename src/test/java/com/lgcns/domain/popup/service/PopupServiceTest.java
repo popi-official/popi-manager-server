@@ -12,6 +12,7 @@ import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.PopupCreateResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
+import com.lgcns.domain.popup.dto.response.SurveyChoiceResponse;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.reservation.domain.Reservation;
@@ -229,6 +230,28 @@ public class PopupServiceTest extends IntegrationTest {
             Assertions.assertAll(
                     () -> assertThat(secondPage.content()).hasSize(2),
                     () -> assertThat(secondPage.isLast()).isTrue());
+        }
+    }
+
+    @Nested
+    class 팝업_설문지_조회할_때 {
+
+        @Test
+        @Transactional
+        void 팝업_ID를_통해_설문지와_선지_조회에_성공한다() {
+            // given
+            Long popupId = createPopup();
+
+            // when
+            List<SurveyChoiceResponse> surveyChoices =
+                    popupService.findAllChoicesByPopupId(popupId);
+
+            // then
+            assertThat(surveyChoices).hasSize(4);
+            for (SurveyChoiceResponse choice : surveyChoices) {
+                assertThat(choice.surveyId()).isNotNull();
+                assertThat(choice.options()).hasSize(4);
+            }
         }
     }
 

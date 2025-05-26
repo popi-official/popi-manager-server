@@ -1,7 +1,10 @@
 package com.lgcns.domain.popup.repository;
 
 import static com.lgcns.domain.popup.domain.QPopup.popup;
+import static com.lgcns.domain.survey.domain.QChoice.choice;
+import static com.lgcns.domain.survey.domain.QSurvey.survey;
 
+import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.querydsl.core.types.Projections;
@@ -57,6 +60,20 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                         .fetch();
 
         return checkLastPage(size, results);
+    }
+
+    @Override
+    public List<ChoiceInfoResponse> findAllChoices(Long popupId) {
+        return jpaQueryFactory
+                .select(
+                        Projections.constructor(
+                                ChoiceInfoResponse.class, survey.id, choice.id, choice.content))
+                .from(popup)
+                .join(popup.surveyList, survey)
+                .join(survey.choiceList, choice)
+                .where(popup.id.eq(popupId))
+                .orderBy(survey.id.asc(), choice.number.asc())
+                .fetch();
     }
 
     private BooleanExpression lastPopupId(Long popupId) {

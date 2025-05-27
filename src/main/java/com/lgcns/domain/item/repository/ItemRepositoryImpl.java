@@ -4,6 +4,7 @@ import static com.lgcns.domain.item.domain.QItem.item;
 import static com.querydsl.core.types.dsl.Expressions.*;
 
 import com.lgcns.domain.item.client.dto.ItemInfoResponse;
+import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -83,6 +84,21 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .where(item.popup.id.eq(popupId))
                 .orderBy(numberTemplate(Double.class, "RAND()").asc())
                 .limit(4)
+                .fetch();
+    }
+
+    @Override
+    public List<ItemForPaymentResponse> findItemsForPayment(Long popupId, List<Long> itemIds) {
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                ItemForPaymentResponse.class,
+                                item.id,
+                                item.name,
+                                item.price,
+                                item.stock))
+                .from(item)
+                .where(item.popup.id.eq(popupId), item.id.in(itemIds))
                 .fetch();
     }
 

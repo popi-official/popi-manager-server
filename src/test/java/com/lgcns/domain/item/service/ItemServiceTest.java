@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.poi.ss.usermodel.Row;
@@ -708,6 +709,72 @@ class ItemServiceTest extends IntegrationTest {
                     () -> assertThat(result).isNotNull(),
                     () -> assertThat(result.content()).isEmpty(), // 빈 리스트 검증
                     () -> assertThat(result.isLast()).isTrue());
+        }
+    }
+
+    @Nested
+    class 내부용_기본_상품_목록을_조회할_때 {
+        @Test
+        @Transactional
+        void 무작위로_선택된_4개의_상품_조회에_성공한다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+            Item item4 =
+                    Item.createItem(popup, "리사 포토카드", "https://bucket/lisa.jpg", 5000, 50, 5, "b2");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+            itemRepository.save(item4);
+
+            // when
+            List<ItemInfoResponse> result = itemService.findRandomItems(popupId);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result).hasSize(4),
+                    () -> assertThat(new HashSet<>(result)).hasSize(result.size()));
+        }
+
+        @Test
+        @Transactional
+        void 상품_데이터가_4개보다_적으면_전체_데이터_수_만큼_상품이_조회된다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+
+            // when
+            List<ItemInfoResponse> result = itemService.findRandomItems(popupId);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result).hasSize(3),
+                    () -> assertThat(new HashSet<>(result)).hasSize(result.size()));
         }
     }
 }

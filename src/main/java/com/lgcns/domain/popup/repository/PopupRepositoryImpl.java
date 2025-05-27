@@ -155,6 +155,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                 .from(popup)
                 .where(popup.id.in(popupIds))
                 .orderBy(popup.id.asc())
+                .limit(4)
                 .fetch();
     }
 

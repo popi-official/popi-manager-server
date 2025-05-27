@@ -1,7 +1,7 @@
 package com.lgcns.domain.item.repository;
 
-import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
+import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import java.util.List;
 import org.springframework.data.domain.Slice;

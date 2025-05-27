@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import com.lgcns.IntegrationTest;
-import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.client.dto.request.ItemIdsForPaymentRequest;
 import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
+import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;

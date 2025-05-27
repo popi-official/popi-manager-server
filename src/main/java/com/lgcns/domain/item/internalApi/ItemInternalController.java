@@ -1,8 +1,8 @@
 package com.lgcns.domain.item.internalApi;
 
-import com.lgcns.domain.item.client.dto.ItemInfoResponse;
 import com.lgcns.domain.item.client.dto.request.ItemIdsForPaymentRequest;
 import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
+import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.service.ItemService;
 import com.lgcns.global.common.response.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;

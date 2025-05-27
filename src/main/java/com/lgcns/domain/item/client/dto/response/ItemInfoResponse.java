@@ -1,4 +1,4 @@
-package com.lgcns.domain.item.client.dto;
+package com.lgcns.domain.item.client.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

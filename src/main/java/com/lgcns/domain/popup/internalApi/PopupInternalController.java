@@ -1,7 +1,7 @@
 package com.lgcns.domain.popup.internalApi;
 
-import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
 import com.lgcns.domain.popup.dto.request.PopupIdsRequest;
+import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.ReservationPopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.SurveyChoiceResponse;

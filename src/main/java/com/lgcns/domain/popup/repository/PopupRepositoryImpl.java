@@ -3,13 +3,11 @@ package com.lgcns.domain.popup.repository;
 import static com.lgcns.domain.popup.domain.QPopup.popup;
 import static com.lgcns.domain.survey.domain.QChoice.choice;
 import static com.lgcns.domain.survey.domain.QSurvey.survey;
-import static com.querydsl.core.types.dsl.Expressions.stringTemplate;
 
 import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
-import com.lgcns.domain.popup.dto.response.ReservationPopupInfoResponse;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.global.error.exception.CustomException;
 import com.querydsl.core.types.Projections;
@@ -85,16 +83,21 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     @Override
-    public List<ReservationPopupInfoResponse> findReservedPopupInfo(List<Long> popupIds) {
+    public List<PopupDetailsResponse> findReservedPopupInfo(List<Long> popupIds) {
         return queryFactory
                 .select(
                         Projections.constructor(
-                                ReservationPopupInfoResponse.class,
+                                PopupDetailsResponse.class,
                                 popup.id,
                                 popup.name,
-                                stringTemplate(
-                                        "CONCAT({0}, ' ', {1})",
-                                        popup.address.roadAddress, popup.address.detailAddress),
+                                popup.imageUrl,
+                                popup.popupStartDate.stringValue(),
+                                popup.popupEndDate.stringValue(),
+                                popup.reservationOpenDateTime.stringValue(),
+                                popup.reservationCloseDateTime.stringValue(),
+                                getFullAddress(),
+                                popup.runOpenTime.stringValue(),
+                                popup.runCloseTime.stringValue(),
                                 popup.address.latitude,
                                 popup.address.longitude))
                 .from(popup)

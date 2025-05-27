@@ -120,7 +120,7 @@ public class PopupServiceImpl implements PopupService {
     }
 
     @Override
-    public List<ReservationPopupInfoResponse> findReservedPopupInfo(PopupIdsRequest request) {
+    public List<PopupDetailsResponse> findReservedPopupInfo(PopupIdsRequest request) {
         return popupRepository.findReservedPopupInfo(request.popupIds());
     }
 

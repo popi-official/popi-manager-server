@@ -54,7 +54,7 @@ public class PopupInternalController {
 
     @PostMapping("/reservations")
     @Operation(summary = "예약한 팝업 정보 조회", description = "사용자가 예약한 팝업들의 정보를 조회합니다.")
-    public List<PopupDetailsResponse> reservedPopupInfoFind(@RequestBody PopupIdsRequest request) {
+    public List<PopupDetailsResponse> findReservedPopupInfo(@RequestBody PopupIdsRequest request) {
         return popupService.findReservedPopupInfo(request);
     }
 }

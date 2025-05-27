@@ -57,4 +57,9 @@ public class PopupInternalController {
     public List<PopupDetailsResponse> findReservedPopupInfo(@RequestBody PopupIdsRequest request) {
         return popupService.findReservedPopupInfo(request);
     }
+
+    @PostMapping("popups/hot")
+    public List<PopupInfoResponse> hotPopupsFind(@RequestBody List<Long> popupIds) {
+        return popupService.findPopupsByIds(popupIds);
+    }
 }

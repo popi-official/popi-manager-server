@@ -16,4 +16,6 @@ public interface PopupRepositoryCustom {
     PopupDetailsResponse findPopupDetailsById(Long popupId);
 
     List<PopupDetailsResponse> findReservedPopupInfo(List<Long> popupIds);
+
+    List<PopupInfoResponse> findPopupsByIds(List<Long> popupIds);
 }

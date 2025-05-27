@@ -15,6 +15,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -133,6 +134,28 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
         }
 
         return result;
+    }
+
+    @Override
+    public List<PopupInfoResponse> findPopupsByIds(List<Long> popupIds) {
+        if (popupIds == null || popupIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return jpaQueryFactory
+                .select(
+                        Projections.constructor(
+                                PopupInfoResponse.class,
+                                popup.id,
+                                popup.name,
+                                popup.imageUrl,
+                                popup.popupStartDate.stringValue(),
+                                popup.popupEndDate.stringValue(),
+                                getFullAddress()))
+                .from(popup)
+                .where(popup.id.in(popupIds))
+                .orderBy(popup.id.asc())
+                .fetch();
     }
 
     private BooleanExpression checkPopupSearchName(String keyword) {

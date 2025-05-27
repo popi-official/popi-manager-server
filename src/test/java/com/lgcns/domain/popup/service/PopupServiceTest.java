@@ -364,16 +364,17 @@ public class PopupServiceTest extends IntegrationTest {
             PopupIdsRequest request = new PopupIdsRequest(List.of(popupId));
 
             // when
-            List<ReservationPopupInfoResponse> reservationPopupInfoList =
+            List<PopupDetailsResponse> reservationPopupInfoList =
                     popupService.findReservedPopupInfo(request);
 
             // then
             assertThat(reservationPopupInfoList).hasSize(1);
 
-            ReservationPopupInfoResponse popupDetail = reservationPopupInfoList.get(0);
+            PopupDetailsResponse popupDetail = reservationPopupInfoList.get(0);
+
             assertThat(popupDetail.popupId()).isEqualTo(popupId);
             assertThat(popupDetail.popupName()).isEqualTo("popup1");
-            assertThat(popupDetail.address()).isEqualTo("서울특별시 강남구 테헤란로 123 3층 A호");
+            assertThat(popupDetail.address()).isEqualTo("서울특별시 강남구 테헤란로 123, 3층 A호");
             assertThat(popupDetail.latitude()).isEqualTo(37.123456);
             assertThat(popupDetail.longitude()).isEqualTo(127.123456);
         }

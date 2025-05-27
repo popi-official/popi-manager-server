@@ -8,6 +8,7 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.dto.request.PopupCreateRequest;
+import com.lgcns.domain.popup.dto.request.PopupIdsRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -349,6 +350,32 @@ public class PopupServiceTest extends IntegrationTest {
             assertThatThrownBy(() -> popupService.findPopupDetailsById(nonExistentPopupId))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
+        }
+    }
+
+    @Nested
+    class 예악된_팝업_정보_조회할_때 {
+
+        @Test
+        @Transactional
+        void 사용자가_예약한_팝업_ID_리스트를_통해_팝업_정보_조회에_성공한다() {
+            // given
+            Long popupId = createPopup();
+            PopupIdsRequest request = new PopupIdsRequest(List.of(popupId));
+
+            // when
+            List<ReservationPopupInfoResponse> reservationPopupInfoList =
+                    popupService.findReservedPopupInfo(request);
+
+            // then
+            assertThat(reservationPopupInfoList).hasSize(1);
+
+            ReservationPopupInfoResponse popupDetail = reservationPopupInfoList.get(0);
+            assertThat(popupDetail.popupId()).isEqualTo(popupId);
+            assertThat(popupDetail.popupName()).isEqualTo("popup1");
+            assertThat(popupDetail.address()).isEqualTo("서울특별시 강남구 테헤란로 123 3층 A호");
+            assertThat(popupDetail.latitude()).isEqualTo(37.123456);
+            assertThat(popupDetail.longitude()).isEqualTo(127.123456);
         }
     }
 

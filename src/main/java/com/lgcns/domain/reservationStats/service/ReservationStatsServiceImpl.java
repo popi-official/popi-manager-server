@@ -10,7 +10,6 @@ import com.lgcns.domain.reservationStats.domain.DayOfWeekReservationCount;
 import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
 import com.lgcns.domain.reservationStats.dto.response.DayOfWeekReservationCountResponse;
 import com.lgcns.domain.reservationStats.dto.response.ReservationStatsResponse;
-import com.lgcns.domain.reservationStats.repository.DailyReservationCountRepository;
 import com.lgcns.domain.reservationStats.repository.DayOfWeekReservationCountRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReservationStatsServiceImpl implements ReservationStatsService {
 
     private final PopupRepository popupRepository;
-    private final DailyReservationCountRepository dailyReservationCountRepository;
     private final DayOfWeekReservationCountRepository dayOfWeekReservationCountRepository;
     private final ManagerUtil managerUtil;
     private final ReservationServiceClient reservationServiceClient;

@@ -135,6 +135,25 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
         return result;
     }
 
+    @Override
+    public List<PopupInfoResponse> findPopupsByIds(List<Long> popupIds) {
+        return jpaQueryFactory
+                .select(
+                        Projections.constructor(
+                                PopupInfoResponse.class,
+                                popup.id,
+                                popup.name,
+                                popup.imageUrl,
+                                popup.popupStartDate.stringValue(),
+                                popup.popupEndDate.stringValue(),
+                                getFullAddress()))
+                .from(popup)
+                .where(popup.id.in(popupIds))
+                .orderBy(popup.id.asc())
+                .limit(4)
+                .fetch();
+    }
+
     private BooleanExpression checkPopupSearchName(String keyword) {
         return StringUtils.hasText(keyword) ? popup.name.contains(keyword.trim()) : null;
     }

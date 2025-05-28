@@ -124,6 +124,11 @@ public class PopupServiceImpl implements PopupService {
         return popupRepository.findReservedPopupInfo(request.popupIds());
     }
 
+    @Override
+    public List<PopupInfoResponse> findPopupsByIds(PopupIdsRequest request) {
+        return popupRepository.findPopupsByIds(request.popupIds());
+    }
+
     private Popup createPopupFromRequest(Manager manager, PopupCreateRequest popupCreateRequest) {
 
         return Popup.createPopup(

@@ -21,4 +21,6 @@ public interface PopupService {
     PopupDetailsResponse findPopupDetailsById(Long popupId);
 
     List<PopupDetailsResponse> findReservedPopupInfo(PopupIdsRequest request);
+
+    List<PopupInfoResponse> findPopupsByIds(PopupIdsRequest request);
 }

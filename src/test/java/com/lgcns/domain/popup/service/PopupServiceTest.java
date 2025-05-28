@@ -1,5 +1,8 @@
 package com.lgcns.domain.popup.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
@@ -19,20 +22,16 @@ import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
 import com.lgcns.global.common.response.SliceResponse;
 import com.lgcns.global.error.exception.CustomException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class PopupServiceTest extends IntegrationTest {
     @Autowired private PopupService popupService;

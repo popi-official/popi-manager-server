@@ -46,7 +46,7 @@ public class PopupInternalController {
         return popupService.findPopupDetailsById(popupId);
     }
 
-    @GetMapping("/reservations/{popupId}/survey")
+    @GetMapping("/reservations/popups/{popupId}/survey")
     @Operation(summary = "팝업에 등록된 설문지 목록 조회", description = "팝업 ID를 통해 등록된 설문지 목록을 조회합니다.")
     public List<SurveyChoiceResponse> choiceListByPopupIdFind(@PathVariable Long popupId) {
         return popupService.findAllChoicesByPopupId(popupId);

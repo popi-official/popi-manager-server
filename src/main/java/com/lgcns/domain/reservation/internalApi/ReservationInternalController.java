@@ -16,7 +16,7 @@ public class ReservationInternalController {
 
     private final ReservationService reservationService;
 
-    @GetMapping("/{popupId}")
+    @GetMapping("/popups/{popupId}")
     @Operation(summary = "해당 달에 대한 예약 목록 조회", description = "팝업스토어 ID와 달을 통해 예약 정보를 조회합니다.")
     public MonthlyReservationResponse findReservationByIdAndDate(
             @PathVariable Long popupId, @RequestParam String date) {

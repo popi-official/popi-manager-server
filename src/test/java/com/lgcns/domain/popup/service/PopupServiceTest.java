@@ -391,10 +391,11 @@ public class PopupServiceTest extends IntegrationTest {
             Long popupId2 = createPopup();
             Long popupId3 = createPopup();
             Long popupId4 = createPopup();
-            List<Long> popupIds = List.of(popupId1, popupId2, popupId3, popupId4);
+            PopupIdsRequest request =
+                    new PopupIdsRequest(List.of(popupId1, popupId2, popupId3, popupId4));
 
             // when
-            List<PopupInfoResponse> results = popupService.findPopupsByIds(popupIds);
+            List<PopupInfoResponse> results = popupService.findPopupsByIds(request);
 
             // then
             assertThat(results).hasSize(4);
@@ -411,10 +412,11 @@ public class PopupServiceTest extends IntegrationTest {
             Long popupId3 = createPopup();
             Long popupId4 = createPopup();
             Long popupId5 = createPopup();
-            List<Long> popupIds = List.of(popupId1, popupId2, popupId3, popupId4, popupId5);
+            PopupIdsRequest request =
+                    new PopupIdsRequest(List.of(popupId1, popupId2, popupId3, popupId4, popupId5));
 
             // when
-            List<PopupInfoResponse> results = popupService.findPopupsByIds(popupIds);
+            List<PopupInfoResponse> results = popupService.findPopupsByIds(request);
 
             // then
             assertThat(results).hasSize(4);
@@ -428,10 +430,10 @@ public class PopupServiceTest extends IntegrationTest {
             // given
             Long popupId1 = createPopup();
             Long popupId2 = createPopup();
-            List<Long> popupIds = List.of(popupId1, popupId2);
+            PopupIdsRequest request = new PopupIdsRequest(List.of(popupId1, popupId2));
 
             // when
-            List<PopupInfoResponse> results = popupService.findPopupsByIds(popupIds);
+            List<PopupInfoResponse> results = popupService.findPopupsByIds(request);
 
             // then
             assertThat(results).hasSize(2);

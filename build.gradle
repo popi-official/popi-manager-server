@@ -66,7 +66,6 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
 
-
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
@@ -74,7 +73,6 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
 
     // S3
     implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
@@ -89,6 +87,9 @@ dependencies {
 
     // Slice & Pageable
     implementation 'org.springframework.data:spring-data-commons'
+
+    // Open Feign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }
 
 dependencyManagement {
@@ -137,6 +138,7 @@ def jacocoExcludePatterns = [
         "**/*Details*",
         "**/*Error*/**",
         "**/resources/**",
+        "**/error/**",
         "**/exception/**",
         "**/config/**",
         "**/internalApi/**",

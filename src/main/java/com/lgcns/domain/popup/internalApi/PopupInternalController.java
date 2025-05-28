@@ -58,7 +58,7 @@ public class PopupInternalController {
         return popupService.findReservedPopupInfo(request);
     }
 
-    @PostMapping("popups/hot")
+    @PostMapping("popups/popularity")
     public List<PopupInfoResponse> hotPopupsFind(@RequestBody List<Long> popupIds) {
         return popupService.findPopupsByIds(popupIds);
     }

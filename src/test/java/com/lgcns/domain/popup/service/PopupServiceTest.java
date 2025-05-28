@@ -1,8 +1,5 @@
 package com.lgcns.domain.popup.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
@@ -22,16 +19,20 @@ import com.lgcns.domain.survey.repository.ChoiceRepository;
 import com.lgcns.domain.survey.repository.SurveyRepository;
 import com.lgcns.global.common.response.SliceResponse;
 import com.lgcns.global.error.exception.CustomException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class PopupServiceTest extends IntegrationTest {
     @Autowired private PopupService popupService;
@@ -57,7 +58,7 @@ public class PopupServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 팝업_등록 {
+    class 팝업을_등록할_때 {
         @Test
         @Transactional
         void 유효한_입력_값이면_팝업_등록에_성공한다() {
@@ -91,7 +92,7 @@ public class PopupServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 팝업_목록_조회 {
+    class 팝업_목록을_조회할_때 {
         @Test
         @Transactional
         void 팝업_목록_조회에_성공한다() {
@@ -111,10 +112,10 @@ public class PopupServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 팝업_삭제 {
+    class 팝업을_삭제할_때 {
         @Test
         @Transactional
-        void 정상적으로_팝업을_삭제한다() {
+        void 정상적으로_팝업이_삭제된다() {
             // given
             Long popupId = createPopup();
 
@@ -377,6 +378,66 @@ public class PopupServiceTest extends IntegrationTest {
             assertThat(popupDetail.address()).isEqualTo("서울특별시 강남구 테헤란로 123, 3층 A호");
             assertThat(popupDetail.latitude()).isEqualTo(37.123456);
             assertThat(popupDetail.longitude()).isEqualTo(127.123456);
+        }
+    }
+
+    @Nested
+    class 팝업_아이디_리스트로_팝업_정보_리스트를_조회할_때 {
+
+        @Test
+        @Transactional
+        void 정상적으로_리스트_조회에_성공한다() {
+            // given
+            Long popupId1 = createPopup();
+            Long popupId2 = createPopup();
+            Long popupId3 = createPopup();
+            Long popupId4 = createPopup();
+            List<Long> popupIds = List.of(popupId1, popupId2, popupId3, popupId4);
+
+            // when
+            List<PopupInfoResponse> results = popupService.findPopupsByIds(popupIds);
+
+            // then
+            assertThat(results).hasSize(4);
+            List<Long> resultIds = results.stream().map(PopupInfoResponse::popupId).toList();
+            assertThat(resultIds).containsExactlyInAnyOrder(popupId1, popupId2, popupId3, popupId4);
+        }
+
+        @Test
+        @Transactional
+        void 팝업_아이디_리스트의_크기가_4보다_큰_경우에도_4개의_팝업_정보_리스트만_반환한다() {
+            // given
+            Long popupId1 = createPopup();
+            Long popupId2 = createPopup();
+            Long popupId3 = createPopup();
+            Long popupId4 = createPopup();
+            Long popupId5 = createPopup();
+            List<Long> popupIds = List.of(popupId1, popupId2, popupId3, popupId4, popupId5);
+
+            // when
+            List<PopupInfoResponse> results = popupService.findPopupsByIds(popupIds);
+
+            // then
+            assertThat(results).hasSize(4);
+            List<Long> resultIds = results.stream().map(PopupInfoResponse::popupId).toList();
+            assertThat(resultIds).containsExactlyInAnyOrder(popupId1, popupId2, popupId3, popupId4);
+        }
+
+        @Test
+        @Transactional
+        void 팝업_아이디_리스트의_크기가_4보다_작은_경우에도_해당_크기의_팝업_정보_리스트를_반환한다() {
+            // given
+            Long popupId1 = createPopup();
+            Long popupId2 = createPopup();
+            List<Long> popupIds = List.of(popupId1, popupId2);
+
+            // when
+            List<PopupInfoResponse> results = popupService.findPopupsByIds(popupIds);
+
+            // then
+            assertThat(results).hasSize(2);
+            List<Long> resultIds = results.stream().map(PopupInfoResponse::popupId).toList();
+            assertThat(resultIds).containsExactlyInAnyOrder(popupId1, popupId2);
         }
     }
 

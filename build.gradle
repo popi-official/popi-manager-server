@@ -135,6 +135,7 @@ def jacocoExcludePatterns = [
         "**/*Details*",
         "**/*Error*/**",
         "**/resources/**",
+        "**/error/**",
         "**/exception/**",
         "**/config/**",
         "**/internalApi/**",

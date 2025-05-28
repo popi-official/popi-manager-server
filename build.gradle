@@ -37,6 +37,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    // Eureka Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
     // Spring Cloud Kubernetes Discovery Client
     implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
 

@@ -14,11 +14,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @AutoConfigureWireMock(port = 0)
+@ActiveProfiles("test")
 public abstract class IntegrationTest {
     @Autowired protected DatabaseCleaner databaseCleaner;
-    @Autowired private WireMockServer wireMockServer;
+    @Autowired protected WireMockServer wireMockServer;
 
     @BeforeEach
     void setUp() {

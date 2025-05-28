@@ -1,7 +1,11 @@
 package com.lgcns.domain.reservationStat.service;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
@@ -18,11 +22,13 @@ import com.lgcns.global.error.exception.CustomException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
 public class ReservationStatsServiceTest extends IntegrationTest {
@@ -30,8 +36,8 @@ public class ReservationStatsServiceTest extends IntegrationTest {
 
     @Autowired private ManagerRepository managerRepository;
     @Autowired private PopupRepository popupRepository;
-    @Autowired private DailyReservationCountRepository dailyReservationCountRepository;
     @Autowired private DayOfWeekReservationCountRepository dayOfWeekReservationCountRepository;
+    @Autowired private ObjectMapper objectMapper;
 
     private Manager ownerManager;
     private Manager otherManager;
@@ -67,15 +73,17 @@ public class ReservationStatsServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 예약_통계_조회 {
+    class 예약_통계를_조회할_때 {
 
         @Test
         @Transactional
-        void 예약자가_있는_경우_예약_통계_조회에_성공한다() {
+        void 예약자가_있는_경우_예약_통계_조회에_성공한다() throws JsonProcessingException {
             // given
             Long popupId = popup.getId();
-            dailyReservationCountRepository.save(
-                    DailyReservationCount.createDailyReservationCount(popupId, 5));
+
+            String expectedResponse =
+                    objectMapper.writeValueAsString(Map.of("reservationCount", 5));
+            stubFindDailyMemberReservationCount(popupId, 200, expectedResponse);
 
             dayOfWeekReservationCountRepository.save(
                     DayOfWeekReservationCount.createDayOfWeekReservationCount(
@@ -128,9 +136,13 @@ public class ReservationStatsServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        void 예약자가_없는_경우_예약_통계_조회에_성공한다() {
+        void 예약자가_없는_경우_예약_통계_조회에_성공한다() throws JsonProcessingException {
             // given
             Long popupId = popup.getId();
+
+            String expectedResponse =
+                    objectMapper.writeValueAsString(Map.of("reservationCount", 0));
+            stubFindDailyMemberReservationCount(popupId, 200, expectedResponse);
 
             // when
             ReservationStatsResponse reservationStats =
@@ -203,5 +215,17 @@ public class ReservationStatsServiceTest extends IntegrationTest {
                     () -> reservationStatsService.getReservationStats(popupId),
                     PopupErrorCode.POPUP_NOT_FOUND.getMessage());
         }
+    }
+
+    private void stubFindDailyMemberReservationCount(Long popupId, int status, String body) {
+        MappingBuilder mappingBuilder =
+                get(urlPathEqualTo("/internal/" + popupId + "/daily-count"));
+
+        wireMockServer.stubFor(
+                mappingBuilder.willReturn(
+                        aResponse()
+                                .withStatus(status)
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(body)));
     }
 }

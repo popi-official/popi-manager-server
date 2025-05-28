@@ -21,3 +21,7 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+reservation:
+  service:
+    name: reservations

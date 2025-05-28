@@ -4,7 +4,8 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
-import com.lgcns.domain.reservationStats.domain.DailyReservationCount;
+import com.lgcns.domain.reservationStats.client.ReservationServiceClient;
+import com.lgcns.domain.reservationStats.client.dto.DailyMemberReservationCountResponse;
 import com.lgcns.domain.reservationStats.domain.DayOfWeekReservationCount;
 import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
 import com.lgcns.domain.reservationStats.dto.response.DayOfWeekReservationCountResponse;
@@ -29,6 +30,7 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
     private final DailyReservationCountRepository dailyReservationCountRepository;
     private final DayOfWeekReservationCountRepository dayOfWeekReservationCountRepository;
     private final ManagerUtil managerUtil;
+    private final ReservationServiceClient reservationServiceClient;
 
     @Override
     @Transactional(readOnly = true)
@@ -37,10 +39,9 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
         Popup popup = findPopupById(popupId);
         validatePopupOwnership(currentManager, popup);
 
-        Optional<DailyReservationCount> dailyReservationCount =
-                dailyReservationCountRepository.findByPopupId(popupId);
-        int dailyCount =
-                dailyReservationCount.map(DailyReservationCount::getReservationCount).orElse(0);
+        DailyMemberReservationCountResponse dailyReservationCount =
+                reservationServiceClient.findDailyMemberReservationCount(popupId);
+        Long dailyCount = dailyReservationCount.reservationCount();
 
         Optional<DayOfWeekReservationCount> dayOfWeekReservationCountList =
                 dayOfWeekReservationCountRepository.findByPopupId(popupId);

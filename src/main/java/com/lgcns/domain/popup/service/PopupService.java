@@ -1,5 +1,6 @@
 package com.lgcns.domain.popup.service;
 
+import com.lgcns.domain.popup.dto.request.PopupIdsRequest;
 import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.global.common.response.SliceResponse;
@@ -18,4 +19,6 @@ public interface PopupService {
             String keyword, Long lastPopupId, int size);
 
     PopupDetailsResponse findPopupDetailsById(Long popupId);
+
+    List<PopupDetailsResponse> findReservedPopupInfo(PopupIdsRequest request);
 }

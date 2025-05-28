@@ -83,6 +83,29 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     @Override
+    public List<PopupDetailsResponse> findReservedPopupInfo(List<Long> popupIds) {
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                PopupDetailsResponse.class,
+                                popup.id,
+                                popup.name,
+                                popup.imageUrl,
+                                popup.popupStartDate.stringValue(),
+                                popup.popupEndDate.stringValue(),
+                                popup.reservationOpenDateTime.stringValue(),
+                                popup.reservationCloseDateTime.stringValue(),
+                                getFullAddress(),
+                                popup.runOpenTime.stringValue(),
+                                popup.runCloseTime.stringValue(),
+                                popup.address.latitude,
+                                popup.address.longitude))
+                .from(popup)
+                .where(popup.id.in(popupIds))
+                .fetch();
+    }
+
+    @Override
     public PopupDetailsResponse findPopupDetailsById(Long popupId) {
         PopupDetailsResponse result =
                 jpaQueryFactory

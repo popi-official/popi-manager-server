@@ -2,9 +2,12 @@ package com.lgcns.domain.item.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import com.lgcns.IntegrationTest;
-import com.lgcns.domain.item.client.dto.ItemInfoResponse;
+import com.lgcns.domain.item.client.dto.request.ItemIdsForPaymentRequest;
+import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
+import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
@@ -775,6 +778,91 @@ class ItemServiceTest extends IntegrationTest {
                     () -> assertThat(result).isNotNull(),
                     () -> assertThat(result).hasSize(3),
                     () -> assertThat(new HashSet<>(result)).hasSize(result.size()));
+        }
+    }
+
+    @Nested
+    class 결제_준비용_상품_상세_목록을_조회할_때 {
+
+        @Test
+        @Transactional
+        void 요청한_itemId_목록에_해당하는_상품_정보를_반환한다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            itemRepository.saveAll(List.of(item1, item2));
+
+            ItemIdsForPaymentRequest request =
+                    new ItemIdsForPaymentRequest(List.of(item1.getId(), item2.getId()));
+
+            // when
+            List<ItemForPaymentResponse> result = itemService.findItemsForPayment(popupId, request);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).hasSize(2),
+                    () ->
+                            assertThat(result)
+                                    .extracting("itemId", "name", "price", "stock")
+                                    .containsExactlyInAnyOrder(
+                                            tuple(
+                                                    item1.getId(),
+                                                    item1.getName(),
+                                                    item1.getPrice(),
+                                                    item1.getStock()),
+                                            tuple(
+                                                    item2.getId(),
+                                                    item2.getName(),
+                                                    item2.getPrice(),
+                                                    item2.getStock())));
+        }
+
+        @Test
+        @Transactional
+        void 존재하지_않는_itemId가_포함된_경우_해당_상품을_제외하고_존재하는_상품_정보만_반환한다() {
+            // given
+            final Long popupId = popup.getId();
+
+            Item item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            Item item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            Item item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+            itemRepository.saveAll(List.of(item1, item2, item3));
+
+            ItemIdsForPaymentRequest request =
+                    new ItemIdsForPaymentRequest(List.of(item1.getId(), 999L, item3.getId()));
+
+            // when
+            List<ItemForPaymentResponse> result = itemService.findItemsForPayment(popupId, request);
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(result).hasSize(2),
+                    () ->
+                            assertThat(result)
+                                    .extracting("itemId", "name", "price", "stock")
+                                    .containsExactlyInAnyOrder(
+                                            tuple(
+                                                    item1.getId(),
+                                                    item1.getName(),
+                                                    item1.getPrice(),
+                                                    item1.getStock()),
+                                            tuple(
+                                                    item3.getId(),
+                                                    item3.getName(),
+                                                    item3.getPrice(),
+                                                    item3.getStock())));
         }
     }
 }

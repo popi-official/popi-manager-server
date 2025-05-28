@@ -1,6 +1,8 @@
 package com.lgcns.domain.item.internalApi;
 
-import com.lgcns.domain.item.client.dto.ItemInfoResponse;
+import com.lgcns.domain.item.client.dto.request.ItemIdsForPaymentRequest;
+import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
+import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.service.ItemService;
 import com.lgcns.global.common.response.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,5 +47,16 @@ public class ItemInternalController {
             @Parameter(description = "팝업 ID", example = "1") @PathVariable(name = "popupId")
                     Long popupId) {
         return itemService.findRandomItems(popupId);
+    }
+
+    @PostMapping("/details")
+    @Operation(
+            summary = "결제용 상품 정보 조회",
+            description = "사용자가 장바구니에서 선택한 상품 ID 목록을 기반으로, 해당 팝업에 등록된 아이템들의 이름, 가격, 재고 정보를 반환합니다.")
+    public List<ItemForPaymentResponse> findItemDetail(
+            @Parameter(description = "팝업 ID", example = "1") @PathVariable(name = "popupId")
+                    Long popupId,
+            @RequestBody ItemIdsForPaymentRequest request) {
+        return itemService.findItemsForPayment(popupId, request);
     }
 }

@@ -1,6 +1,8 @@
 package com.lgcns.domain.item.service;
 
-import com.lgcns.domain.item.client.dto.ItemInfoResponse;
+import com.lgcns.domain.item.client.dto.request.ItemIdsForPaymentRequest;
+import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
+import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
@@ -155,6 +157,13 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public List<ItemInfoResponse> findRandomItems(Long popupId) {
         return itemRepository.findRandomItems(popupId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ItemForPaymentResponse> findItemsForPayment(
+            Long popupId, ItemIdsForPaymentRequest request) {
+        return itemRepository.findItemsForPayment(popupId, request.itemIds());
     }
 
     private Popup findPopupById(Long popupId) {

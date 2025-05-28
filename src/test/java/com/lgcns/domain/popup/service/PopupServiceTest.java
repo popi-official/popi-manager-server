@@ -44,7 +44,6 @@ public class PopupServiceTest extends IntegrationTest {
 
     private Manager ownerManager;
     private Manager otherManager;
-    private Popup popup;
 
     @BeforeEach
     void setUp() {

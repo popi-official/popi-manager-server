@@ -1,6 +1,7 @@
 package com.lgcns.domain.reservation.internalApi;
 
 import com.lgcns.domain.reservation.dto.response.MonthlyReservationResponse;
+import com.lgcns.domain.reservation.dto.response.ReservationInfoResponse;
 import com.lgcns.domain.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,5 +21,11 @@ public class ReservationInternalController {
     public MonthlyReservationResponse findReservationByIdAndDate(
             @PathVariable Long popupId, @RequestParam String date) {
         return reservationService.findReservationByIdAndDate(popupId, date);
+    }
+
+    @GetMapping("/{reservationId}")
+    @Operation(summary = "예약 상세 정보 조회", description = "예약 ID를 통해 예약의 상세 정보를 조회합니다.")
+    public ReservationInfoResponse findReservationById(@PathVariable Long reservationId) {
+        return reservationService.findReservationById(reservationId);
     }
 }

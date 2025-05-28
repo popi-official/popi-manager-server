@@ -12,7 +12,11 @@ import com.lgcns.domain.popup.dto.request.PopupWithChoicesCreateRequest;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.popup.service.PopupService;
+import com.lgcns.domain.reservation.domain.Reservation;
 import com.lgcns.domain.reservation.dto.response.MonthlyReservationResponse;
+import com.lgcns.domain.reservation.dto.response.ReservationInfoResponse;
+import com.lgcns.domain.reservation.exception.ReservationErrorCode;
+import com.lgcns.domain.reservation.repository.ReservationRepository;
 import com.lgcns.domain.survey.dto.request.ChoiceCreateRequest;
 import com.lgcns.global.error.exception.CustomException;
 import java.time.LocalDate;
@@ -32,6 +36,7 @@ public class reservationServiceTest extends IntegrationTest {
     @Autowired private PopupService popupService;
     @Autowired private PopupRepository popupRepository;
     @Autowired private ManagerRepository managerRepository;
+    @Autowired private ReservationRepository reservationRepository;
 
     private Manager manager;
     private Popup popup;
@@ -46,9 +51,9 @@ public class reservationServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 팝업에_대한_예약_날짜_조회 {
+    class 팝업에_대한_예약_날짜_조회_할_때 {
         @Test
-        void 예약_날짜_조회_성공() {
+        void 예약_날짜_조회_성공한다() {
             // given
             Long popupId = popup.getId();
 
@@ -95,7 +100,7 @@ public class reservationServiceTest extends IntegrationTest {
         }
 
         @Test
-        void 예약_날짜_조회_실패() {
+        void 예약_날짜_조회_실패한다() {
             // given
             Long popupId = 999L; // 존재하지 않는 팝업 ID
             String date = "2023-10-01";
@@ -104,6 +109,40 @@ public class reservationServiceTest extends IntegrationTest {
             assertThatThrownBy(() -> reservationService.findReservationByIdAndDate(popupId, date))
                     .isInstanceOf(CustomException.class)
                     .hasMessageContaining(PopupErrorCode.POPUP_NOT_FOUND.getMessage());
+        }
+    }
+
+    @Nested
+    class 예약_정보를_조회할_때 {
+
+        @Test
+        void 예약_정보_조회에_성공한다() {
+            // given
+            Reservation reservation = reservationRepository.findAllByPopupId(popup.getId()).get(0);
+            // when
+            ReservationInfoResponse reservationInfoResponse =
+                    reservationService.findReservationById(reservation.getId());
+
+            // then
+            Assertions.assertAll(
+                    () -> assertThat(reservationInfoResponse.popupId()).isEqualTo(popup.getId()),
+                    () ->
+                            assertThat(reservationInfoResponse.reservationDate())
+                                    .isEqualTo(reservation.getReservationDate()),
+                    () ->
+                            assertThat(reservationInfoResponse.reservationTime())
+                                    .isEqualTo(reservation.getReservationTime()));
+        }
+
+        @Test
+        void 예약_정보_조회에_실패한다() {
+            // given
+            Long reservationId = -1L; // 존재하지 않는 예약 ID
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.findReservationById(reservationId))
+                    .isInstanceOf(CustomException.class)
+                    .hasMessageContaining(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
         }
     }
 

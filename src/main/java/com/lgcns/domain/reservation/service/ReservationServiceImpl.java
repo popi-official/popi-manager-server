@@ -3,8 +3,11 @@ package com.lgcns.domain.reservation.service;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.domain.reservation.domain.Reservation;
 import com.lgcns.domain.reservation.dto.response.DailyReservation;
 import com.lgcns.domain.reservation.dto.response.MonthlyReservationResponse;
+import com.lgcns.domain.reservation.dto.response.ReservationInfoResponse;
+import com.lgcns.domain.reservation.exception.ReservationErrorCode;
 import com.lgcns.domain.reservation.repository.ReservationRepository;
 import com.lgcns.global.error.exception.CustomException;
 import java.util.List;
@@ -36,5 +39,20 @@ public class ReservationServiceImpl implements ReservationService {
                 popup.getPopupEndDate(),
                 popup.getTimeCapacity(),
                 dailyReservationList);
+    }
+
+    @Override
+    public ReservationInfoResponse findReservationById(Long reservationId) {
+        Reservation reservation =
+                reservationRepository
+                        .findById(reservationId)
+                        .orElseThrow(
+                                () ->
+                                        new CustomException(
+                                                ReservationErrorCode.RESERVATION_NOT_FOUND));
+        return ReservationInfoResponse.of(
+                reservation.getPopup().getId(),
+                reservation.getReservationDate(),
+                reservation.getReservationTime());
     }
 }

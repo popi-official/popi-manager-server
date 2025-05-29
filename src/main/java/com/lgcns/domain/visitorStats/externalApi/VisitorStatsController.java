@@ -24,7 +24,7 @@ public class VisitorStatsController {
 
     @PostMapping("/test")
     public ResponseEntity<Void> test(@PathVariable Long popupId) {
-        visitorStatsService.createVisitorStats(popupId);
+        visitorStatsService.createVisitorStats();
         return ResponseEntity.ok().build();
     }
 }

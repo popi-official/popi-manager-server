@@ -15,6 +15,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -217,6 +218,18 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
 
     private OrderSpecifier<Double> randomOrder() {
         return Expressions.numberTemplate(Double.class, "function('rand')").asc();
+    }
+
+    public List<Long> findAllPopupIdsAfterPopupStartTime(LocalDate nowDate, LocalTime nowTime) {
+        return jpaQueryFactory
+                .select(popup.id)
+                .from(popup)
+                .where(
+                        popup.popupStartDate.loe(nowDate),
+                        popup.popupEndDate.goe(nowDate),
+                        popup.runOpenTime.loe(nowTime),
+                        popup.runCloseTime.goe(nowTime))
+                .fetch();
     }
 
     private BooleanExpression checkPopupSearchName(String keyword) {

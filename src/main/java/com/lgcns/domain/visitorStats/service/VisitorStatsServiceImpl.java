@@ -67,17 +67,21 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
     }
 
     @Override
-    public void createVisitorStats(Long popupId) {
+    public void createVisitorStats() {
         LocalDate nowDate = LocalDate.now();
         LocalTime nowTime = LocalTime.now();
-        validateVisitorStatsDuplication(popupId, nowDate, nowTime);
+        List<Long> popupIds = popupRepository.findAllPopupIdsAfterPopupStartTime(nowDate, nowTime);
 
-        HourlyEntranceResponse hourlyEntranceResponse =
-                entranceRepository.findHourlyEntrance(popupId, nowDate, nowTime);
+        for (Long popupId : popupIds) {
+            validateVisitorStatsDuplication(popupId, nowDate, nowTime);
 
-        VisitorStats visitorStats =
-                fromHourlyEntranceResponse(popupId, hourlyEntranceResponse, nowDate, nowTime);
-        visitorStatsRepository.save(visitorStats);
+            HourlyEntranceResponse hourlyEntranceResponse =
+                    entranceRepository.findHourlyEntrance(popupId, nowDate, nowTime);
+
+            VisitorStats visitorStats =
+                    fromHourlyEntranceResponse(popupId, hourlyEntranceResponse, nowDate, nowTime);
+            visitorStatsRepository.save(visitorStats);
+        }
     }
 
     private Popup findPopupById(Long popupId) {

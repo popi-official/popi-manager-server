@@ -1,6 +1,8 @@
 package com.lgcns.domain.popup.repository;
 
 import com.lgcns.domain.popup.dto.response.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.domain.Slice;
 
@@ -23,4 +25,6 @@ public interface PopupRepositoryCustom {
     List<PopupInfoResponse> findPopupsByIds(List<Long> popupIds, int limit);
 
     List<PopupInfoResponse> findRandomPopups(List<Long> excludeIds, int size);
+
+    List<Long> findAllPopupIdsAfterPopupStartTime(LocalDate nowDate, LocalTime nowTime);
 }

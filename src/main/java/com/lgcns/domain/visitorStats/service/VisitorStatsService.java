@@ -5,5 +5,5 @@ import com.lgcns.domain.visitorStats.dto.response.VisitorAnalysisResponse;
 public interface VisitorStatsService {
     VisitorAnalysisResponse getVisitorAnalysis(Long popupId);
 
-    void createVisitorStats(Long popupId);
+    void createVisitorStats();
 }

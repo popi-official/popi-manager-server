@@ -31,7 +31,7 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
     }
 
     @Override
-    public HourlyEntranceResponse findHourlyEntrances(
+    public HourlyEntranceResponse findHourlyEntrance(
             Long popupId, LocalDate nowDate, LocalTime nowTime) {
         NumberExpression<Integer> maleCount =
                 new CaseBuilder()

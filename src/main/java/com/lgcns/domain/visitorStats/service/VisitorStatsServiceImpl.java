@@ -1,13 +1,18 @@
 package com.lgcns.domain.visitorStats.service;
 
+import com.lgcns.domain.entrance.dto.response.HourlyEntranceResponse;
+import com.lgcns.domain.entrance.repository.EntranceRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.domain.visitorStats.domain.VisitorStats;
 import com.lgcns.domain.visitorStats.dto.response.*;
 import com.lgcns.domain.visitorStats.repository.VisitorStatsRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +28,7 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
 
     private final VisitorStatsRepository visitorStatsRepository;
     private final PopupRepository popupRepository;
+    private final EntranceRepository entranceRepository;
     private final ManagerUtil managerUtil;
 
     @Override
@@ -59,6 +65,18 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
         return VisitorAnalysisResponse.of(gender, age);
     }
 
+    @Override
+    public void createVisitorStats(Long popupId) {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+        HourlyEntranceResponse hourlyEntranceResponse =
+                entranceRepository.findHourlyEntrance(popupId, nowDate, nowTime);
+
+        VisitorStats visitorStats =
+                fromHourlyEntranceResponse(popupId, hourlyEntranceResponse, nowDate, nowTime);
+        visitorStatsRepository.save(visitorStats);
+    }
+
     private Popup findPopupById(Long popupId) {
         return popupRepository
                 .findById(popupId)
@@ -85,5 +103,22 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
 
     private int calculateRatio(int count, int total) {
         return (int) Math.round((double) count * 100 / total);
+    }
+
+    private VisitorStats fromHourlyEntranceResponse(
+            Long popupId,
+            HourlyEntranceResponse hourlyEntranceResponse,
+            LocalDate nowDate,
+            LocalTime nowTime) {
+        return VisitorStats.createVisitorStats(
+                popupId,
+                hourlyEntranceResponse.maleCount(),
+                hourlyEntranceResponse.femaleCount(),
+                hourlyEntranceResponse.teenCount(),
+                hourlyEntranceResponse.twentyCount(),
+                hourlyEntranceResponse.thirtyCount(),
+                hourlyEntranceResponse.fortyCount(),
+                nowDate,
+                nowTime);
     }
 }

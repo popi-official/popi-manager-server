@@ -8,5 +8,5 @@ import java.time.LocalTime;
 public interface EntranceRepositoryCustom {
     DailyEntrantCountResponse findDailyEntrantCount(Long popupId, LocalDate today);
 
-    HourlyEntranceResponse findHourlyEntrances(Long popupId, LocalDate nowDate, LocalTime nowTime);
+    HourlyEntranceResponse findHourlyEntrance(Long popupId, LocalDate nowDate, LocalTime nowTime);
 }

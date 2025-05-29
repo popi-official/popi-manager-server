@@ -23,14 +23,9 @@ public class MemberAnswer extends BaseTimeEntity {
 
     private int answerNumber;
 
-    private String memberGender;
-    private int memberAge;
-
     @Builder
-    private MemberAnswer(Survey survey, int answerNumber, String memberGender, int memberAge) {
+    private MemberAnswer(Survey survey, int answerNumber) {
         this.survey = survey;
         this.answerNumber = answerNumber;
-        this.memberGender = memberGender;
-        this.memberAge = memberAge;
     }
 }

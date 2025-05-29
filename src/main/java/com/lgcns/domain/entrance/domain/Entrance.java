@@ -23,7 +23,8 @@ public class Entrance {
     @Enumerated(EnumType.STRING)
     private MemberGender gender;
 
-    private int ageGroup;
+    @Enumerated(EnumType.STRING)
+    private MemberAge age;
 
     private LocalDate reservationDate;
 
@@ -33,12 +34,12 @@ public class Entrance {
     private Entrance(
             Long popupId,
             MemberGender gender,
-            int ageGroup,
+            MemberAge age,
             LocalDate reservationDate,
             LocalTime reservationTime) {
         this.popupId = popupId;
         this.gender = gender;
-        this.ageGroup = ageGroup;
+        this.age = age;
         this.reservationDate = reservationDate;
         this.reservationTime = reservationTime;
     }
@@ -46,13 +47,13 @@ public class Entrance {
     public static Entrance createPopupEnter(
             Long popupId,
             MemberGender gender,
-            int ageGroup,
+            MemberAge age,
             LocalDate reservationDate,
             LocalTime reservationTime) {
         return Entrance.builder()
                 .popupId(popupId)
                 .gender(gender)
-                .ageGroup(ageGroup)
+                .age(age)
                 .reservationDate(reservationDate)
                 .reservationTime(reservationTime)
                 .build();

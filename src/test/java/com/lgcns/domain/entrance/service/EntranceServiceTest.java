@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.entrance.domain.Entrance;
+import com.lgcns.domain.entrance.domain.MemberAge;
 import com.lgcns.domain.entrance.domain.MemberGender;
 import com.lgcns.domain.entrance.dto.request.EntranceCreateRequest;
 import com.lgcns.domain.entrance.dto.response.DailyEntrantCountResponse;
@@ -75,12 +76,12 @@ class EntranceServiceTest extends IntegrationTest {
             // given
             Long popupId = 1L;
             MemberGender gender = MemberGender.MALE;
-            int ageGroup = 20;
+            MemberAge age = MemberAge.TWENTIES;
             LocalDate date = LocalDate.parse("2025-05-13");
             LocalTime time = LocalTime.parse("10:00:00");
 
             EntranceCreateRequest request =
-                    new EntranceCreateRequest(popupId, gender, ageGroup, date, time);
+                    new EntranceCreateRequest(popupId, gender, age, date, time);
 
             // when
             entranceService.createEntrance(request);
@@ -90,7 +91,7 @@ class EntranceServiceTest extends IntegrationTest {
             Assertions.assertAll(
                     () -> assertThat(savedEntrance.getPopupId()).isEqualTo(1L),
                     () -> assertThat(savedEntrance.getGender()).isEqualTo(MemberGender.MALE),
-                    () -> assertThat(savedEntrance.getAgeGroup()).isEqualTo(20),
+                    () -> assertThat(savedEntrance.getAge()).isEqualTo(MemberAge.TWENTIES),
                     () ->
                             assertThat(savedEntrance.getReservationDate())
                                     .isEqualTo(LocalDate.parse("2025-05-13")),
@@ -123,35 +124,35 @@ class EntranceServiceTest extends IntegrationTest {
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             LocalDate.now(),
                             LocalTime.parse("10:00:00")));
             entranceRepository.save(
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             LocalDate.now(),
                             LocalTime.parse("10:00:00")));
             entranceRepository.save(
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             LocalDate.now(),
                             LocalTime.parse("10:00:00")));
             entranceRepository.save(
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             LocalDate.now(),
                             LocalTime.parse("10:00:00")));
             entranceRepository.save(
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             LocalDate.now(),
                             LocalTime.parse("10:00:00")));
 

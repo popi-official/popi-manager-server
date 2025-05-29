@@ -5,6 +5,8 @@ import static com.lgcns.domain.visitorStats.domain.QVisitorStats.visitorStats;
 import com.lgcns.domain.visitorStats.dto.response.VisitorStatsResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -29,5 +31,20 @@ public class VisitorStatsRepositoryImpl implements VisitorStatsRepositoryCustom 
                 .from(visitorStats)
                 .where(visitorStats.popupId.eq(popupId))
                 .fetchOne();
+    }
+
+    @Override
+    public boolean existByPopupIdAndAnalyzedDateTime(
+            Long popupId, LocalDate nowDate, LocalTime nowTime) {
+        Integer fetchFirst =
+                queryFactory
+                        .selectOne()
+                        .from(visitorStats)
+                        .where(
+                                visitorStats.popupId.eq(popupId),
+                                visitorStats.analyzedDate.eq(nowDate),
+                                visitorStats.analyzedTime.hour().eq(nowTime.getHour()))
+                        .fetchFirst();
+        return fetchFirst != null;
     }
 }

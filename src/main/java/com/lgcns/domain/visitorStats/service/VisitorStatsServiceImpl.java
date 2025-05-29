@@ -8,6 +8,7 @@ import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.visitorStats.domain.VisitorStats;
 import com.lgcns.domain.visitorStats.dto.response.*;
+import com.lgcns.domain.visitorStats.exception.VisitorStatsErrorCode;
 import com.lgcns.domain.visitorStats.repository.VisitorStatsRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
@@ -69,6 +70,8 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
     public void createVisitorStats(Long popupId) {
         LocalDate nowDate = LocalDate.now();
         LocalTime nowTime = LocalTime.now();
+        validateVisitorStatsDuplication(popupId, nowDate, nowTime);
+
         HourlyEntranceResponse hourlyEntranceResponse =
                 entranceRepository.findHourlyEntrance(popupId, nowDate, nowTime);
 
@@ -103,6 +106,13 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
 
     private int calculateRatio(int count, int total) {
         return (int) Math.round((double) count * 100 / total);
+    }
+
+    private void validateVisitorStatsDuplication(
+            Long popupId, LocalDate nowDate, LocalTime nowTime) {
+        if (visitorStatsRepository.existByPopupIdAndAnalyzedDateTime(popupId, nowDate, nowTime)) {
+            throw new CustomException(VisitorStatsErrorCode.VISITOR_STATS_DUPLICATED);
+        }
     }
 
     private VisitorStats fromHourlyEntranceResponse(

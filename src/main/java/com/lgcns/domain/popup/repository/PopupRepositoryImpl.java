@@ -10,12 +10,17 @@ import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
 import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.global.error.exception.CustomException;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -136,7 +141,7 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     @Override
-    public List<PopupInfoResponse> findPopupsByIds(List<Long> popupIds) {
+    public List<PopupInfoResponse> findPopupsByIds(List<Long> popupIds, int limit) {
         return jpaQueryFactory
                 .select(
                         Projections.constructor(
@@ -149,9 +154,42 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                                 getFullAddress()))
                 .from(popup)
                 .where(popup.id.in(popupIds))
-                .orderBy(popup.id.asc())
-                .limit(4)
+                .orderBy(createOrderByPopupIds(popupIds).asc())
+                .limit(limit)
                 .fetch();
+    }
+
+    @Override
+    public List<PopupInfoResponse> findRandomPopups(List<Long> excludeIds, int size) {
+        return jpaQueryFactory
+                .select(
+                        Projections.constructor(
+                                PopupInfoResponse.class,
+                                popup.id,
+                                popup.name,
+                                popup.imageUrl,
+                                popup.popupStartDate.stringValue(),
+                                popup.popupEndDate.stringValue(),
+                                getFullAddress()))
+                .from(popup)
+                .where(popup.id.notIn(excludeIds))
+                .orderBy(randomOrder())
+                .limit(size)
+                .fetch();
+    }
+
+    private NumberExpression<Integer> createOrderByPopupIds(List<Long> popupIds) {
+        String caseWhenClause =
+                IntStream.range(0, popupIds.size())
+                        .mapToObj(i -> "WHEN {" + i + "} = popup.id THEN " + i)
+                        .collect(Collectors.joining(" "));
+
+        return Expressions.numberTemplate(
+                Integer.class, "CASE " + caseWhenClause + " END", popupIds.toArray());
+    }
+
+    private OrderSpecifier<Double> randomOrder() {
+        return Expressions.numberTemplate(Double.class, "function('rand')").asc();
     }
 
     private BooleanExpression checkPopupSearchName(String keyword) {

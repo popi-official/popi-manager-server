@@ -384,35 +384,17 @@ public class PopupServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        void 정상적으로_리스트_조회에_성공한다() {
-            // given
-            Long popupId1 = createPopup();
-            Long popupId2 = createPopup();
-            Long popupId3 = createPopup();
-            Long popupId4 = createPopup();
-            PopupIdsRequest request =
-                    new PopupIdsRequest(List.of(popupId1, popupId2, popupId3, popupId4));
-
-            // when
-            List<PopupInfoResponse> results = popupService.findPopupsByIds(request);
-
-            // then
-            assertThat(results).hasSize(4);
-            List<Long> resultIds = results.stream().map(PopupInfoResponse::popupId).toList();
-            assertThat(resultIds).containsExactlyInAnyOrder(popupId1, popupId2, popupId3, popupId4);
-        }
-
-        @Test
-        @Transactional
-        void 팝업_아이디_리스트의_크기가_4보다_큰_경우에도_4개의_팝업_정보_리스트만_반환한다() {
+        void 요청된_아이디가_4개보다_많은_경우_정확히_4개만_반환한다() {
             // given
             Long popupId1 = createPopup();
             Long popupId2 = createPopup();
             Long popupId3 = createPopup();
             Long popupId4 = createPopup();
             Long popupId5 = createPopup();
+            Long popupId6 = createPopup();
             PopupIdsRequest request =
-                    new PopupIdsRequest(List.of(popupId1, popupId2, popupId3, popupId4, popupId5));
+                    new PopupIdsRequest(
+                            List.of(popupId1, popupId2, popupId3, popupId4, popupId5, popupId6));
 
             // when
             List<PopupInfoResponse> results = popupService.findPopupsByIds(request);
@@ -425,19 +407,55 @@ public class PopupServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        void 팝업_아이디_리스트의_크기가_4보다_작은_경우에도_해당_크기의_팝업_정보_리스트를_반환한다() {
+        void 요청된_아이디가_4개보다_적은_경우_부족한_개수만큼_랜덤으로_채워서_4개를_반환한다() {
             // given
             Long popupId1 = createPopup();
             Long popupId2 = createPopup();
-            PopupIdsRequest request = new PopupIdsRequest(List.of(popupId1, popupId2));
+            Long popupId3 = createPopup(); // 요청 ID
+            Long popupId4 = createPopup(); // 요청 ID
+            Long popupId5 = createPopup();
+            Long popupId6 = createPopup();
+            Long popupId7 = createPopup();
+            PopupIdsRequest request = new PopupIdsRequest(List.of(popupId3, popupId4));
 
             // when
             List<PopupInfoResponse> results = popupService.findPopupsByIds(request);
 
             // then
-            assertThat(results).hasSize(2);
+            assertThat(results).hasSize(4);
+
             List<Long> resultIds = results.stream().map(PopupInfoResponse::popupId).toList();
-            assertThat(resultIds).containsExactlyInAnyOrder(popupId1, popupId2);
+
+            assertThat(resultIds).contains(popupId3, popupId4);
+
+            List<Long> otherPopupIds = List.of(popupId1, popupId2, popupId5, popupId6, popupId7);
+            List<Long> additionalIds =
+                    resultIds.stream()
+                            .filter(id -> !List.of(popupId3, popupId4).contains(id))
+                            .toList();
+
+            assertThat(additionalIds).hasSize(2);
+            assertThat(otherPopupIds).containsAll(additionalIds);
+        }
+
+        @Test
+        @Transactional
+        void 전체_팝업이_4개_미만인_경우_존재하는_모든_팝업을_반환한다() {
+            // given
+            Long popupId1 = createPopup();
+            Long popupId2 = createPopup();
+            Long popupId3 = createPopup();
+
+            PopupIdsRequest request = new PopupIdsRequest(List.of(popupId1));
+
+            // when
+            List<PopupInfoResponse> results = popupService.findPopupsByIds(request);
+
+            // then
+            assertThat(results).hasSize(3);
+
+            List<Long> resultIds = results.stream().map(PopupInfoResponse::popupId).toList();
+            assertThat(resultIds).containsExactlyInAnyOrder(popupId1, popupId2, popupId3);
         }
     }
 

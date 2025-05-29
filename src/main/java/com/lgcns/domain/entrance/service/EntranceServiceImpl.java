@@ -3,6 +3,7 @@ package com.lgcns.domain.entrance.service;
 import com.lgcns.domain.entrance.domain.Entrance;
 import com.lgcns.domain.entrance.dto.request.EntranceCreateRequest;
 import com.lgcns.domain.entrance.dto.response.DailyEntrantCountResponse;
+import com.lgcns.domain.entrance.dto.response.HourlyEntranceResponse;
 import com.lgcns.domain.entrance.repository.EntranceRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
@@ -12,6 +13,7 @@ import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,14 @@ public class EntranceServiceImpl implements EntranceService {
 
         LocalDate today = LocalDate.now();
         return entranceRepository.findDailyEntrantCount(popupId, today);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HourlyEntranceResponse> findHourlyEntrances(Long popupId) {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+        return entranceRepository.findHourlyEntrances(popupId, today, now);
     }
 
     private Popup findPopupById(Long popupId) {

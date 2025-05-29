@@ -30,7 +30,7 @@ public class EntranceServiceImpl implements EntranceService {
                 Entrance.createPopupEnter(
                         request.popupId(),
                         request.gender(),
-                        request.ageGroup(),
+                        request.age(),
                         request.reservationDate(),
                         request.reservationTime());
 

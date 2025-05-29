@@ -1,5 +1,6 @@
 package com.lgcns.domain.entrance.dto.request;
 
+import com.lgcns.domain.entrance.domain.MemberAge;
 import com.lgcns.domain.entrance.domain.MemberGender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +13,7 @@ public record EntranceCreateRequest(
         @NotNull(message = "방문자 성별은 필수입니다.") @Schema(description = "방문자 성별", example = "FEMALE")
                 MemberGender gender,
         @NotNull(message = "방문자 나이대는 필수입니다.") @Schema(description = "방문자 나이대", example = "20")
-                Integer ageGroup,
+                MemberAge age,
         @NotNull(message = "예약 날짜는 필수입니다.")
                 @Schema(description = "팝업 예약 날짜", example = "2025-05-13")
                 LocalDate reservationDate,
@@ -21,10 +22,9 @@ public record EntranceCreateRequest(
     public static EntranceCreateRequest of(
             Long popupId,
             MemberGender gender,
-            Integer ageGroup,
+            MemberAge age,
             LocalDate reservationDate,
             LocalTime reservationTime) {
-        return new EntranceCreateRequest(
-                popupId, gender, ageGroup, reservationDate, reservationTime);
+        return new EntranceCreateRequest(popupId, gender, age, reservationDate, reservationTime);
     }
 }

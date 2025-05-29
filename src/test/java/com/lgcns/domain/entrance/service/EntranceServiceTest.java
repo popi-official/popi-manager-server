@@ -102,8 +102,8 @@ class EntranceServiceTest extends IntegrationTest {
 
     @Nested
     class 입장자_수를_조회할_때 {
+
         @Test
-        @Transactional
         void 입장자가_없어도_조회에_성공한다() {
             // given
             Long popupId = popup.getId();
@@ -116,7 +116,6 @@ class EntranceServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 입장자가_있으면_조회에_성공한다() {
             // given
             Long popupId = popup.getId();
@@ -164,7 +163,6 @@ class EntranceServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 팝업_소유자가_아니면_입장자_수_조회에_실패한다() {
             // given
             Long popupId = popup.getId();
@@ -177,7 +175,6 @@ class EntranceServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_팝업에_대해_요청할_경우_조회에_실패한다() {
             // given
             Long popupId = -1L;

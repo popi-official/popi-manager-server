@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
 
 public class ReservationStatsServiceTest extends IntegrationTest {
     @Autowired private ReservationStatsService reservationStatsService;
@@ -76,7 +75,6 @@ public class ReservationStatsServiceTest extends IntegrationTest {
     class 예약_통계를_조회할_때 {
 
         @Test
-        @Transactional
         void 예약자가_있는_경우_예약_통계_조회에_성공한다() throws JsonProcessingException {
             // given
             Long popupId = popup.getId();
@@ -135,7 +133,6 @@ public class ReservationStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 예약자가_없는_경우_예약_통계_조회에_성공한다() throws JsonProcessingException {
             // given
             Long popupId = popup.getId();
@@ -190,7 +187,6 @@ public class ReservationStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 다른_관리자가_소유한_팝업에_대한_예약_통계_조회는_실패한다() {
             // given
             Long popupId = popup.getId();
@@ -204,7 +200,6 @@ public class ReservationStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_팝업에_대한_예약_통계_조회는_실패한다() {
             // given
             Long popupId = -1L;

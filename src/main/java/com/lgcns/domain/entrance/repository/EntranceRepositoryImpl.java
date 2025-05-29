@@ -12,6 +12,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -78,6 +81,17 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
                         entrance.reservationTime.eq(getPreviousHour(nowTime)))
                 .groupBy(entrance.reservationDate, entrance.reservationTime)
                 .fetchOne();
+    }
+
+    @Override
+    public Set<Long> findPopupIdsWithEntrances(List<Long> popupIds) {
+        return new HashSet<>(
+                queryFactory
+                        .select(entrance.popupId)
+                        .distinct()
+                        .from(entrance)
+                        .where(entrance.popupId.in(popupIds))
+                        .fetch());
     }
 
     private LocalTime getPreviousHour(LocalTime nowTime) {

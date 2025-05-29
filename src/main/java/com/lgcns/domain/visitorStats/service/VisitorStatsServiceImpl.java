@@ -8,7 +8,6 @@ import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.domain.visitorStats.domain.VisitorStats;
 import com.lgcns.domain.visitorStats.dto.response.*;
-import com.lgcns.domain.visitorStats.exception.VisitorStatsErrorCode;
 import com.lgcns.domain.visitorStats.repository.VisitorStatsRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
@@ -17,6 +16,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -70,11 +70,17 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
     public void createVisitorStats() {
         LocalDate nowDate = LocalDate.now();
         LocalTime nowTime = LocalTime.now();
+
+        // 운영 중인 팝업 필터링
         List<Long> popupIds = popupRepository.findAllPopupIdsAfterPopupStartTime(nowDate, nowTime);
+        // 입장 내역이 존재하는 팝업 필터링
+        Set<Long> popupIdsWithEntrances = entranceRepository.findPopupIdsWithEntrances(popupIds);
+        // 중복된 방문자 분석이 존재하지 않는 팝업 필터링
+        Set<Long> popupIdsWithoutVisitorStats =
+                visitorStatsRepository.findPopupIdsWithoutVisitorStats(
+                        popupIdsWithEntrances, nowDate, nowTime);
 
-        for (Long popupId : popupIds) {
-            validateVisitorStatsDuplication(popupId, nowDate, nowTime);
-
+        for (Long popupId : popupIdsWithoutVisitorStats) {
             HourlyEntranceResponse hourlyEntranceResponse =
                     entranceRepository.findHourlyEntrance(popupId, nowDate, nowTime);
 
@@ -110,13 +116,6 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
 
     private int calculateRatio(int count, int total) {
         return (int) Math.round((double) count * 100 / total);
-    }
-
-    private void validateVisitorStatsDuplication(
-            Long popupId, LocalDate nowDate, LocalTime nowTime) {
-        if (visitorStatsRepository.existByPopupIdAndAnalyzedDateTime(popupId, nowDate, nowTime)) {
-            throw new CustomException(VisitorStatsErrorCode.VISITOR_STATS_DUPLICATED);
-        }
     }
 
     private VisitorStats fromHourlyEntranceResponse(

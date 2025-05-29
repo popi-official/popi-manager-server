@@ -7,6 +7,9 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -34,17 +37,21 @@ public class VisitorStatsRepositoryImpl implements VisitorStatsRepositoryCustom 
     }
 
     @Override
-    public boolean existByPopupIdAndAnalyzedDateTime(
-            Long popupId, LocalDate nowDate, LocalTime nowTime) {
-        Integer fetchFirst =
-                queryFactory
-                        .selectOne()
-                        .from(visitorStats)
-                        .where(
-                                visitorStats.popupId.eq(popupId),
-                                visitorStats.analyzedDate.eq(nowDate),
-                                visitorStats.analyzedTime.hour().eq(nowTime.getHour()))
-                        .fetchFirst();
-        return fetchFirst != null;
+    public Set<Long> findPopupIdsWithoutVisitorStats(
+            Set<Long> popupIds, LocalDate nowDate, LocalTime nowTime) {
+        Set<Long> existingIds =
+                new HashSet<>(
+                        queryFactory
+                                .select(visitorStats.popupId)
+                                .from(visitorStats)
+                                .where(
+                                        visitorStats.popupId.in(popupIds),
+                                        visitorStats.analyzedDate.eq(nowDate),
+                                        visitorStats.analyzedTime.hour().eq(nowTime.getHour()))
+                                .fetch());
+
+        return popupIds.stream()
+                .filter(id -> !existingIds.contains(id))
+                .collect(Collectors.toSet());
     }
 }

@@ -67,7 +67,7 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
     }
 
     @Override
-    public void createVisitorStats() {
+    public List<Long> findTargetPopupIds() {
         LocalDate nowDate = LocalDate.now();
         LocalTime nowTime = LocalTime.now();
 
@@ -76,18 +76,25 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
         // 입장 내역이 존재하는 팝업 필터링
         Set<Long> popupIdsWithEntrances = entranceRepository.findPopupIdsWithEntrances(popupIds);
         // 중복된 방문자 분석이 존재하지 않는 팝업 필터링
-        Set<Long> popupIdsWithoutVisitorStats =
+        return new ArrayList<>(
                 visitorStatsRepository.findPopupIdsWithoutVisitorStats(
-                        popupIdsWithEntrances, nowDate, nowTime);
+                        popupIdsWithEntrances, nowDate, nowTime));
+    }
 
-        for (Long popupId : popupIdsWithoutVisitorStats) {
-            HourlyEntranceResponse hourlyEntranceResponse =
-                    entranceRepository.findHourlyEntrance(popupId, nowDate, nowTime);
+    @Override
+    public VisitorStats convertVisitorStats(Long popupId) {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
 
-            VisitorStats visitorStats =
-                    fromHourlyEntranceResponse(popupId, hourlyEntranceResponse, nowDate, nowTime);
-            visitorStatsRepository.save(visitorStats);
-        }
+        HourlyEntranceResponse hourlyEntranceResponse =
+                entranceRepository.findHourlyEntrance(popupId, nowDate, nowTime);
+
+        return fromHourlyEntranceResponse(popupId, hourlyEntranceResponse, nowDate, nowTime);
+    }
+
+    @Override
+    public void createVisitorStats(List<VisitorStats> visitorStatsList) {
+        visitorStatsRepository.bulkInsertVisitorStats(visitorStatsList);
     }
 
     private Popup findPopupById(Long popupId) {

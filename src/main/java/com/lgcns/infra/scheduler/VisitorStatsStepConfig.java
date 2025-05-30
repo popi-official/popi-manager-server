@@ -22,7 +22,15 @@ public class VisitorStatsStepConfig {
     @Bean
     @StepScope
     public ItemReader<Long> createVisitorStatsItemReader() {
-        return new ListItemReader<>(visitorStatsService.findTargetPopupIds());
+        ListItemReader<Long> delegate =
+                new ListItemReader<>(visitorStatsService.findTargetPopupIds());
+
+        return new ItemReader<>() {
+            @Override
+            public synchronized Long read() {
+                return delegate.read();
+            }
+        };
     }
 
     @Bean

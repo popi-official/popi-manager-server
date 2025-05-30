@@ -18,8 +18,12 @@ import org.springframework.context.annotation.Configuration;
 public class VisitorStatsStepConfig {
 
     private final VisitorStatsService visitorStatsService;
+    private static final String CREATE_VISITOR_STATS_ITEM_READER = "createVisitorStatsItemReader";
+    private static final String CREATE_VISITOR_STATS_ITEM_PROCESSOR =
+            "createVisitorStatsItemProcessor";
+    private static final String CREATE_VISITOR_STATS_ITEM_WRITER = "createVisitorStatsItemWriter";
 
-    @Bean
+    @Bean(name = CREATE_VISITOR_STATS_ITEM_READER)
     @StepScope
     public ItemReader<Long> createVisitorStatsItemReader() {
         ListItemReader<Long> delegate =
@@ -33,13 +37,13 @@ public class VisitorStatsStepConfig {
         };
     }
 
-    @Bean
+    @Bean(name = CREATE_VISITOR_STATS_ITEM_PROCESSOR)
     @StepScope
     public ItemProcessor<Long, VisitorStats> createVisitorStatsItemProcessor() {
         return visitorStatsService::convertVisitorStats;
     }
 
-    @Bean
+    @Bean(name = CREATE_VISITOR_STATS_ITEM_WRITER)
     @StepScope
     public ItemWriter<VisitorStats> createVisitorStatsItemWriter() {
         return chunk -> {

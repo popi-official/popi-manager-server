@@ -24,25 +24,28 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class VisitorStatsJobConfig {
 
     public static final Integer CHUNK_SIZE = 100;
+    public static final String VISITOR_STATS_JOB = "visitorStatsJob";
+    public static final String CREATE_VISITOR_STATS_STEP = "createVisitorStatsStep";
+    public static final String VISITOR_STATS_TASK_EXECUTOR = "visitorStatsTaskExecutor";
 
-    @Bean
+    @Bean(name = VISITOR_STATS_JOB)
     public Job visitorStatsJob(JobRepository jobRepository, Step createVisitorStatsStep) {
-        return new JobBuilder("visitorStatsJob", jobRepository)
+        return new JobBuilder(VISITOR_STATS_JOB, jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(createVisitorStatsStep)
                 .build();
     }
 
+    @Bean(name = CREATE_VISITOR_STATS_STEP)
     @JobScope
-    @Bean
     public Step createVisitorStatsStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
             ItemReader<Long> createVisitorStatsItemReader,
             ItemProcessor<Long, VisitorStats> createVisitorStatsItemProcessor,
             ItemWriter<VisitorStats> createVisitorStatsItemWriter,
-            @Qualifier("visitorStatsTaskExecutor") TaskExecutor taskExecutor) {
-        return new StepBuilder("createVisitorStatsJob", jobRepository)
+            @Qualifier(VISITOR_STATS_TASK_EXECUTOR) TaskExecutor taskExecutor) {
+        return new StepBuilder(CREATE_VISITOR_STATS_STEP, jobRepository)
                 .<Long, VisitorStats>chunk(CHUNK_SIZE, transactionManager)
                 .reader(createVisitorStatsItemReader)
                 .processor(createVisitorStatsItemProcessor)
@@ -53,7 +56,7 @@ public class VisitorStatsJobConfig {
                 .build();
     }
 
-    @Bean(name = "visitorStatsTaskExecutor")
+    @Bean(name = VISITOR_STATS_TASK_EXECUTOR)
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(CHUNK_SIZE);

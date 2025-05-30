@@ -93,6 +93,10 @@ dependencies {
 
     // WireMock
     testImplementation 'org.springframework.cloud:spring-cloud-contract-wiremock:4.2.1'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
 }
 
 dependencyManagement {

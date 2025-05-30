@@ -126,8 +126,13 @@ public class PopupServiceImpl implements PopupService {
 
     @Override
     public List<PopupInfoResponse> findPopupsByIds(PopupIdsRequest request) {
-        final int requestSize = request.popupIds().size();
+
         final int targetSize = 4;
+        final int requestSize = request.popupIds().size();
+
+        if (request.popupIds().isEmpty()) {
+            return popupRepository.findRandomPopups(request.popupIds(), targetSize);
+        }
 
         if (requestSize >= targetSize) {
             return popupRepository.findPopupsByIds(request.popupIds(), targetSize);

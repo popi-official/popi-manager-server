@@ -104,6 +104,7 @@ public class WebSecurityConfig {
             configuration.addAllowedOriginPattern(DEV_SERVER_URL);
             configuration.addAllowedOriginPattern(DEV_CLIENT_URL);
             configuration.addAllowedOriginPattern(LOCAL_CLIENT_URL);
+            configuration.addAllowedOriginPattern(LOCAL_TEST_URL);
         }
 
         configuration.addAllowedHeader("*");

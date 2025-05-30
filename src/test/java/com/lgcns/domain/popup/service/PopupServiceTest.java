@@ -469,7 +469,7 @@ public class PopupServiceTest extends IntegrationTest {
             // 서울 전제에 해당하는 위,경도 범위
             Double latMin = 37.378638;
             Double latMax = 37.671877;
-            Double lngMin = 126.7995439;
+            Double lngMin = 126.799543;
             Double lngMax = 127.184881;
 
             Long popupId1 =
@@ -554,7 +554,7 @@ public class PopupServiceTest extends IntegrationTest {
             // 서울
             Double latMin = 37.378638;
             Double latMax = 37.671877;
-            Double lngMin = 126.7995439;
+            Double lngMin = 126.799543;
             Double lngMax = 127.184881;
 
             // when

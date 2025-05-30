@@ -1,0 +1,8 @@
+spring:
+  config:
+    activate:
+      on-profile: "batch"
+
+  batch:
+    jdbc:
+      initialize-schema: always

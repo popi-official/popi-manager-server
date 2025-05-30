@@ -178,6 +178,34 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<PopupInfoResponse> findPopupsByMapArea(
+            Double latMin, Double latMax, Double lngMin, Double lngMax) {
+        return jpaQueryFactory
+                .select(
+                        Projections.constructor(
+                                PopupInfoResponse.class,
+                                popup.id,
+                                popup.name,
+                                popup.imageUrl,
+                                popup.popupStartDate.stringValue(),
+                                popup.popupEndDate.stringValue(),
+                                getFullAddress()))
+                .from(popup)
+                .where(
+                        popup.popupEndDate.goe(LocalDate.now()),
+                        isWithinMapArea(latMin, latMax, lngMin, lngMax))
+                .fetch();
+    }
+
+    private BooleanExpression isWithinMapArea(
+            Double latMin, Double latMax, Double lngMin, Double lngMax) {
+        return popup.address
+                .latitude
+                .between(latMin, latMax)
+                .and(popup.address.longitude.between(lngMin, lngMax));
+    }
+
     private NumberExpression<Integer> createOrderByPopupIds(List<Long> popupIds) {
         String caseWhenClause =
                 IntStream.range(0, popupIds.size())

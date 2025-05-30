@@ -11,6 +11,7 @@ import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +32,8 @@ public class EntranceServiceImpl implements EntranceService {
                         request.popupId(),
                         request.gender(),
                         request.age(),
-                        request.reservationDate(),
-                        request.reservationTime());
+                        LocalDate.parse(request.reservationDate()),
+                        LocalTime.parse(request.reservationTime()));
 
         entranceRepository.save(entrance);
     }

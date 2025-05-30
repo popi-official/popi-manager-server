@@ -77,8 +77,8 @@ class EntranceServiceTest extends IntegrationTest {
             Long popupId = 1L;
             MemberGender gender = MemberGender.MALE;
             MemberAge age = MemberAge.TWENTIES;
-            LocalDate date = LocalDate.parse("2025-05-13");
-            LocalTime time = LocalTime.parse("10:00:00");
+            String date = LocalDate.parse("2025-05-13").toString();
+            String time = LocalTime.parse("10:00:00").toString();
 
             EntranceCreateRequest request =
                     new EntranceCreateRequest(popupId, gender, age, date, time);

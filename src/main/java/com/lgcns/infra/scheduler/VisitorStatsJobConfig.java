@@ -47,6 +47,8 @@ public class VisitorStatsJobConfig {
                 .reader(createVisitorStatsItemReader)
                 .processor(createVisitorStatsItemProcessor)
                 .writer(createVisitorStatsItemWriter)
+                .faultTolerant()
+                .skip(Exception.class)
                 .taskExecutor(taskExecutor)
                 .build();
     }

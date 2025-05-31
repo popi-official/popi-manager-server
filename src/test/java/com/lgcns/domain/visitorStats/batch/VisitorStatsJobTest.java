@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.entrance.domain.Entrance;
+import com.lgcns.domain.entrance.domain.MemberAge;
 import com.lgcns.domain.entrance.domain.MemberGender;
 import com.lgcns.domain.entrance.repository.EntranceRepository;
 import com.lgcns.domain.manager.domain.Manager;
@@ -108,15 +109,25 @@ public class VisitorStatsJobTest extends IntegrationTest {
 
             entranceRepository.save(
                     Entrance.createPopupEnter(
-                            popupId, MemberGender.MALE, 20, nowDate, nowTime.minusHours(2)));
-
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.TWENTIES,
+                            nowDate,
+                            nowTime.minusHours(2)));
             entranceRepository.save(
                     Entrance.createPopupEnter(
-                            popupId, MemberGender.MALE, 20, nowDate, nowTime.minusHours(2)));
-
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.TWENTIES,
+                            nowDate,
+                            nowTime.minusHours(2)));
             entranceRepository.save(
                     Entrance.createPopupEnter(
-                            popupId, MemberGender.MALE, 20, nowDate, nowTime.minusHours(2)));
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.TWENTIES,
+                            nowDate,
+                            nowTime.minusHours(2)));
 
             JobParameters jobParameters = buildJobParameters();
 
@@ -154,23 +165,21 @@ public class VisitorStatsJobTest extends IntegrationTest {
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             nowDate,
                             nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
-
             entranceRepository.save(
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             nowDate,
                             nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
-
             entranceRepository.save(
                     Entrance.createPopupEnter(
                             popupId,
                             MemberGender.MALE,
-                            20,
+                            MemberAge.TWENTIES,
                             nowDate,
                             nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
 

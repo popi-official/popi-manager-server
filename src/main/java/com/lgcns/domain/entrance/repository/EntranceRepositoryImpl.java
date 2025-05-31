@@ -2,6 +2,7 @@ package com.lgcns.domain.entrance.repository;
 
 import static com.lgcns.domain.entrance.domain.QEntrance.entrance;
 
+import com.lgcns.domain.entrance.domain.MemberAge;
 import com.lgcns.domain.entrance.domain.MemberGender;
 import com.lgcns.domain.entrance.dto.response.DailyEntrantCountResponse;
 import com.lgcns.domain.entrance.dto.response.HourlyEntranceResponse;
@@ -52,16 +53,32 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
                         .sum();
 
         NumberExpression<Integer> teenCount =
-                new CaseBuilder().when(entrance.ageGroup.eq(10)).then(1).otherwise(0).sum();
+                new CaseBuilder()
+                        .when(entrance.age.eq(MemberAge.TEENAGER))
+                        .then(1)
+                        .otherwise(0)
+                        .sum();
 
         NumberExpression<Integer> twentyCount =
-                new CaseBuilder().when(entrance.ageGroup.eq(20)).then(1).otherwise(0).sum();
+                new CaseBuilder()
+                        .when(entrance.age.eq(MemberAge.TWENTIES))
+                        .then(1)
+                        .otherwise(0)
+                        .sum();
 
         NumberExpression<Integer> thirtyCount =
-                new CaseBuilder().when(entrance.ageGroup.eq(30)).then(1).otherwise(0).sum();
+                new CaseBuilder()
+                        .when(entrance.age.eq(MemberAge.THIRTIES))
+                        .then(1)
+                        .otherwise(0)
+                        .sum();
 
         NumberExpression<Integer> fortyCount =
-                new CaseBuilder().when(entrance.ageGroup.eq(40)).then(1).otherwise(0).sum();
+                new CaseBuilder()
+                        .when(entrance.age.eq(MemberAge.FORTIES_AND_ABOVE))
+                        .then(1)
+                        .otherwise(0)
+                        .sum();
 
         return Optional.ofNullable(
                 queryFactory

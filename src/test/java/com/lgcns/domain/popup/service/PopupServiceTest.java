@@ -509,7 +509,7 @@ public class PopupServiceTest extends IntegrationTest {
                             createDefaultChoices());
 
             // when
-            List<PopupInfoResponse> result =
+            List<PopupMapResponse> result =
                     popupService.findPopupsByMapArea(latMin, latMax, lngMin, lngMax);
 
             // then
@@ -558,7 +558,7 @@ public class PopupServiceTest extends IntegrationTest {
             Double lngMax = 127.184881;
 
             // when
-            List<PopupInfoResponse> result =
+            List<PopupMapResponse> result =
                     popupService.findPopupsByMapArea(latMin, latMax, lngMin, lngMax);
 
             // then

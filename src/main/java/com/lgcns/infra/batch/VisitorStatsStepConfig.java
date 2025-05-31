@@ -1,4 +1,4 @@
-package com.lgcns.infra.scheduler;
+package com.lgcns.infra.batch;
 
 import com.lgcns.domain.visitorStats.domain.VisitorStats;
 import com.lgcns.domain.visitorStats.service.VisitorStatsService;

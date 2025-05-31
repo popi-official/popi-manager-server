@@ -1,6 +1,7 @@
-package com.lgcns.infra.scheduler;
+package com.lgcns.infra.batch;
 
 import com.lgcns.domain.visitorStats.domain.VisitorStats;
+import com.lgcns.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -51,7 +52,7 @@ public class VisitorStatsJobConfig {
                 .processor(createVisitorStatsItemProcessor)
                 .writer(createVisitorStatsItemWriter)
                 .faultTolerant()
-                .skip(Exception.class)
+                .skip(CustomException.class)
                 .taskExecutor(taskExecutor)
                 .build();
     }

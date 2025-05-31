@@ -14,6 +14,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -34,7 +35,7 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
     }
 
     @Override
-    public HourlyEntranceResponse findHourlyEntrance(
+    public Optional<HourlyEntranceResponse> findHourlyEntrance(
             Long popupId, LocalDate nowDate, LocalTime nowTime) {
         NumberExpression<Integer> maleCount =
                 new CaseBuilder()
@@ -62,25 +63,26 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
         NumberExpression<Integer> fortyCount =
                 new CaseBuilder().when(entrance.ageGroup.eq(40)).then(1).otherwise(0).sum();
 
-        return queryFactory
-                .select(
-                        Projections.constructor(
-                                HourlyEntranceResponse.class,
-                                maleCount,
-                                femaleCount,
-                                teenCount,
-                                twentyCount,
-                                thirtyCount,
-                                fortyCount,
-                                entrance.reservationDate,
-                                entrance.reservationTime))
-                .from(entrance)
-                .where(
-                        entrance.popupId.eq(popupId),
-                        entrance.reservationDate.eq(nowDate),
-                        entrance.reservationTime.eq(getPreviousHour(nowTime)))
-                .groupBy(entrance.reservationDate, entrance.reservationTime)
-                .fetchOne();
+        return Optional.ofNullable(
+                queryFactory
+                        .select(
+                                Projections.constructor(
+                                        HourlyEntranceResponse.class,
+                                        maleCount,
+                                        femaleCount,
+                                        teenCount,
+                                        twentyCount,
+                                        thirtyCount,
+                                        fortyCount,
+                                        entrance.reservationDate,
+                                        entrance.reservationTime))
+                        .from(entrance)
+                        .where(
+                                entrance.popupId.eq(popupId),
+                                entrance.reservationDate.eq(nowDate),
+                                entrance.reservationTime.eq(getPreviousHour(nowTime)))
+                        .groupBy(entrance.reservationDate, entrance.reservationTime)
+                        .fetchOne());
     }
 
     @Override

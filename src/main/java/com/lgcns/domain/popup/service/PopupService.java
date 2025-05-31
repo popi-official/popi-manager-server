@@ -11,6 +11,9 @@ public interface PopupService {
 
     List<PopupPreviewResponse> findAllPopups();
 
+    List<PopupInfoResponse> findPopupsByMapArea(
+            Double latMin, Double latMax, Double lngMin, Double lngMax);
+
     void deletePopup(Long popupId);
 
     List<SurveyChoiceResponse> findAllChoicesByPopupId(Long popupId);

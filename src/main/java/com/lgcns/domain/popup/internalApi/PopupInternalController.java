@@ -40,6 +40,16 @@ public class PopupInternalController {
         return popupService.findPopupsByNameWithPagination(keyword, lastPopupId, size);
     }
 
+    @GetMapping("/popups/map")
+    @Operation(summary = "지도 기반 팝업 조회", description = "요청된 범위 내의 존재하는 모든 팝업을 조회합니다.")
+    public List<PopupInfoResponse> findPopupsByMapArea(
+            @RequestParam Double latMin,
+            @RequestParam Double latMax,
+            @RequestParam Double lngMin,
+            @RequestParam Double lngMax) {
+        return popupService.findPopupsByMapArea(latMin, latMax, lngMin, lngMax);
+    }
+
     @GetMapping("/popups/{popupId}")
     @Operation(summary = "팝업 상세 조회", description = "팝업 ID를 통해 해당 팝업의 상세 정보를 조회합니다.")
     public PopupDetailsResponse popupDetailsFind(@PathVariable Long popupId) {

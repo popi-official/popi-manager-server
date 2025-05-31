@@ -93,6 +93,13 @@ public class PopupServiceImpl implements PopupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<PopupInfoResponse> findPopupsByMapArea(
+            Double latMin, Double latMax, Double lngMin, Double lngMax) {
+        return popupRepository.findPopupsByMapArea(latMin, latMax, lngMin, lngMax);
+    }
+
+    @Override
     public List<SurveyChoiceResponse> findAllChoicesByPopupId(Long popupId) {
 
         List<ChoiceInfoResponse> choiceInfoList = popupRepository.findAllChoices(popupId);

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -52,6 +53,9 @@ public class VisitorStatsJobConfig {
                 .processor(createVisitorStatsItemProcessor)
                 .writer(createVisitorStatsItemWriter)
                 .faultTolerant()
+                .retryLimit(3)
+                .retry(DataAccessException.class)
+                .skipLimit(3)
                 .skip(CustomException.class)
                 .taskExecutor(taskExecutor)
                 .build();

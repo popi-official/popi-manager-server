@@ -10,7 +10,24 @@ import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-@RestControllerAdvice(basePackages = "com.lgcns.externalApi")
+@RestControllerAdvice(
+        basePackages = {
+            "com.lgcns.domain.auth.externalApi",
+            "com.lgcns.domain.congestionStats.externalApi",
+            "com.lgcns.domain.conversionStats.externalApi",
+            "com.lgcns.domain.entrance.externalApi",
+            "com.lgcns.domain.image.externalApi",
+            "com.lgcns.domain.item.externalApi",
+            "com.lgcns.domain.itemAnalysis.externalApi",
+            "com.lgcns.domain.manager.externalApi",
+            "com.lgcns.domain.notification.externalApi",
+            "com.lgcns.domain.paymentStats.externalApi",
+            "com.lgcns.domain.popup.externalApi",
+            "com.lgcns.domain.reservation.externalApi",
+            "com.lgcns.domain.reservationStats.externalApi",
+            "com.lgcns.domain.survey.externalApi",
+            "com.lgcns.domain.visitorStats.externalApi"
+        })
 public class GlobalResponseAdvice implements ResponseBodyAdvice {
 
     @Override

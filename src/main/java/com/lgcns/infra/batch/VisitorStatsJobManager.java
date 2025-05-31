@@ -23,7 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
-public class VisitorStatsJobConfig {
+public class VisitorStatsJobManager {
 
     public static final Integer CHUNK_SIZE = 100;
     public static final String VISITOR_STATS_JOB = "visitorStatsJob";

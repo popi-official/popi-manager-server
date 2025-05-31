@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class VisitorStatsStepConfig {
+public class VisitorStatsStepManager {
 
     private final VisitorStatsService visitorStatsService;
     private static final String CREATE_VISITOR_STATS_ITEM_READER = "createVisitorStatsItemReader";

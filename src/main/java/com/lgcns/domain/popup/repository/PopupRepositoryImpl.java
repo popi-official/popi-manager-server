@@ -4,10 +4,7 @@ import static com.lgcns.domain.popup.domain.QPopup.popup;
 import static com.lgcns.domain.survey.domain.QChoice.choice;
 import static com.lgcns.domain.survey.domain.QSurvey.survey;
 
-import com.lgcns.domain.popup.dto.response.ChoiceInfoResponse;
-import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
-import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
-import com.lgcns.domain.popup.dto.response.PopupPreviewResponse;
+import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.global.error.exception.CustomException;
 import com.querydsl.core.types.OrderSpecifier;
@@ -179,18 +176,20 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
     }
 
     @Override
-    public List<PopupInfoResponse> findPopupsByMapArea(
+    public List<PopupMapResponse> findPopupsByMapArea(
             Double latMin, Double latMax, Double lngMin, Double lngMax) {
         return jpaQueryFactory
                 .select(
                         Projections.constructor(
-                                PopupInfoResponse.class,
+                                PopupMapResponse.class,
                                 popup.id,
                                 popup.name,
                                 popup.imageUrl,
                                 popup.popupStartDate.stringValue(),
                                 popup.popupEndDate.stringValue(),
-                                getFullAddress()))
+                                getFullAddress(),
+                                popup.address.latitude,
+                                popup.address.longitude))
                 .from(popup)
                 .where(
                         popup.popupEndDate.goe(LocalDate.now()),

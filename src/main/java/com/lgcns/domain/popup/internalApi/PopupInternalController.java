@@ -3,6 +3,7 @@ package com.lgcns.domain.popup.internalApi;
 import com.lgcns.domain.popup.dto.request.PopupIdsRequest;
 import com.lgcns.domain.popup.dto.response.PopupDetailsResponse;
 import com.lgcns.domain.popup.dto.response.PopupInfoResponse;
+import com.lgcns.domain.popup.dto.response.PopupMapResponse;
 import com.lgcns.domain.popup.dto.response.SurveyChoiceResponse;
 import com.lgcns.domain.popup.service.PopupService;
 import com.lgcns.global.common.response.SliceResponse;
@@ -42,7 +43,7 @@ public class PopupInternalController {
 
     @GetMapping("/popups/map")
     @Operation(summary = "지도 기반 팝업 조회", description = "요청된 범위 내의 존재하는 모든 팝업을 조회합니다.")
-    public List<PopupInfoResponse> findPopupsByMapArea(
+    public List<PopupMapResponse> findPopupsByMapArea(
             @RequestParam Double latMin,
             @RequestParam Double latMax,
             @RequestParam Double lngMin,

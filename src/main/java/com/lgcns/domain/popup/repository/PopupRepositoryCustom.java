@@ -13,7 +13,7 @@ public interface PopupRepositoryCustom {
     Slice<PopupInfoResponse> findPopupsByNameWithPagination(
             String keyword, Long lastPopupId, int size);
 
-    List<PopupInfoResponse> findPopupsByMapArea(
+    List<PopupMapResponse> findPopupsByMapArea(
             Double latMin, Double latMax, Double lngMin, Double lngMax);
 
     PopupDetailsResponse findPopupDetailsById(Long popupId);

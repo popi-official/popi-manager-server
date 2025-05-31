@@ -1,6 +1,8 @@
 package com.lgcns.domain.item.domain;
 
+import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.popup.domain.Popup;
+import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -73,5 +75,12 @@ public class Item extends BaseTimeEntity {
 
     public void updateMinStock(int minStock) {
         this.minStock = minStock;
+    }
+
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new CustomException(ItemErrorCode.INSUFFICIENT_STOCK);
+        }
+        this.stock -= quantity;
     }
 }

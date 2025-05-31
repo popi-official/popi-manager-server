@@ -1,7 +1,5 @@
 package com.lgcns.domain.entrance.service;
 
-import com.lgcns.domain.entrance.domain.Entrance;
-import com.lgcns.domain.entrance.dto.request.EntranceCreateRequest;
 import com.lgcns.domain.entrance.dto.response.DailyEntrantCountResponse;
 import com.lgcns.domain.entrance.repository.EntranceRepository;
 import com.lgcns.domain.manager.domain.Manager;
@@ -11,7 +9,6 @@ import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,19 +21,6 @@ public class EntranceServiceImpl implements EntranceService {
     private final EntranceRepository entranceRepository;
     private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;
-
-    @Override
-    public void createEntrance(EntranceCreateRequest request) {
-        Entrance entrance =
-                Entrance.createPopupEnter(
-                        request.popupId(),
-                        request.gender(),
-                        request.age(),
-                        LocalDate.parse(request.reservationDate()),
-                        LocalTime.parse(request.reservationTime()));
-
-        entranceRepository.save(entrance);
-    }
 
     @Override
     public DailyEntrantCountResponse findDailyEntrantCount(Long popupId) {

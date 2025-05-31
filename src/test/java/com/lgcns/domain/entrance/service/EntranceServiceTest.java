@@ -7,7 +7,6 @@ import com.lgcns.IntegrationTest;
 import com.lgcns.domain.entrance.domain.Entrance;
 import com.lgcns.domain.entrance.domain.MemberAge;
 import com.lgcns.domain.entrance.domain.MemberGender;
-import com.lgcns.domain.entrance.dto.request.EntranceCreateRequest;
 import com.lgcns.domain.entrance.dto.response.DailyEntrantCountResponse;
 import com.lgcns.domain.entrance.repository.EntranceRepository;
 import com.lgcns.domain.manager.domain.Manager;
@@ -19,12 +18,10 @@ import com.lgcns.global.error.exception.CustomException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 class EntranceServiceTest extends IntegrationTest {
 
@@ -65,40 +62,6 @@ class EntranceServiceTest extends IntegrationTest {
                         37.123456,
                         127.123456);
         popup = popupRepository.save(popup);
-    }
-
-    @Nested
-    class 방문자_팝업_입장할_때 {
-
-        @Test
-        @Transactional
-        void 방문자_입장시_등록에_성공한다() {
-            // given
-            Long popupId = 1L;
-            MemberGender gender = MemberGender.MALE;
-            MemberAge age = MemberAge.TWENTIES;
-            String date = LocalDate.parse("2025-05-13").toString();
-            String time = LocalTime.parse("10:00:00").toString();
-
-            EntranceCreateRequest request =
-                    new EntranceCreateRequest(popupId, gender, age, date, time);
-
-            // when
-            entranceService.createEntrance(request);
-
-            // then
-            Entrance savedEntrance = entranceRepository.findAll().get(0);
-            Assertions.assertAll(
-                    () -> assertThat(savedEntrance.getPopupId()).isEqualTo(1L),
-                    () -> assertThat(savedEntrance.getGender()).isEqualTo(MemberGender.MALE),
-                    () -> assertThat(savedEntrance.getAge()).isEqualTo(MemberAge.TWENTIES),
-                    () ->
-                            assertThat(savedEntrance.getReservationDate())
-                                    .isEqualTo(LocalDate.parse("2025-05-13")),
-                    () ->
-                            assertThat(savedEntrance.getReservationTime())
-                                    .isEqualTo(LocalTime.parse("10:00:00")));
-        }
     }
 
     @Nested

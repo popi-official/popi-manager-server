@@ -31,7 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 public class PopupServiceTest extends IntegrationTest {
     @Autowired private PopupService popupService;
@@ -57,8 +56,8 @@ public class PopupServiceTest extends IntegrationTest {
 
     @Nested
     class 팝업을_등록할_때 {
+
         @Test
-        @Transactional
         void 유효한_입력_값이면_팝업_등록에_성공한다() {
             // given
             PopupWithChoicesCreateRequest popupWithChoicesCreateRequest =
@@ -91,8 +90,8 @@ public class PopupServiceTest extends IntegrationTest {
 
     @Nested
     class 팝업_목록을_조회할_때 {
+
         @Test
-        @Transactional
         void 팝업_목록_조회에_성공한다() {
             // given
             createPopup();
@@ -111,13 +110,14 @@ public class PopupServiceTest extends IntegrationTest {
 
     @Nested
     class 팝업을_삭제할_때 {
+
         @Test
-        @Transactional
         void 정상적으로_팝업이_삭제된다() {
             // given
             Long popupId = createPopup();
 
             // when
+            reservationRepository.deleteAll();
             popupService.deletePopup(popupId);
 
             // then
@@ -125,7 +125,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_팝업을_삭제하면_예외가_발생한다() {
             // given
             final Long nonExistentPopupId = 9999L;
@@ -137,7 +136,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 권한이_없는_사용자가_팝업을_삭제하면_예외가_발생한다() {
             // given
             final Long popupId = createPopup();
@@ -153,8 +151,8 @@ public class PopupServiceTest extends IntegrationTest {
 
     @Nested
     class 내부용_팝업_목록을_조회할_때 {
+
         @Test
-        @Transactional
         void 운영중인_팝업이_존재하면_리스트를_반환한다() {
             LocalDate now = LocalDate.now();
 
@@ -182,7 +180,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 운영중인_팝업이_없으면_빈_리스트를_반환한다() {
             // given
             LocalDate now = LocalDate.now();
@@ -202,7 +199,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 페이징_처리가_정상적으로_동작한다() {
             // given
             LocalDate now = LocalDate.now();
@@ -233,7 +229,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 검색어에_대한_결과가_존재하면_결과_리스트를_반환한다() {
             // given
             LocalDate now = LocalDate.now();
@@ -264,7 +259,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 검색어에_대해_결과가_없으면_빈_리스트를_반환한다() {
             // given
             LocalDate now = LocalDate.now();
@@ -289,7 +283,6 @@ public class PopupServiceTest extends IntegrationTest {
     class 팝업_설문지_조회할_때 {
 
         @Test
-        @Transactional
         void 팝업_ID를_통해_설문지와_선지_조회에_성공한다() {
             // given
             Long popupId = createPopup();
@@ -311,7 +304,6 @@ public class PopupServiceTest extends IntegrationTest {
     class 내부용_팝업_상세_정보를_조회할_떼 {
 
         @Test
-        @Transactional
         void 존재하는_팝업_아이디로_상세_조회에_성공한다() {
             // given
             Long popupId = createPopup();
@@ -340,7 +332,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_팝업_아이디로_조회하면_예외를_발생시킨다() {
             // given
             final Long nonExistentPopupId = 999L;
@@ -356,7 +347,6 @@ public class PopupServiceTest extends IntegrationTest {
     class 예악된_팝업_정보_조회할_때 {
 
         @Test
-        @Transactional
         void 사용자가_예약한_팝업_ID_리스트를_통해_팝업_정보_조회에_성공한다() {
             // given
             Long popupId = createPopup();
@@ -383,7 +373,6 @@ public class PopupServiceTest extends IntegrationTest {
     class 팝업_아이디_리스트로_팝업_정보_리스트를_조회할_때 {
 
         @Test
-        @Transactional
         void 요청된_아이디가_4개보다_많은_경우_정확히_4개만_반환한다() {
             // given
             Long popupId1 = createPopup();
@@ -406,7 +395,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 요청된_아이디가_4개보다_적은_경우_부족한_개수만큼_랜덤으로_채워서_4개를_반환한다() {
             // given
             Long popupId1 = createPopup();
@@ -439,7 +427,6 @@ public class PopupServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 전체_팝업이_4개_미만인_경우_존재하는_모든_팝업을_반환한다() {
             // given
             Long popupId1 = createPopup();
@@ -463,7 +450,6 @@ public class PopupServiceTest extends IntegrationTest {
     class 지도_기반_팝업_리스트를_조회할_때 {
 
         @Test
-        @Transactional
         void 지정된_범위_내에_팝업이_존재할_때_해당_팝업들을_반환한다() {
             // given
             // 서울 전제에 해당하는 위,경도 범위
@@ -472,41 +458,39 @@ public class PopupServiceTest extends IntegrationTest {
             Double lngMin = 126.799543;
             Double lngMax = 127.184881;
 
-            Long popupId1 =
-                    createPopupWithAllParams(
-                            "강남 BLACKPINK 팝업스토어",
-                            "https://bucket/blackpink.jpg",
-                            LocalDate.of(2025, 5, 1),
-                            LocalDate.of(2025, 6, 1),
-                            LocalDateTime.of(2025, 4, 25, 10, 0),
-                            LocalDateTime.of(2025, 5, 31, 23, 59),
-                            LocalTime.of(10, 0),
-                            LocalTime.of(18, 0),
-                            100,
-                            10,
-                            "서울특별시 강남구 테헤란로 123",
-                            "3층",
-                            37.5,
-                            127.0,
-                            createDefaultChoices());
+            createPopupWithAllParams(
+                    "강남 BLACKPINK 팝업스토어",
+                    "https://bucket/blackpink.jpg",
+                    LocalDate.of(2025, 5, 1),
+                    LocalDate.of(2025, 7, 1),
+                    LocalDateTime.of(2025, 4, 25, 10, 0),
+                    LocalDateTime.of(2025, 5, 31, 23, 59),
+                    LocalTime.of(10, 0),
+                    LocalTime.of(18, 0),
+                    100,
+                    10,
+                    "서울특별시 강남구 테헤란로 123",
+                    "3층",
+                    37.5,
+                    127.0,
+                    createDefaultChoices());
 
-            Long popupId2 =
-                    createPopupWithAllParams(
-                            "홍대 BTS 팝업스토어",
-                            "https://bucket/bts.jpg",
-                            LocalDate.of(2025, 5, 15),
-                            LocalDate.of(2025, 6, 15),
-                            LocalDateTime.of(2025, 5, 10, 10, 0),
-                            LocalDateTime.of(2025, 6, 14, 23, 59),
-                            LocalTime.of(11, 0),
-                            LocalTime.of(19, 0),
-                            80,
-                            8,
-                            "서울특별시 마포구 홍익로 456",
-                            "2층",
-                            37.55,
-                            126.92,
-                            createDefaultChoices());
+            createPopupWithAllParams(
+                    "홍대 BTS 팝업스토어",
+                    "https://bucket/bts.jpg",
+                    LocalDate.of(2025, 5, 15),
+                    LocalDate.of(2025, 7, 15),
+                    LocalDateTime.of(2025, 5, 10, 10, 0),
+                    LocalDateTime.of(2025, 6, 14, 23, 59),
+                    LocalTime.of(11, 0),
+                    LocalTime.of(19, 0),
+                    80,
+                    8,
+                    "서울특별시 마포구 홍익로 456",
+                    "2층",
+                    37.55,
+                    126.92,
+                    createDefaultChoices());
 
             // when
             List<PopupMapResponse> result =
@@ -520,36 +504,34 @@ public class PopupServiceTest extends IntegrationTest {
                             assertThat(result.get(0).imageUrl())
                                     .isEqualTo("https://bucket/blackpink.jpg"),
                     () -> assertThat(result.get(0).popupOpenDate()).isEqualTo("2025-05-01"),
-                    () -> assertThat(result.get(0).popupCloseDate()).isEqualTo("2025-06-01"),
+                    () -> assertThat(result.get(0).popupCloseDate()).isEqualTo("2025-07-01"),
                     () -> assertThat(result.get(0).address()).isEqualTo("서울특별시 강남구 테헤란로 123, 3층"),
                     () -> assertThat(result.get(1).popupName()).isEqualTo("홍대 BTS 팝업스토어"),
                     () -> assertThat(result.get(1).imageUrl()).isEqualTo("https://bucket/bts.jpg"),
                     () -> assertThat(result.get(1).popupOpenDate()).isEqualTo("2025-05-15"),
-                    () -> assertThat(result.get(1).popupCloseDate()).isEqualTo("2025-06-15"),
+                    () -> assertThat(result.get(1).popupCloseDate()).isEqualTo("2025-07-15"),
                     () -> assertThat(result.get(1).address()).isEqualTo("서울특별시 마포구 홍익로 456, 2층"));
         }
 
         @Test
-        @Transactional
         void 지정된_범위_내에_팝업이_존재하지_않으면_빈_리스트를_반환한다() {
             // given
-            Long popupId1 =
-                    createPopupWithAllParams(
-                            "부산 팝업스토어",
-                            "https://bucket/busan.jpg",
-                            LocalDate.of(2025, 5, 1),
-                            LocalDate.of(2025, 6, 1),
-                            LocalDateTime.of(2025, 4, 25, 10, 0),
-                            LocalDateTime.of(2025, 5, 31, 23, 59),
-                            LocalTime.of(10, 0),
-                            LocalTime.of(18, 0),
-                            100,
-                            10,
-                            "부산광역시 해운대구",
-                            "1층",
-                            35.1,
-                            129.0,
-                            createDefaultChoices());
+            createPopupWithAllParams(
+                    "부산 팝업스토어",
+                    "https://bucket/busan.jpg",
+                    LocalDate.of(2025, 5, 1),
+                    LocalDate.of(2025, 6, 1),
+                    LocalDateTime.of(2025, 4, 25, 10, 0),
+                    LocalDateTime.of(2025, 5, 31, 23, 59),
+                    LocalTime.of(10, 0),
+                    LocalTime.of(18, 0),
+                    100,
+                    10,
+                    "부산광역시 해운대구",
+                    "1층",
+                    35.1,
+                    129.0,
+                    createDefaultChoices());
 
             // 서울
             Double latMin = 37.378638;

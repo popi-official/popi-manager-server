@@ -1,6 +1,7 @@
 package com.lgcns.domain.item.kafka;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.item.domain.Item;
@@ -10,6 +11,7 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -18,6 +20,7 @@ import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -28,6 +31,7 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
+@Order(0)
 @EmbeddedKafka(partitions = 1, topics = "item-purchased-topic")
 class ItemPurchasedConsumerTest extends IntegrationTest {
 
@@ -69,7 +73,7 @@ class ItemPurchasedConsumerTest extends IntegrationTest {
     }
 
     @Test
-    void Kafka_메시지_수신_후_재고가_감소한다() throws InterruptedException {
+    void Kafka_메시지_수신_후_재고가_감소한다() {
         // given
         Map<String, Object> producerProps = KafkaTestUtils.producerProps(embeddedKafkaBroker);
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -92,9 +96,13 @@ class ItemPurchasedConsumerTest extends IntegrationTest {
         kafkaTemplate.send("item-purchased-topic", message);
 
         // then
-        Thread.sleep(2000);
-
-        assertThat(itemRepository.findById(1L).orElseThrow().getStock()).isEqualTo(48);
-        assertThat(itemRepository.findById(2L).orElseThrow().getStock()).isEqualTo(97);
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(
+                        () -> {
+                            assertThat(itemRepository.findById(1L).orElseThrow().getStock())
+                                    .isEqualTo(48);
+                            assertThat(itemRepository.findById(2L).orElseThrow().getStock())
+                                    .isEqualTo(97);
+                        });
     }
 }

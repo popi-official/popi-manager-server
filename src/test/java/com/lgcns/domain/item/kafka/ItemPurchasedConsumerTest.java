@@ -1,6 +1,7 @@
 package com.lgcns.domain.item.kafka;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.item.domain.Item;
@@ -10,6 +11,7 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -92,9 +94,13 @@ class ItemPurchasedConsumerTest extends IntegrationTest {
         kafkaTemplate.send("item-purchased-topic", message);
 
         // then
-        Thread.sleep(2000);
-
-        assertThat(itemRepository.findById(1L).orElseThrow().getStock()).isEqualTo(48);
-        assertThat(itemRepository.findById(2L).orElseThrow().getStock()).isEqualTo(97);
+        await().atMost(Duration.ofSeconds(5))
+                .untilAsserted(
+                        () -> {
+                            assertThat(itemRepository.findById(1L).orElseThrow().getStock())
+                                    .isEqualTo(48);
+                            assertThat(itemRepository.findById(2L).orElseThrow().getStock())
+                                    .isEqualTo(97);
+                        });
     }
 }

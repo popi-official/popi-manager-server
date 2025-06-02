@@ -200,7 +200,7 @@ public class VisitorStatsJobTest extends IntegrationTest {
 
     private JobParameters buildJobParameters() {
         return new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis()) // 유니크하게
+                .addLong("time", System.currentTimeMillis())
                 .toJobParameters();
     }
 

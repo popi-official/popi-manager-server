@@ -1,5 +1,7 @@
 package com.lgcns.infra.batch;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -26,10 +28,10 @@ public class VisitorStatsScheduler {
                     JobParametersInvalidException,
                     JobRestartException {
 
+        String dateHour = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"));
+
         JobParameters jobParameters =
-                new JobParametersBuilder()
-                        .addLong("time", System.currentTimeMillis())
-                        .toJobParameters();
+                new JobParametersBuilder().addString("dateHour", dateHour).toJobParameters();
 
         jobLauncher.run(visitorStatsJob, jobParameters);
     }

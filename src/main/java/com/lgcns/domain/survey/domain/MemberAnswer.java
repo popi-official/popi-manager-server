@@ -21,11 +21,18 @@ public class MemberAnswer extends BaseTimeEntity {
     @JoinColumn(name = "survey_id")
     private Survey survey;
 
-    private int answerNumber;
+    private Long choiceId;
+
+    private Long memberId;
 
     @Builder
-    private MemberAnswer(Survey survey, int answerNumber) {
+    private MemberAnswer(Survey survey, Long choiceId, Long memberId) {
         this.survey = survey;
-        this.answerNumber = answerNumber;
+        this.choiceId = choiceId;
+        this.memberId = memberId;
+    }
+
+    public static MemberAnswer createMemberAnswer(Survey survey, Long choiceId, Long memberId) {
+        return MemberAnswer.builder().survey(survey).choiceId(choiceId).memberId(memberId).build();
     }
 }

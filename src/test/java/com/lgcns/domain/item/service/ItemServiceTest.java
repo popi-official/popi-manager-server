@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 class ItemServiceTest extends IntegrationTest {
@@ -110,8 +109,8 @@ class ItemServiceTest extends IntegrationTest {
 
     @Nested
     class 상품_등록 {
+
         @Test
-        @Transactional
         void 유효한_입력_값이면_상품_등록에_성공한다() {
             // given
             ItemCreateRequest request = createItemCreateRequest();
@@ -132,7 +131,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_팝업_ID로_상품_등록을_시도하면_실패한다() {
             // given
             final Long popupId = 9999L;
@@ -149,7 +147,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 권한이_없는_사용자가_상품을_등록하면_예외가_발생한다() {
             // give
             setAuthentication(otherManager);
@@ -165,8 +162,8 @@ class ItemServiceTest extends IntegrationTest {
 
     @Nested
     class 엑셀_파일_상품_등록 {
+
         @Test
-        @Transactional
         void 유효한_엑셀파일로_상품_등록에_성공한다() throws IOException {
             // given
             MultipartFile excelFile = createExcelFile();
@@ -211,7 +208,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_팝업_ID로_엑셀_상품_등록을_시도하면_실패한다() throws IOException {
             // given
             MultipartFile excelFile = createExcelFile();
@@ -274,7 +270,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 권한이_없는_사용자가_엑셀로_상품을_등록하면_예외가_발생한다() throws IOException {
             // given
             setAuthentication(otherManager);
@@ -290,8 +285,8 @@ class ItemServiceTest extends IntegrationTest {
 
     @Nested
     class 상품_목록_조회 {
+
         @Test
-        @Transactional
         void 상품_목록_조회에_성공한다() {
             // given
             final Long popupId = popup.getId();
@@ -356,7 +351,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 여러_위치에_존재하는_상품_목록을_조회한다() {
             //  given
             Long popupId = popup.getId();
@@ -417,8 +411,8 @@ class ItemServiceTest extends IntegrationTest {
 
     @Nested
     class 상품_삭제 {
+
         @Test
-        @Transactional
         void 정상적으로_상품을_삭제한다() {
             // given
             Item savedItem = createTestItem();
@@ -431,7 +425,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_상품을_삭제하면_예외가_발생한다() {
             // given
             Long nonExistentItemId = 9999L;
@@ -443,7 +436,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 상품이_해당_팝업에_속하지_않으면_예외가_발생한다() {
             // given
             Item savedItem = createTestItem();
@@ -459,8 +451,8 @@ class ItemServiceTest extends IntegrationTest {
 
     @Nested
     class 상품_최소_발주_수량_수정 {
+
         @Test
-        @Transactional
         void 정상적으로_최소_발주_수량_수정에_성공한다() {
             // given
             Item savedItem = createTestItem(); // 기본 minStock = 10
@@ -480,7 +472,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 성공_응답에_알맞은_상품_정보가_포함되어있다() {
             // given
             Item savedItem = createTestItem();
@@ -506,7 +497,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_상품의_최소_발주_수량을_수정하면_예외가_발생한다() {
             // given
             final Long popupId = popup.getId();
@@ -523,7 +513,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 권한이_없는_사용자가_최소_발주_수량을_수정하면_예외가_발생한다() {
             // given
             Item savedItem = createTestItem();
@@ -543,7 +532,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 상품이_해당_팝업에_속하지_않으면_예외가_발생한다() {
             // given
             Item savedItem = createTestItem();
@@ -562,7 +550,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 최소_발주_수량이_재고보다_크면_예외가_발생한다() {
             // given
             Item savedItem = createTestItem(); // stock = 100
@@ -581,8 +568,8 @@ class ItemServiceTest extends IntegrationTest {
 
     @Nested
     class 내부용_상품_목록을_조회할_때 {
+
         @Test
-        @Transactional
         void 데이터가_존재하면_상품_목록_조회에_성공한다() {
             // given
             final Long popupId = popup.getId();
@@ -620,7 +607,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 마지막_상품까지_조회하면_is_last가_true를_반환한다() {
             // given
             final Long popupId = popup.getId();
@@ -654,7 +640,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 검색어에_대해_결과가_존재하면_상품_검색에_성공한다() {
             // given
             final Long popupId = popup.getId();
@@ -692,7 +677,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 검색어에_대해_결과가_없으면_빈_리스트를_반환한다() {
             // given
             final Long popupId = popup.getId();
@@ -717,8 +701,8 @@ class ItemServiceTest extends IntegrationTest {
 
     @Nested
     class 내부용_기본_상품_목록을_조회할_때 {
+
         @Test
-        @Transactional
         void 무작위로_선택된_4개의_상품_조회에_성공한다() {
             // given
             final Long popupId = popup.getId();
@@ -751,7 +735,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 상품_데이터가_4개보다_적으면_전체_데이터_수_만큼_상품이_조회된다() {
             // given
             final Long popupId = popup.getId();
@@ -785,7 +768,6 @@ class ItemServiceTest extends IntegrationTest {
     class 결제_준비용_상품_상세_목록을_조회할_때 {
 
         @Test
-        @Transactional
         void 요청한_itemId_목록에_해당하는_상품_정보를_반환한다() {
             // given
             final Long popupId = popup.getId();
@@ -824,7 +806,6 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_itemId가_포함된_경우_해당_상품을_제외하고_존재하는_상품_정보만_반환한다() {
             // given
             final Long popupId = popup.getId();

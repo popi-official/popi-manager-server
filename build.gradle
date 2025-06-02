@@ -97,9 +97,6 @@ dependencies {
     // Kafka
     implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
-
-    // Awaitility
-    testImplementation 'org.awaitility:awaitility:4.2.0'
 }
 
 dependencyManagement {

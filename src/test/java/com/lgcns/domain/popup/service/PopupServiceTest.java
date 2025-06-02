@@ -463,7 +463,6 @@ public class PopupServiceTest extends IntegrationTest {
     class 지도_기반_팝업_리스트를_조회할_때 {
 
         @Test
-        @Transactional
         void 지정된_범위_내에_팝업이_존재할_때_해당_팝업들을_반환한다() {
             // given
             // 서울 전제에 해당하는 위,경도 범위
@@ -472,41 +471,39 @@ public class PopupServiceTest extends IntegrationTest {
             Double lngMin = 126.799543;
             Double lngMax = 127.184881;
 
-            Long popupId1 =
-                    createPopupWithAllParams(
-                            "강남 BLACKPINK 팝업스토어",
-                            "https://bucket/blackpink.jpg",
-                            LocalDate.of(2025, 5, 1),
-                            LocalDate.of(2025, 6, 1),
-                            LocalDateTime.of(2025, 4, 25, 10, 0),
-                            LocalDateTime.of(2025, 5, 31, 23, 59),
-                            LocalTime.of(10, 0),
-                            LocalTime.of(18, 0),
-                            100,
-                            10,
-                            "서울특별시 강남구 테헤란로 123",
-                            "3층",
-                            37.5,
-                            127.0,
-                            createDefaultChoices());
+            createPopupWithAllParams(
+                    "강남 BLACKPINK 팝업스토어",
+                    "https://bucket/blackpink.jpg",
+                    LocalDate.of(2025, 5, 1),
+                    LocalDate.of(2025, 7, 1),
+                    LocalDateTime.of(2025, 4, 25, 10, 0),
+                    LocalDateTime.of(2025, 5, 31, 23, 59),
+                    LocalTime.of(10, 0),
+                    LocalTime.of(18, 0),
+                    100,
+                    10,
+                    "서울특별시 강남구 테헤란로 123",
+                    "3층",
+                    37.5,
+                    127.0,
+                    createDefaultChoices());
 
-            Long popupId2 =
-                    createPopupWithAllParams(
-                            "홍대 BTS 팝업스토어",
-                            "https://bucket/bts.jpg",
-                            LocalDate.of(2025, 5, 15),
-                            LocalDate.of(2025, 6, 15),
-                            LocalDateTime.of(2025, 5, 10, 10, 0),
-                            LocalDateTime.of(2025, 6, 14, 23, 59),
-                            LocalTime.of(11, 0),
-                            LocalTime.of(19, 0),
-                            80,
-                            8,
-                            "서울특별시 마포구 홍익로 456",
-                            "2층",
-                            37.55,
-                            126.92,
-                            createDefaultChoices());
+            createPopupWithAllParams(
+                    "홍대 BTS 팝업스토어",
+                    "https://bucket/bts.jpg",
+                    LocalDate.of(2025, 5, 15),
+                    LocalDate.of(2025, 7, 15),
+                    LocalDateTime.of(2025, 5, 10, 10, 0),
+                    LocalDateTime.of(2025, 6, 14, 23, 59),
+                    LocalTime.of(11, 0),
+                    LocalTime.of(19, 0),
+                    80,
+                    8,
+                    "서울특별시 마포구 홍익로 456",
+                    "2층",
+                    37.55,
+                    126.92,
+                    createDefaultChoices());
 
             // when
             List<PopupMapResponse> result =
@@ -520,12 +517,12 @@ public class PopupServiceTest extends IntegrationTest {
                             assertThat(result.get(0).imageUrl())
                                     .isEqualTo("https://bucket/blackpink.jpg"),
                     () -> assertThat(result.get(0).popupOpenDate()).isEqualTo("2025-05-01"),
-                    () -> assertThat(result.get(0).popupCloseDate()).isEqualTo("2025-06-01"),
+                    () -> assertThat(result.get(0).popupCloseDate()).isEqualTo("2025-07-01"),
                     () -> assertThat(result.get(0).address()).isEqualTo("서울특별시 강남구 테헤란로 123, 3층"),
                     () -> assertThat(result.get(1).popupName()).isEqualTo("홍대 BTS 팝업스토어"),
                     () -> assertThat(result.get(1).imageUrl()).isEqualTo("https://bucket/bts.jpg"),
                     () -> assertThat(result.get(1).popupOpenDate()).isEqualTo("2025-05-15"),
-                    () -> assertThat(result.get(1).popupCloseDate()).isEqualTo("2025-06-15"),
+                    () -> assertThat(result.get(1).popupCloseDate()).isEqualTo("2025-07-15"),
                     () -> assertThat(result.get(1).address()).isEqualTo("서울특별시 마포구 홍익로 456, 2층"));
         }
 

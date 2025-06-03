@@ -29,7 +29,7 @@ public class MemberAnswerConsumer {
     @KafkaListener(
             topics = TOPIC,
             groupId = "member-answer",
-            containerFactory = "memberAnswerMessageConcurrentKafkaListenerContainerFactory")
+            containerFactory = "memberAnswerKafkaListenerContainerFactory")
     public void createMemberAnswer(MemberAnswerMessage message) {
 
         List<Long> surveyIds =

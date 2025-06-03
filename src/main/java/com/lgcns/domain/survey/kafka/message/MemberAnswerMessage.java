@@ -1,6 +1,6 @@
 package com.lgcns.domain.survey.kafka.message;
 
-import com.lgcns.domain.survey.kafka.dto.SurveyChoiceDto;
+import com.lgcns.domain.survey.kafka.message.dto.SurveyChoiceDto;
 import java.util.List;
 
 public record MemberAnswerMessage(Long memberId, List<SurveyChoiceDto> surveyChoices) {

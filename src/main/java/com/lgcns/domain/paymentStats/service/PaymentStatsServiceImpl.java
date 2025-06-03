@@ -1,7 +1,7 @@
 package com.lgcns.domain.paymentStats.service;
 
 import com.lgcns.domain.manager.domain.Manager;
-import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
+import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
 import com.lgcns.domain.paymentStats.repository.PaymentStatsRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -24,7 +24,7 @@ public class PaymentStatsServiceImpl implements PaymentStatsService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaymentAverageResponse getPaymentAverages(Long popupId) {
+    public AverageAmountResponse getPaymentAverages(Long popupId) {
         Manager currentManager = managerUtil.getCurrentManager();
         Popup popup = findPopupById(popupId);
 

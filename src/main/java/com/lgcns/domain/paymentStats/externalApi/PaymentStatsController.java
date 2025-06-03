@@ -1,6 +1,6 @@
 package com.lgcns.domain.paymentStats.externalApi;
 
-import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
+import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
 import com.lgcns.domain.paymentStats.service.PaymentStatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +20,7 @@ public class PaymentStatsController {
 
     @GetMapping("/average-purchase")
     @Operation(summary = "1인당 평균 구매액 조회", description = "팝업의 총 평균 구매액과 오늘의 평균 구매액을 조회합니다.")
-    public PaymentAverageResponse paymentAverageGet(@PathVariable Long popupId) {
+    public AverageAmountResponse paymentAverageGet(@PathVariable Long popupId) {
         return paymentStatsService.getPaymentAverages(popupId);
     }
 }

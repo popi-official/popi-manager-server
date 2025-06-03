@@ -7,7 +7,7 @@ import com.lgcns.IntegrationTest;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.paymentStats.domain.PaymentStats;
-import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
+import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
 import com.lgcns.domain.paymentStats.repository.PaymentStatsRepository;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -115,12 +115,12 @@ class PaymentStatsServiceTest extends IntegrationTest {
             Long popupId = popup.getId();
 
             // when
-            PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
+            AverageAmountResponse response = paymentStatsService.getPaymentAverages(popupId);
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.totalPrice()).isNotNull();
-            assertThat(response.todayPrice()).isNotNull();
+            assertThat(response.totalAverageAmount()).isNotNull();
+            assertThat(response.todayAverageAmount()).isNotNull();
         }
 
         @Test
@@ -188,11 +188,11 @@ class PaymentStatsServiceTest extends IntegrationTest {
                             popup.getId(), today, LocalTime.of(12, 0), 60000, 10));
 
             // when
-            PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
+            AverageAmountResponse response = paymentStatsService.getPaymentAverages(popupId);
 
             // then
-            assertThat(response.totalPrice()).isEqualTo(5000);
-            assertThat(response.todayPrice()).isEqualTo(6000);
+            assertThat(response.totalAverageAmount()).isEqualTo(5000);
+            assertThat(response.todayAverageAmount()).isEqualTo(6000);
         }
 
         @Test
@@ -203,11 +203,11 @@ class PaymentStatsServiceTest extends IntegrationTest {
             paymentStatsRepository.deleteAll();
 
             // when
-            PaymentAverageResponse response = paymentStatsService.getPaymentAverages(popupId);
+            AverageAmountResponse response = paymentStatsService.getPaymentAverages(popupId);
 
             // then
-            assertThat(response.totalPrice()).isEqualTo(0);
-            assertThat(response.todayPrice()).isEqualTo(0);
+            assertThat(response.totalAverageAmount()).isEqualTo(0);
+            assertThat(response.todayAverageAmount()).isEqualTo(0);
         }
     }
 }

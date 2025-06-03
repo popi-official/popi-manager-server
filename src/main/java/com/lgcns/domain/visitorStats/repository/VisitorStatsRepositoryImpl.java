@@ -9,9 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -42,22 +40,22 @@ public class VisitorStatsRepositoryImpl implements VisitorStatsRepositoryCustom 
     }
 
     @Override
-    public Set<Long> findPopupIdsWithoutVisitorStats(
-            Set<Long> popupIds, LocalDate nowDate, LocalTime nowTime) {
-        Set<Long> existingIds =
-                new HashSet<>(
-                        queryFactory
-                                .select(visitorStats.popupId)
-                                .from(visitorStats)
-                                .where(
-                                        visitorStats.popupId.in(popupIds),
-                                        visitorStats.analyzedDate.eq(nowDate),
-                                        visitorStats.analyzedTime.hour().eq(nowTime.getHour()))
-                                .fetch());
+    public List<Long> findPopupIdsWithoutVisitorStats(
+            List<Long> popupIds, LocalDate nowDate, LocalTime nowTime) {
+        List<Long> existingIds =
+                queryFactory
+                        .select(visitorStats.popupId)
+                        .distinct()
+                        .from(visitorStats)
+                        .where(
+                                visitorStats.popupId.in(popupIds),
+                                visitorStats.analyzedDate.eq(nowDate),
+                                visitorStats.analyzedTime.hour().eq(nowTime.getHour()))
+                        .fetch();
 
         return popupIds.stream()
                 .filter(id -> !existingIds.contains(id))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @Override

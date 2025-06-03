@@ -13,10 +13,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -38,47 +36,13 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
     @Override
     public Optional<HourlyEntranceResponse> findHourlyEntrance(
             Long popupId, LocalDate nowDate, LocalTime nowTime) {
-        NumberExpression<Integer> maleCount =
-                new CaseBuilder()
-                        .when(entrance.gender.eq(MemberGender.MALE))
-                        .then(1)
-                        .otherwise(0)
-                        .sum();
+        NumberExpression<Integer> maleCount = createGenderCountCase(MemberGender.MALE);
+        NumberExpression<Integer> femaleCount = createGenderCountCase(MemberGender.FEMALE);
 
-        NumberExpression<Integer> femaleCount =
-                new CaseBuilder()
-                        .when(entrance.gender.eq(MemberGender.FEMALE))
-                        .then(1)
-                        .otherwise(0)
-                        .sum();
-
-        NumberExpression<Integer> teenCount =
-                new CaseBuilder()
-                        .when(entrance.age.eq(MemberAge.TEENAGER))
-                        .then(1)
-                        .otherwise(0)
-                        .sum();
-
-        NumberExpression<Integer> twentyCount =
-                new CaseBuilder()
-                        .when(entrance.age.eq(MemberAge.TWENTIES))
-                        .then(1)
-                        .otherwise(0)
-                        .sum();
-
-        NumberExpression<Integer> thirtyCount =
-                new CaseBuilder()
-                        .when(entrance.age.eq(MemberAge.THIRTIES))
-                        .then(1)
-                        .otherwise(0)
-                        .sum();
-
-        NumberExpression<Integer> fortyCount =
-                new CaseBuilder()
-                        .when(entrance.age.eq(MemberAge.FORTIES_AND_ABOVE))
-                        .then(1)
-                        .otherwise(0)
-                        .sum();
+        NumberExpression<Integer> teenCount = createAgeCountCase(MemberAge.TEENAGER);
+        NumberExpression<Integer> twentyCount = createAgeCountCase(MemberAge.TWENTIES);
+        NumberExpression<Integer> thirtyCount = createAgeCountCase(MemberAge.THIRTIES);
+        NumberExpression<Integer> fortyCount = createAgeCountCase(MemberAge.FORTIES_AND_ABOVE);
 
         return Optional.ofNullable(
                 queryFactory
@@ -103,14 +67,21 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
     }
 
     @Override
-    public Set<Long> findPopupIdsWithEntrances(List<Long> popupIds) {
-        return new HashSet<>(
-                queryFactory
-                        .select(entrance.popupId)
-                        .distinct()
-                        .from(entrance)
-                        .where(entrance.popupId.in(popupIds))
-                        .fetch());
+    public List<Long> findPopupIdsWithEntrances(List<Long> popupIds) {
+        return queryFactory
+                .select(entrance.popupId)
+                .distinct()
+                .from(entrance)
+                .where(entrance.popupId.in(popupIds))
+                .fetch();
+    }
+
+    private NumberExpression<Integer> createGenderCountCase(MemberGender gender) {
+        return new CaseBuilder().when(entrance.gender.eq(gender)).then(1).otherwise(0).sum();
+    }
+
+    private NumberExpression<Integer> createAgeCountCase(MemberAge age) {
+        return new CaseBuilder().when(entrance.age.eq(age)).then(1).otherwise(0).sum();
     }
 
     private LocalTime getPreviousHour(LocalTime nowTime) {

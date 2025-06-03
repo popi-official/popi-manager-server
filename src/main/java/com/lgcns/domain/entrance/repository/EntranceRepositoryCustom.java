@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface EntranceRepositoryCustom {
     DailyEntrantCountResponse findDailyEntrantCount(Long popupId, LocalDate today);
@@ -14,5 +13,5 @@ public interface EntranceRepositoryCustom {
     Optional<HourlyEntranceResponse> findHourlyEntrance(
             Long popupId, LocalDate nowDate, LocalTime nowTime);
 
-    Set<Long> findPopupIdsWithEntrances(List<Long> popupIds);
+    List<Long> findPopupIdsWithEntrances(List<Long> popupIds);
 }

@@ -72,7 +72,7 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
         // 운영 중인 팝업 필터링
         List<Long> popupIds = popupRepository.findAllPopupIdsAfterPopupStartTime(nowDate, nowTime);
         // 입장 내역이 존재하는 팝업 필터링
-        Set<Long> popupIdsWithEntrances = entranceRepository.findPopupIdsWithEntrances(popupIds);
+        List<Long> popupIdsWithEntrances = entranceRepository.findPopupIdsWithEntrances(popupIds);
         // 중복된 방문자 분석이 존재하지 않는 팝업 필터링
         return new ArrayList<>(
                 visitorStatsRepository.findPopupIdsWithoutVisitorStats(

@@ -1,4 +1,4 @@
-package com.lgcns.infra.batch;
+package com.lgcns.domain.visitorStats.batch;
 
 import com.lgcns.domain.visitorStats.domain.VisitorStats;
 import com.lgcns.global.error.exception.CustomException;

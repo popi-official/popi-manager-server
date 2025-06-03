@@ -1,4 +1,4 @@
-package com.lgcns.infra.batch;
+package com.lgcns.infra.scheduler;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

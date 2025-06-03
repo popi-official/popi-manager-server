@@ -26,6 +26,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class VisitorStatsJobManager {
 
     public static final Integer CHUNK_SIZE = 100;
+    public static final Integer TASK_POOL_SIZE = 2;
     public static final String VISITOR_STATS_JOB = "visitorStatsJob";
     public static final String CREATE_VISITOR_STATS_STEP = "createVisitorStatsStep";
     public static final String VISITOR_STATS_TASK_EXECUTOR = "visitorStatsTaskExecutor";
@@ -64,8 +65,8 @@ public class VisitorStatsJobManager {
     @Bean(name = VISITOR_STATS_TASK_EXECUTOR)
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(CHUNK_SIZE);
-        taskExecutor.setMaxPoolSize(CHUNK_SIZE * 2);
+        taskExecutor.setCorePoolSize(TASK_POOL_SIZE);
+        taskExecutor.setMaxPoolSize(TASK_POOL_SIZE * 2);
         taskExecutor.setThreadNamePrefix("async-thread");
         return taskExecutor;
     }

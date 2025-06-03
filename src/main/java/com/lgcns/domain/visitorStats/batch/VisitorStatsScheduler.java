@@ -28,7 +28,7 @@ public class VisitorStatsScheduler {
         this.jobLauncher = jobLauncher;
     }
 
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 0 * * * *", zone = "Asia/Seoul")
     public void createVisitorStats()
             throws JobInstanceAlreadyCompleteException,
                     JobExecutionAlreadyRunningException,

@@ -1,4 +1,4 @@
-package com.lgcns.domain.paymentStats.client;
+package com.lgcns.infra.client.payment;
 
 import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
 import com.lgcns.global.config.feign.FeignConfig;

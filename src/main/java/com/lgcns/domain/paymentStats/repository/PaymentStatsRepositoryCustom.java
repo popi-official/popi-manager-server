@@ -1,8 +1,11 @@
 package com.lgcns.domain.paymentStats.repository;
 
-import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
-import java.time.LocalDate;
+import com.lgcns.domain.paymentStats.domain.PaymentStats;
+import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
+import java.util.List;
 
 public interface PaymentStatsRepositoryCustom {
-    PaymentAverageResponse getPaymentAverages(Long popupId, LocalDate today);
+    AverageAmountResponse findLatestAverageAmountByPopupId(Long popupId);
+
+    void bulkInsertPaymentStats(List<PaymentStats> statsList);
 }

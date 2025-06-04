@@ -23,3 +23,8 @@ reservation:
   service:
     name: reservations
     url: http://localhost:${wiremock.server.port}
+
+payment:
+  service:
+    name: payments
+    url: http://localhost:${wiremock.server.port}

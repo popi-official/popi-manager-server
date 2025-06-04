@@ -1,7 +1,9 @@
 package com.lgcns.domain.paymentStats.service;
 
-import com.lgcns.domain.paymentStats.dto.response.PaymentAverageResponse;
+import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
 
 public interface PaymentStatsService {
-    PaymentAverageResponse getPaymentAverages(Long popupId);
+    AverageAmountResponse findLatestAverageAmount(Long popupId);
+
+    void createPaymentStats();
 }

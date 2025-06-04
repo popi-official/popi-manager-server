@@ -21,42 +21,43 @@ public class PaymentStats {
     @Column(name = "popup_id")
     private Long popupId;
 
+    private int averageAmount;
+
+    @Enumerated(EnumType.STRING)
+    private AveragePeriod period;
+
     @Column(name = "analyzed_date")
     private LocalDate analyzedDate;
 
     @Column(name = "analyzed_time")
     private LocalTime analyzedTime;
 
-    private int totalPayment;
-
-    private int userCount;
-
     @Builder(access = AccessLevel.PRIVATE)
     public PaymentStats(
             Long popupId,
+            int averageAmount,
+            AveragePeriod period,
             LocalDate analyzedDate,
-            LocalTime analyzedTime,
-            int totalPayment,
-            int userCount) {
+            LocalTime analyzedTime) {
         this.popupId = popupId;
+        this.averageAmount = averageAmount;
+        this.period = period;
         this.analyzedDate = analyzedDate;
         this.analyzedTime = analyzedTime;
-        this.totalPayment = totalPayment;
-        this.userCount = userCount;
     }
 
     public static PaymentStats createPaymentStats(
             Long popupId,
+            int averageAmount,
+            AveragePeriod period,
             LocalDate analyzedDate,
-            LocalTime analyzedTime,
-            int totalPayment,
-            int userCount) {
+            LocalTime analyzedTime) {
         return PaymentStats.builder()
                 .popupId(popupId)
+                .averageAmount(averageAmount)
+                .period(period)
                 .analyzedDate(analyzedDate)
                 .analyzedTime(analyzedTime)
-                .totalPayment(totalPayment)
-                .userCount(userCount)
                 .build();
     }
 }

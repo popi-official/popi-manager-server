@@ -26,12 +26,12 @@ public class SurveyRepositoryImpl implements SurveyRepositoryCustom {
                                 survey.number.as("surveyNumber"),
                                 choice.content.as("choiceContent"),
                                 choice.number.as("choiceNumber"),
-                                memberAnswer.answerNumber.count().as("memberAnswerCount")))
+                                memberAnswer.choiceId.count().as("memberAnswerCount")))
                 .from(survey)
                 .join(choice)
                 .on(choice.survey.eq(survey))
                 .leftJoin(memberAnswer)
-                .on(memberAnswer.survey.eq(survey), memberAnswer.answerNumber.eq(choice.number))
+                .on(memberAnswer.survey.eq(survey), memberAnswer.choiceId.eq(choice.id))
                 .where(survey.popup.id.eq(popupId))
                 .groupBy(survey.number, choice.content, choice.number)
                 .orderBy(survey.number.asc(), choice.number.asc())

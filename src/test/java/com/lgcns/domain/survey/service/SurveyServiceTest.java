@@ -162,8 +162,16 @@ public class SurveyServiceTest extends IntegrationTest {
 
         // 1명의 사용자 응답 (Survey 4개에 대해 각 1개씩 응답)
         for (Survey survey : surveys) {
-            // 예: 선택 번호는 무조건 1번으로 고정 (또는 랜덤 가능)
-            MemberAnswer answer = MemberAnswer.builder().survey(survey).answerNumber(1).build();
+            List<Choice> choices = choiceRepository.findBySurveyId(survey.getId());
+            Long validChoiceId = choices.get(0).getId();
+
+            MemberAnswer answer =
+                    MemberAnswer.builder()
+                            .survey(survey)
+                            .choiceId(validChoiceId) // 실제 choiceId 지정
+                            .memberId(1L)
+                            .build();
+
             memberAnswerRepository.save(answer);
         }
     }

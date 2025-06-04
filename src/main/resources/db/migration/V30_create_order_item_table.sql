@@ -1,7 +1,7 @@
 CREATE TABLE order_item (
                             order_item_id BIGINT AUTO_INCREMENT PRIMARY KEY,
                             item_id BIGINT NOT NULL,
-                            real_count INT NOT NULL,
+                            real_count INT DEFAULT NULL,
                             status VARCHAR(20) NOT NULL,
                             created_at DATETIME NOT NULL,
                             updated_at DATETIME NOT NULL,

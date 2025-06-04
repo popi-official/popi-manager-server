@@ -22,18 +22,18 @@ public class OrderItem extends BaseTimeEntity {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    private int realCount;
+    private Integer realCount;
 
     private OrderItemStatus status;
 
     @Builder
-    private OrderItem(Item item, int realCount) {
+    private OrderItem(Item item) {
         this.item = item;
-        this.realCount = realCount;
+        this.realCount = null;
         this.status = OrderItemStatus.PENDING;
     }
 
-    public static OrderItem createOrderItem(Item item, int realCount) {
-        return OrderItem.builder().item(item).realCount(realCount).build();
+    public static OrderItem createOrderItem(Item item) {
+        return OrderItem.builder().item(item).build();
     }
 }

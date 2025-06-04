@@ -6,8 +6,6 @@ CREATE TABLE conversion_stats (
                                buyer_count INT NOT NULL,
                                conversion_rate INT NOT NULL,
                                analyzed_date	DATE	NOT NULL,
-                               analyzed_time	TIME	NOT NULL,
-                               created_at DATETIME NOT NULL,
-                               updated_at DATETIME
+                               analyzed_time	TIME	NOT NULL
 );
 

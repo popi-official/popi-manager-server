@@ -1,6 +1,5 @@
 package com.lgcns.domain.conversionStats.domain;
 
-import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ConversionStats extends BaseTimeEntity {
+public class ConversionStats {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

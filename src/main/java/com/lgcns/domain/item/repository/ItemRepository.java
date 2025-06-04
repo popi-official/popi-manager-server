@@ -19,7 +19,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
                     """
     UPDATE item i
     JOIN popup p ON i.popup_id = p.popup_id
-    SET i.average_sales = FLOOR(i.sales / (DATEDIFF(LEAST(CURDATE(), p.popup_end_date), p.popup_start_date) + 1))
+    SET i.average_sales = FLOOR(i.sales / (DATEDIFF(CURDATE(), p.popup_start_date) + 1))
     WHERE CURDATE() BETWEEN p.popup_start_date AND DATE_SUB(p.popup_end_date, INTERVAL 1 DAY)
     """,
             nativeQuery = true)

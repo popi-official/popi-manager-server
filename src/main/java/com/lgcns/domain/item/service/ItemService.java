@@ -36,5 +36,5 @@ public interface ItemService {
     List<ItemForPaymentResponse> findItemsForPayment(
             Long popupId, ItemIdsForPaymentRequest request);
 
-    void calculateItemAverageSales();
+    void updateItemAverageSales();
 }

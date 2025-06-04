@@ -167,7 +167,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void calculateItemAverageSales() {
+    public void updateItemAverageSales() {
         itemRepository.bulkUpdateAverageSalesForOperatingPopups();
     }
 

@@ -13,6 +13,6 @@ public class ItemAverageSalesScheduler {
 
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
     public void runAverageSalesUpdate() {
-        itemService.calculateItemAverageSales();
+        itemService.updateItemAverageSales();
     }
 }

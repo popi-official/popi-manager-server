@@ -1,5 +1,6 @@
 package com.lgcns.domain.paymentStats.service;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -30,209 +31,94 @@ class PaymentStatsServiceTest extends IntegrationTest {
     @Autowired PopupRepository popupRepository;
     @Autowired ManagerRepository managerRepository;
 
-    private Manager ownerManager;
+    private Manager manager;
     private Manager otherManager;
-    private Popup popup;
-
-    @BeforeEach
-    void setUp() {
-        ownerManager =
-                managerRepository.save(Manager.createManager("testManager1", "testPassword"));
-        otherManager =
-                managerRepository.save(Manager.createManager("otherManager", "testPassword"));
-
-        setAuthentication(ownerManager);
-
-        popup =
-                Popup.createPopup(
-                        ownerManager,
-                        "testPopup",
-                        "https://bucket/이미지.jpg",
-                        LocalDate.now().minusMonths(1),
-                        LocalDate.parse("2025-05-01"),
-                        LocalDateTime.of(LocalDate.now().minusMonths(1), LocalTime.of(6, 0)),
-                        LocalDateTime.parse("2025-05-01T22:00:00"),
-                        LocalTime.parse("06:00:00"),
-                        LocalTime.parse("22:00:00"),
-                        100,
-                        20,
-                        "서울특별시 강남구 테헤란로 123",
-                        "3층 A호",
-                        37.123456,
-                        127.123456);
-        popup = popupRepository.save(popup);
-
-        PaymentStats paymentStats1 =
-                PaymentStats.createPaymentStats(
-                        popup.getId(),
-                        10080,
-                        AveragePeriod.TOTAL,
-                        LocalDate.of(2025, 5, 2),
-                        LocalTime.of(8, 0));
-
-        PaymentStats paymentStats2 =
-                PaymentStats.createPaymentStats(
-                        popup.getId(),
-                        15032,
-                        AveragePeriod.TOTAL,
-                        LocalDate.of(2025, 5, 2),
-                        LocalTime.of(10, 0));
-
-        PaymentStats paymentStats3 =
-                PaymentStats.createPaymentStats(
-                        popup.getId(),
-                        19048,
-                        AveragePeriod.TOTAL,
-                        LocalDate.of(2025, 5, 2),
-                        LocalTime.of(12, 0));
-
-        PaymentStats paymentStats4 =
-                PaymentStats.createPaymentStats(
-                        popup.getId(),
-                        21794,
-                        AveragePeriod.TOTAL,
-                        LocalDate.of(2025, 5, 3),
-                        LocalTime.of(14, 0));
-
-        PaymentStats paymentStats5 =
-                paymentStatsRepository.save(
-                        PaymentStats.createPaymentStats(
-                                popup.getId(),
-                                10000,
-                                AveragePeriod.TODAY,
-                                LocalDate.now(),
-                                LocalTime.of(8, 0)));
-
-        PaymentStats paymentStats6 =
-                PaymentStats.createPaymentStats(
-                        popup.getId(),
-                        12900,
-                        AveragePeriod.TODAY,
-                        LocalDate.now(),
-                        LocalTime.of(10, 0));
-
-        PaymentStats paymentStats7 =
-                paymentStatsRepository.save(
-                        PaymentStats.createPaymentStats(
-                                popup.getId(),
-                                21237,
-                                AveragePeriod.TODAY,
-                                LocalDate.now(),
-                                LocalTime.of(12, 0)));
-
-        paymentStatsRepository.saveAll(
-                List.of(
-                        paymentStats1,
-                        paymentStats2,
-                        paymentStats3,
-                        paymentStats4,
-                        paymentStats5,
-                        paymentStats6,
-                        paymentStats7));
-    }
 
     @Nested
     class 평균_구매액을_조회할_때 {
 
+        @BeforeEach
+        void setUp() {
+            manager = managerRepository.save(Manager.createManager("testManager1", "testPassword"));
+            otherManager =
+                    managerRepository.save(Manager.createManager("otherManager", "testPassword"));
+
+            setAuthentication(manager);
+
+            popupRepository.save(createTestPopup(manager, "popup1"));
+            paymentStatsRepository.saveAll(
+                    List.of(
+                            createTestPaymentStats(50000, AveragePeriod.TOTAL),
+                            createTestPaymentStats(60000, AveragePeriod.TODAY)));
+        }
+
         @Test
         void 정상적으로_평균_구매액_조회에_성공한다() {
             // given
-            Long popupId = popup.getId();
+            Long popupId = 1L;
 
             // when
             AverageAmountResponse response = paymentStatsService.findLatestAverageAmount(popupId);
 
             // then
-            assertThat(response).isNotNull();
-            assertThat(response.totalAverageAmount()).isNotNull();
-            assertThat(response.todayAverageAmount()).isNotNull();
+            assertThat(response.totalAverageAmount()).isEqualTo(50000);
+            assertThat(response.todayAverageAmount()).isEqualTo(60000);
         }
 
         @Test
-        void 존재하지_않는_팝업_ID로_조회하면_예외가_발생한다() {
-            // given
-            Long nonExistentPopupId = 9999L;
-
-            // when & then
-            assertThatThrownBy(
-                            () -> paymentStatsService.findLatestAverageAmount(nonExistentPopupId))
-                    .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
-        }
-
-        @Test
-        void 다른_매니저의_팝업에_접근하면_예외가_발생한다() {
-            // given
-            Popup otherPopup =
-                    Popup.createPopup(
-                            otherManager,
-                            "testPopup2",
-                            "https://bucket/이미지2.jpg",
-                            LocalDate.now().minusMonths(1),
-                            LocalDate.parse("2025-07-16"),
-                            LocalDateTime.of(LocalDate.now().minusMonths(1), LocalTime.of(6, 0)),
-                            LocalDateTime.parse("2025-07-16T22:00:00"),
-                            LocalTime.parse("06:00:00"),
-                            LocalTime.parse("22:00:00"),
-                            200,
-                            30,
-                            "인천광역시 서구 비즈니스로 123",
-                            "16층 1601호",
-                            39.123456,
-                            129.123456);
-            otherPopup = popupRepository.save(otherPopup);
-            final Long otherPopupId = otherPopup.getId();
-
-            // when & then
-            assertThatThrownBy(() -> paymentStatsService.findLatestAverageAmount(otherPopupId))
-                    .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
-        }
-
-        @Test
-        void 계산된_1인당_구매_평균값이_정확한지_확인한다() {
+        void 데이터가_존재하지_않으면_0을_반환한다() {
             // given
             paymentStatsRepository.deleteAll();
 
-            Long popupId = popup.getId();
-
-            paymentStatsRepository.save(
-                    PaymentStats.createPaymentStats(
-                            popup.getId(),
-                            5000,
-                            AveragePeriod.TOTAL,
-                            LocalDate.now().minusDays(1),
-                            LocalTime.of(12, 0)));
-
-            paymentStatsRepository.save(
-                    PaymentStats.createPaymentStats(
-                            popup.getId(),
-                            6000,
-                            AveragePeriod.TODAY,
-                            LocalDate.now(),
-                            LocalTime.of(12, 0)));
-
             // when
-            AverageAmountResponse response = paymentStatsService.findLatestAverageAmount(popupId);
-
-            // then
-            assertThat(response.totalAverageAmount()).isEqualTo(5000);
-            assertThat(response.todayAverageAmount()).isEqualTo(6000);
-        }
-
-        @Test
-        void 데이터가_없을_경우_0을_반환한다() {
-            // given
-            paymentStatsRepository.deleteAll();
-
-            Long popupId = popup.getId();
-
-            // when
-            AverageAmountResponse response = paymentStatsService.findLatestAverageAmount(popupId);
+            AverageAmountResponse response = paymentStatsService.findLatestAverageAmount(1L);
 
             // then
             assertThat(response.totalAverageAmount()).isEqualTo(0);
             assertThat(response.todayAverageAmount()).isEqualTo(0);
         }
+
+        @Test
+        void 존재하지_않는_팝업_ID로_조회하면_예외가_발생한다() {
+            // when & then
+            assertThatThrownBy(() -> paymentStatsService.findLatestAverageAmount(999L))
+                    .isInstanceOf(CustomException.class)
+                    .hasMessage(PopupErrorCode.POPUP_NOT_FOUND.getMessage());
+        }
+
+        @Test
+        void 다른_매니저의_팝업에_접근하면_예외가_발생한다() {
+            // given
+            popupRepository.save(createTestPopup(otherManager, "popup2"));
+
+            // when & then
+            assertThatThrownBy(() -> paymentStatsService.findLatestAverageAmount(2L))
+                    .isInstanceOf(CustomException.class)
+                    .hasMessage(PopupErrorCode.POPUP_UNAUTHORIZED.getMessage());
+        }
+    }
+
+    private Popup createTestPopup(Manager manager, String name) {
+        return Popup.createPopup(
+                manager,
+                name,
+                "https://bucket/이미지.jpg",
+                LocalDate.now().minusMonths(1),
+                LocalDate.parse("2025-05-01"),
+                LocalDateTime.of(LocalDate.now().minusMonths(1), LocalTime.of(6, 0)),
+                LocalDateTime.parse("2025-05-01T22:00:00"),
+                LocalTime.parse("06:00:00"),
+                LocalTime.parse("22:00:00"),
+                100,
+                20,
+                "서울특별시 강남구 테헤란로 123",
+                "3층 A호",
+                37.123456,
+                127.123456);
+    }
+
+    private PaymentStats createTestPaymentStats(int averageAmount, AveragePeriod period) {
+        return PaymentStats.createPaymentStats(
+                1L, averageAmount, period, LocalDate.now(), LocalTime.now());
     }
 }

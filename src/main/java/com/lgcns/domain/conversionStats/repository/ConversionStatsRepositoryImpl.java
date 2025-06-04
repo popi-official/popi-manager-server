@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ConversionStatsRepositoryImpl implements ConversionStatsRepositoryCustom {
 
-    private EntityManager em;
+    private final EntityManager em;
     private final JPAQueryFactory queryFactory;
 
     @Override

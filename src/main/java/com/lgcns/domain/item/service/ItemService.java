@@ -37,4 +37,6 @@ public interface ItemService {
             Long popupId, ItemIdsForPaymentRequest request);
 
     void updateItemAverageSales();
+
+    void calculateItemAverageSales();
 }

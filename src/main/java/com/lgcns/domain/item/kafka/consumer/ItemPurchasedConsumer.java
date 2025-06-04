@@ -4,6 +4,8 @@ import com.lgcns.domain.item.kafka.message.ItemPurchasedMessage;
 import com.lgcns.domain.item.repository.ItemRepository;
 import com.lgcns.domain.notification.service.NotificationService;
 import com.lgcns.domain.orderItem.event.dto.OrderItemEvent;
+import com.lgcns.domain.notification.service.NotificationService;
+import com.lgcns.domain.orderItem.event.dto.OrderItemEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,6 +18,7 @@ public class ItemPurchasedConsumer {
     private static final String TOPIC = "item-purchased-topic";
 
     private final ItemRepository itemRepository;
+    private final NotificationService notificationService;
     private final ApplicationEventPublisher eventPublisher;
 
     @KafkaListener(

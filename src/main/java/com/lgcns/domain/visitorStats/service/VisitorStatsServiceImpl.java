@@ -1,16 +1,20 @@
 package com.lgcns.domain.visitorStats.service;
 
+import com.lgcns.domain.entrance.dto.response.HourlyEntranceResponse;
+import com.lgcns.domain.entrance.repository.EntranceRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.domain.visitorStats.domain.VisitorStats;
 import com.lgcns.domain.visitorStats.dto.response.*;
+import com.lgcns.domain.visitorStats.exception.VisitorStatsErrorCode;
 import com.lgcns.domain.visitorStats.repository.VisitorStatsRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
 
     private final VisitorStatsRepository visitorStatsRepository;
     private final PopupRepository popupRepository;
+    private final EntranceRepository entranceRepository;
     private final ManagerUtil managerUtil;
 
     @Override
@@ -59,6 +64,42 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
         return VisitorAnalysisResponse.of(gender, age);
     }
 
+    @Override
+    public List<Long> findTargetPopupIds() {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+
+        // 운영 중인 팝업 필터링
+        List<Long> popupIds = popupRepository.findAllPopupIdsAfterPopupStartTime(nowDate, nowTime);
+        // 입장 내역이 존재하는 팝업 필터링
+        List<Long> popupIdsWithEntrances = entranceRepository.findPopupIdsWithEntrances(popupIds);
+        // 중복된 방문자 분석이 존재하지 않는 팝업 필터링
+        return new ArrayList<>(
+                visitorStatsRepository.findPopupIdsWithoutVisitorStats(
+                        popupIdsWithEntrances, nowDate, nowTime));
+    }
+
+    @Override
+    public VisitorStats convertVisitorStats(Long popupId) {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+
+        HourlyEntranceResponse hourlyEntranceResponse =
+                entranceRepository
+                        .findHourlyEntrance(popupId, nowDate, nowTime)
+                        .orElseThrow(
+                                () ->
+                                        new CustomException(
+                                                VisitorStatsErrorCode.HOURLY_ENTRANCE_NOT_FOUND));
+
+        return fromHourlyEntranceResponse(popupId, hourlyEntranceResponse, nowDate, nowTime);
+    }
+
+    @Override
+    public void createVisitorStats(List<VisitorStats> visitorStatsList) {
+        visitorStatsRepository.bulkInsertVisitorStats(visitorStatsList);
+    }
+
     private Popup findPopupById(Long popupId) {
         return popupRepository
                 .findById(popupId)
@@ -85,5 +126,22 @@ public class VisitorStatsServiceImpl implements VisitorStatsService {
 
     private int calculateRatio(int count, int total) {
         return (int) Math.round((double) count * 100 / total);
+    }
+
+    private VisitorStats fromHourlyEntranceResponse(
+            Long popupId,
+            HourlyEntranceResponse hourlyEntranceResponse,
+            LocalDate nowDate,
+            LocalTime nowTime) {
+        return VisitorStats.createVisitorStats(
+                popupId,
+                hourlyEntranceResponse.maleCount(),
+                hourlyEntranceResponse.femaleCount(),
+                hourlyEntranceResponse.teenCount(),
+                hourlyEntranceResponse.twentyCount(),
+                hourlyEntranceResponse.thirtyCount(),
+                hourlyEntranceResponse.fortyCount(),
+                nowDate,
+                nowTime);
     }
 }

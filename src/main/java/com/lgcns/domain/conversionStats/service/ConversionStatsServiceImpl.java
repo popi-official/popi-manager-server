@@ -71,7 +71,7 @@ public class ConversionStatsServiceImpl implements ConversionStatsService {
                     int interestedCount =
                             countInterestedUsersByItem(popupId, count.itemId()).intValue();
                     int buyerCount = count.buyerCount();
-                    int conversionRate = count.buyerCount() / interestedCount * 100;
+                    int conversionRate = Math.round((float) buyerCount / interestedCount * 100);
 
                     ConversionStats stats =
                             ConversionStats.createConversionStats(

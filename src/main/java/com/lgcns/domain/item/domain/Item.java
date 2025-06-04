@@ -1,10 +1,14 @@
 package com.lgcns.domain.item.domain;
 
 import com.lgcns.domain.item.exception.ItemErrorCode;
+import com.lgcns.domain.orderItem.domian.OrderItem;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +40,14 @@ public class Item extends BaseTimeEntity {
 
     private String location;
 
+    private int sales;
+    private int averageSales;
+
+    private LocalDateTime lastRestockDate;
+
+    @OneToMany(mappedBy = "item")
+    private List<OrderItem> orderItemList = new ArrayList<>();
+
     @Builder(access = AccessLevel.PRIVATE)
     public Item(
             Popup popup,
@@ -52,6 +64,9 @@ public class Item extends BaseTimeEntity {
         this.stock = stock;
         this.minStock = minStock;
         this.location = location;
+        this.sales = 0;
+        this.averageSales = 0;
+        this.lastRestockDate = LocalDateTime.now();
     }
 
     public static Item createItem(

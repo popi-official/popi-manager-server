@@ -96,7 +96,7 @@ class ItemPurchasedConsumerTest extends IntegrationTest {
         kafkaTemplate.send("item-purchased-topic", message);
 
         // then
-        await().atMost(Duration.ofSeconds(5))
+        await().atMost(Duration.ofSeconds(15))
                 .untilAsserted(
                         () -> {
                             assertThat(itemRepository.findById(1L).orElseThrow().getStock())

@@ -30,7 +30,7 @@ public class OrderItem extends BaseTimeEntity {
     @Builder
     private OrderItem(Item item) {
         this.item = item;
-        this.realCount = null;
+        this.realCount = -1;
         this.status = OrderItemStatus.PENDING;
     }
 

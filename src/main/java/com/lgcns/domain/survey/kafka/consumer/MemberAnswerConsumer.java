@@ -55,6 +55,6 @@ public class MemberAnswerConsumer {
                                 })
                         .toList();
 
-        memberAnswerRepository.saveAll(memberAnswers);
+        memberAnswerRepository.bulkInsertMemberAnswer(memberAnswers);
     }
 }

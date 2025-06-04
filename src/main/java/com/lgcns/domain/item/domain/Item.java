@@ -43,7 +43,7 @@ public class Item extends BaseTimeEntity {
     private int sales;
     private int averageSales;
 
-    private LocalDateTime lastRestockDate;
+    private LocalDateTime lastRestockDateTime;
 
     private int recommendCount;
     private Boolean isAlarmed;
@@ -69,7 +69,7 @@ public class Item extends BaseTimeEntity {
         this.location = location;
         this.sales = 0;
         this.averageSales = 0;
-        this.lastRestockDate = LocalDateTime.now();
+        this.lastRestockDateTime = LocalDateTime.now();
         this.recommendCount = stock;
         this.isAlarmed = false;
     }
@@ -97,11 +97,12 @@ public class Item extends BaseTimeEntity {
         this.minStock = minStock;
     }
 
-    public void decreaseStock(int quantity) {
+    public void decreaseStockAndIncreaseSales(int quantity) {
         if (this.stock < quantity) {
             throw new CustomException(ItemErrorCode.INSUFFICIENT_STOCK);
         }
         this.stock -= quantity;
+        this.sales += quantity;
     }
 
     public void updateIsAlarmed(Boolean isAlarmed) {

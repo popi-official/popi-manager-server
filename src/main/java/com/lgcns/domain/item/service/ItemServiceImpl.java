@@ -166,6 +166,11 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.findItemsForPayment(popupId, request.itemIds());
     }
 
+    @Override
+    public void calculateItemAverageSales() {
+        itemRepository.bulkUpdateAverageSalesForOperatingPopups();
+    }
+
     private Popup findPopupById(Long popupId) {
         return popupRepository
                 .findById(popupId)

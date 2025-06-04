@@ -24,6 +24,7 @@ public class OrderItem extends BaseTimeEntity {
 
     private Integer realCount;
 
+    @Enumerated(EnumType.STRING)
     private OrderItemStatus status;
 
     @Builder

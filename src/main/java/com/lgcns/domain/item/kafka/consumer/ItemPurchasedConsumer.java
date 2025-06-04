@@ -28,7 +28,7 @@ public class ItemPurchasedConsumer {
                     .findWithPopupAndManagerById(item.itemId())
                     .ifPresent(
                             foundItem -> {
-                                foundItem.decreaseStock(item.quantity());
+                                foundItem.decreaseStockAndIncreaseSales(item.quantity());
                                 itemRepository.save(foundItem);
                                 if (foundItem.checkOutOfStockAndAlarmed())
                                     eventPublisher.publishEvent(

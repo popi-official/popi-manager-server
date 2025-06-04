@@ -45,6 +45,9 @@ public class Item extends BaseTimeEntity {
 
     private LocalDateTime lastRestockDate;
 
+    private int recommendCount;
+    private Boolean isAlarmed;
+
     @OneToMany(mappedBy = "item")
     private List<OrderItem> orderItemList = new ArrayList<>();
 
@@ -67,6 +70,8 @@ public class Item extends BaseTimeEntity {
         this.sales = 0;
         this.averageSales = 0;
         this.lastRestockDate = LocalDateTime.now();
+        this.recommendCount = stock;
+        this.isAlarmed = false;
     }
 
     public static Item createItem(

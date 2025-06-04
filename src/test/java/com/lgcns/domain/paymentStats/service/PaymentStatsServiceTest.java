@@ -17,12 +17,11 @@ import com.lgcns.global.error.exception.CustomException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 class PaymentStatsServiceTest extends IntegrationTest {
 
@@ -63,75 +62,80 @@ class PaymentStatsServiceTest extends IntegrationTest {
                         127.123456);
         popup = popupRepository.save(popup);
 
-        createTestPaymentStats();
-    }
-
-    private void createTestPaymentStats() {
-        paymentStatsRepository.save(
+        PaymentStats paymentStats1 =
                 PaymentStats.createPaymentStats(
                         popup.getId(),
                         10080,
                         AveragePeriod.TOTAL,
                         LocalDate.of(2025, 5, 2),
-                        LocalTime.of(8, 0)));
+                        LocalTime.of(8, 0));
 
-        paymentStatsRepository.save(
+        PaymentStats paymentStats2 =
                 PaymentStats.createPaymentStats(
                         popup.getId(),
                         15032,
                         AveragePeriod.TOTAL,
                         LocalDate.of(2025, 5, 2),
-                        LocalTime.of(10, 0)));
+                        LocalTime.of(10, 0));
 
-        paymentStatsRepository.save(
+        PaymentStats paymentStats3 =
                 PaymentStats.createPaymentStats(
                         popup.getId(),
                         19048,
                         AveragePeriod.TOTAL,
                         LocalDate.of(2025, 5, 2),
-                        LocalTime.of(12, 0)));
+                        LocalTime.of(12, 0));
 
-        paymentStatsRepository.save(
+        PaymentStats paymentStats4 =
                 PaymentStats.createPaymentStats(
                         popup.getId(),
                         21794,
                         AveragePeriod.TOTAL,
                         LocalDate.of(2025, 5, 3),
-                        LocalTime.of(14, 0)));
+                        LocalTime.of(14, 0));
 
-        LocalDate today = LocalDate.now();
-        paymentStatsRepository.save(
-                PaymentStats.createPaymentStats(
-                        popup.getId(),
-                        10000,
-                        AveragePeriod.TODAY,
-                        today,
-                        LocalTime.of(8, 0))); // 980000 / 98
+        PaymentStats paymentStats5 =
+                paymentStatsRepository.save(
+                        PaymentStats.createPaymentStats(
+                                popup.getId(),
+                                10000,
+                                AveragePeriod.TODAY,
+                                LocalDate.now(),
+                                LocalTime.of(8, 0)));
 
-        paymentStatsRepository.save(
+        PaymentStats paymentStats6 =
                 PaymentStats.createPaymentStats(
                         popup.getId(),
                         12900,
                         AveragePeriod.TODAY,
-                        today,
-                        LocalTime.of(10, 0))); // 1870000 / 145
+                        LocalDate.now(),
+                        LocalTime.of(10, 0));
 
-        paymentStatsRepository.save(
-                PaymentStats.createPaymentStats(
-                        popup.getId(),
-                        21237,
-                        AveragePeriod.TODAY,
-                        today,
-                        LocalTime.of(12, 0))); // 4120000 / 194
+        PaymentStats paymentStats7 =
+                paymentStatsRepository.save(
+                        PaymentStats.createPaymentStats(
+                                popup.getId(),
+                                21237,
+                                AveragePeriod.TODAY,
+                                LocalDate.now(),
+                                LocalTime.of(12, 0)));
+
+        paymentStatsRepository.saveAll(
+                List.of(
+                        paymentStats1,
+                        paymentStats2,
+                        paymentStats3,
+                        paymentStats4,
+                        paymentStats5,
+                        paymentStats6,
+                        paymentStats7));
     }
 
     @Nested
-    @DisplayName("평균 결제액 조회 테스트")
-    class GetPaymentAverageTest {
+    class 평균_구매액을_조회할_때 {
 
         @Test
-        @Transactional
-        void 정상적으로_평균_결제액_조회에_성공한다() {
+        void 정상적으로_평균_구매액_조회에_성공한다() {
             // given
             Long popupId = popup.getId();
 
@@ -145,7 +149,6 @@ class PaymentStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 존재하지_않는_팝업_ID로_조회하면_예외가_발생한다() {
             // given
             Long nonExistentPopupId = 9999L;
@@ -158,7 +161,6 @@ class PaymentStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 다른_매니저의_팝업에_접근하면_예외가_발생한다() {
             // given
             Popup otherPopup =
@@ -188,30 +190,27 @@ class PaymentStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 계산된_1인당_구매_평균값이_정확한지_확인한다() {
             // given
-            Long popupId = popup.getId();
-
             paymentStatsRepository.deleteAll();
 
-            // 단순한 데이터 시나리오 구성
-            // 전체 기간: 결제액 100,000원, 방문자 20명 -> 1인당 5,000원
-            // 오늘: 결제액 60,000원, 방문자 10명 -> 1인당 6,000원
-            LocalDate today = LocalDate.now();
+            Long popupId = popup.getId();
 
-            // 초기
             paymentStatsRepository.save(
                     PaymentStats.createPaymentStats(
                             popup.getId(),
                             5000,
                             AveragePeriod.TOTAL,
-                            today.minusDays(1),
+                            LocalDate.now().minusDays(1),
                             LocalTime.of(12, 0)));
 
             paymentStatsRepository.save(
                     PaymentStats.createPaymentStats(
-                            popup.getId(), 6000, AveragePeriod.TODAY, today, LocalTime.of(12, 0)));
+                            popup.getId(),
+                            6000,
+                            AveragePeriod.TODAY,
+                            LocalDate.now(),
+                            LocalTime.of(12, 0)));
 
             // when
             AverageAmountResponse response = paymentStatsService.findLatestAverageAmount(popupId);
@@ -222,11 +221,11 @@ class PaymentStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        @Transactional
         void 데이터가_없을_경우_0을_반환한다() {
             // given
-            Long popupId = popup.getId();
             paymentStatsRepository.deleteAll();
+
+            Long popupId = popup.getId();
 
             // when
             AverageAmountResponse response = paymentStatsService.findLatestAverageAmount(popupId);

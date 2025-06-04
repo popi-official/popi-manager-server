@@ -10,6 +10,8 @@ import org.springframework.data.domain.Slice;
 public interface ItemRepositoryCustom {
     List<ItemLocationResponse> findItemsWithSplitLocation(Long popupId);
 
+    Item findItemWithPopupAndMember(Long itemId);
+
     Slice<ItemInfoResponse> findItemsByNameWithPagination(
             Long popupId, String keyword, Long lastItemId, int size);
 

@@ -103,4 +103,12 @@ public class Item extends BaseTimeEntity {
         }
         this.stock -= quantity;
     }
+
+    public void updateIsAlarmed(Boolean isAlarmed) {
+        this.isAlarmed = isAlarmed;
+    }
+
+    public Boolean checkOutOfStockAndAlarmed() {
+        return this.stock <= this.minStock + this.averageSales && !this.isAlarmed;
+    }
 }

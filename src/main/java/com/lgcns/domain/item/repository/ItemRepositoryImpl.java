@@ -1,12 +1,14 @@
 package com.lgcns.domain.item.repository;
 
 import static com.lgcns.domain.item.domain.QItem.item;
+import static com.lgcns.domain.manager.domain.QManager.manager;
 import static com.querydsl.core.types.dsl.Expressions.*;
 
 import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
 import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
+import com.lgcns.domain.popup.domain.QPopup;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringExpression;
@@ -45,6 +47,18 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .from(item)
                 .where(item.popup.id.eq(popupId))
                 .fetch();
+    }
+
+    @Override
+    public Item findItemWithPopupAndMember(Long itemId) {
+        return queryFactory
+                .selectFrom(item)
+                .join(item.popup, QPopup.popup)
+                .fetchJoin()
+                .join(item.popup.manager, manager)
+                .fetchJoin()
+                .where(item.id.eq(itemId))
+                .fetchOne();
     }
 
     @Override

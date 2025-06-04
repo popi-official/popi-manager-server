@@ -36,6 +36,7 @@ public class OrderItemServiceImpl implements OrderItemService {
 
         OrderItem orderItem = OrderItem.createOrderItem(item);
         orderItemRepository.save(orderItem);
+        item.updateIsAlarmed(true);
         createNotification(item);
     }
 

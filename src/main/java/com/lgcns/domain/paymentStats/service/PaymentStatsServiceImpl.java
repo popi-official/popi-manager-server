@@ -8,31 +8,28 @@ import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class PaymentStatsServiceImpl implements PaymentStatsService {
 
-    private final PaymentStatsRepository paymentStatsRepository;
-    private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;
+    private final PopupRepository popupRepository;
+    private final PaymentStatsRepository paymentStatsRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public AverageAmountResponse getPaymentAverages(Long popupId) {
-        Manager currentManager = managerUtil.getCurrentManager();
-        Popup popup = findPopupById(popupId);
-
+    public AverageAmountResponse findLatestAverageAmount(Long popupId) {
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
         validatePopupOwnership(currentManager, popup);
 
-        final LocalDate today = LocalDate.now();
-
-        return paymentStatsRepository.getPaymentAverages(popupId, today);
+        return paymentStatsRepository.findLatestAverageAmountByPopupId(popupId);
     }
 
     private Popup findPopupById(Long popupId) {

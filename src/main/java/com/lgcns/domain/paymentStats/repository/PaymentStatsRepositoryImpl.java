@@ -2,9 +2,8 @@ package com.lgcns.domain.paymentStats.repository;
 
 import static com.lgcns.domain.paymentStats.domain.QPaymentStats.paymentStats;
 
+import com.lgcns.domain.paymentStats.domain.AveragePeriod;
 import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -13,38 +12,35 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class PaymentStatsRepositoryImpl implements PaymentStatsRepositoryCustom {
+
     private final JPAQueryFactory queryFactory;
 
-    public AverageAmountResponse getPaymentAverages(Long popupId, LocalDate today) {
-        NumberExpression<Double> avgExpression =
-                new CaseBuilder()
-                        .when(paymentStats.userCount.sum().eq(0))
-                        .then(0.0)
-                        .otherwise(
-                                paymentStats
-                                        .totalPayment
-                                        .sum()
-                                        .doubleValue()
-                                        .divide(paymentStats.userCount.sum().doubleValue()));
-
-        Double totalAvg =
+    @Override
+    public AverageAmountResponse findLatestAverageAmountByPopupId(Long popupId) {
+        Integer totalAverageAmount =
                 queryFactory
-                        .select(avgExpression)
-                        .from(paymentStats)
-                        .where(paymentStats.popupId.eq(popupId))
-                        .fetchOne();
-
-        Double todayAvg =
-                queryFactory
-                        .select(avgExpression)
+                        .select(paymentStats.averageAmount)
                         .from(paymentStats)
                         .where(
                                 paymentStats.popupId.eq(popupId),
-                                paymentStats.analyzedDate.eq(today))
-                        .fetchOne();
+                                paymentStats.period.eq(AveragePeriod.TOTAL))
+                        .orderBy(paymentStats.analyzedTime.desc())
+                        .fetchFirst();
 
-        return new AverageAmountResponse(
-                (int) Math.round(totalAvg != null ? totalAvg : 0),
-                (int) Math.round(todayAvg != null ? todayAvg : 0));
+        Integer todayAverageAmount =
+                queryFactory
+                        .select(paymentStats.averageAmount)
+                        .from(paymentStats)
+                        .where(
+                                paymentStats.popupId.eq(popupId),
+                                paymentStats.period.eq(AveragePeriod.TODAY),
+                                paymentStats.analyzedDate.eq(LocalDate.now()))
+                        .orderBy(paymentStats.analyzedTime.desc())
+                        .fetchFirst();
+
+        totalAverageAmount = totalAverageAmount != null ? totalAverageAmount : 0;
+        todayAverageAmount = todayAverageAmount != null ? todayAverageAmount : 0;
+
+        return AverageAmountResponse.of(totalAverageAmount, todayAverageAmount);
     }
 }

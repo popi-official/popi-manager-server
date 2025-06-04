@@ -3,7 +3,10 @@ package com.lgcns.domain.paymentStats.service;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
@@ -19,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -30,6 +34,8 @@ class PaymentStatsServiceTest extends IntegrationTest {
     @Autowired PaymentStatsRepository paymentStatsRepository;
     @Autowired PopupRepository popupRepository;
     @Autowired ManagerRepository managerRepository;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private Manager manager;
     private Manager otherManager;
@@ -95,6 +101,65 @@ class PaymentStatsServiceTest extends IntegrationTest {
             assertThatThrownBy(() -> paymentStatsService.findLatestAverageAmount(2L))
                     .isInstanceOf(CustomException.class)
                     .hasMessage(PopupErrorCode.POPUP_UNAUTHORIZED.getMessage());
+        }
+    }
+
+    @Nested
+    class 전체_팝업_평균_구매액을_저장할_때 {
+
+        @BeforeEach
+        void setUp() {
+            manager = managerRepository.save(Manager.createManager("testManager1", "testPassword"));
+            popupRepository.saveAll(
+                    List.of(
+                            createTestPopup(manager, "popup1"),
+                            createTestPopup(manager, "popup2")));
+        }
+
+        @Test
+        void 정상적으로_통계_데이터를_저장한다() throws JsonProcessingException {
+            // given
+            String expectedResponse1 =
+                    objectMapper.writeValueAsString(
+                            Map.of("totalAverageAmount", 300_000, "todayAverageAmount", 100_000));
+
+            stubFor(
+                    get(urlEqualTo("/internal/1/average-purchase"))
+                            .willReturn(
+                                    aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(expectedResponse1)));
+
+            String expectedResponse2 =
+                    objectMapper.writeValueAsString(
+                            Map.of("totalAverageAmount", 200_000, "todayAverageAmount", 150_000));
+
+            stubFor(
+                    get(urlEqualTo("/internal/2/average-purchase"))
+                            .willReturn(
+                                    aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody(expectedResponse2)));
+
+            // when
+            paymentStatsService.createPaymentStats();
+
+            // then
+            List<PaymentStats> stats = paymentStatsRepository.findAll();
+
+            assertThat(stats).hasSize(4);
+            assertThat(stats)
+                    .extracting(
+                            PaymentStats::getPopupId,
+                            PaymentStats::getAverageAmount,
+                            PaymentStats::getPeriod)
+                    .containsExactlyInAnyOrder(
+                            tuple(1L, 300_000, AveragePeriod.TOTAL),
+                            tuple(1L, 100_000, AveragePeriod.TODAY),
+                            tuple(2L, 200_000, AveragePeriod.TOTAL),
+                            tuple(2L, 150_000, AveragePeriod.TODAY));
         }
     }
 

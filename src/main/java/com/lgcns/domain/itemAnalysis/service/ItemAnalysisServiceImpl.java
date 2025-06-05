@@ -4,9 +4,8 @@ import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.repository.ItemRepository;
 import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
 import com.lgcns.domain.itemAnalysis.domain.ItemSalesStats;
+import com.lgcns.domain.itemAnalysis.dto.ItemScore;
 import com.lgcns.domain.itemAnalysis.dto.response.ItemTrendingResponse;
-import com.lgcns.domain.itemAnalysis.dto.response.PopupEventResponse;
-import com.lgcns.domain.itemAnalysis.repository.DynamoDBRepository;
 import com.lgcns.domain.itemAnalysis.repository.ItemAnalysisRepository;
 import com.lgcns.domain.itemAnalysis.repository.ItemSalesStatsRepository;
 import com.lgcns.domain.manager.domain.Manager;
@@ -15,6 +14,9 @@ import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
+import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventDynamoDbClient;
+import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventResponse;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -28,41 +30,67 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ItemAnalysisServiceImpl implements ItemAnalysisService {
 
-    private final DynamoDBRepository dynamoDBRepository;
+    private final PopupEventDynamoDbClient dynamoDbClient;
     private final ItemSalesStatsRepository itemSalesStatsRepository;
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;
     private final ItemAnalysisRepository itemAnalysisRepository;
 
+    private final int DASHBOARD_HOT_ITEM_SIZE = 3;
+
     @Override
-    @Transactional
     public List<ItemTrendingResponse> getTrendingItems(Long popupId) {
         final Manager currentManager = managerUtil.getCurrentManager();
         final Popup popup = findPopupById(popupId);
 
         validatePopupOwnership(currentManager, popup);
 
+        List<ItemTrendingResponse> trendingItems =
+                itemAnalysisRepository.findTopItemsByPopupId(popupId, DASHBOARD_HOT_ITEM_SIZE);
+
+        return trendingItems.isEmpty() ? Collections.emptyList() : trendingItems;
+    }
+
+    @Override
+    public List<Long> findTargetPopupIds() {
+        List<Popup> activePopups = findActivePopups();
+        return activePopups.stream().map(Popup::getId).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ItemAnalysis> processPopupItemAnalysis(Long popupId) {
         LocalDateTime endTime = calculatePreviousTimeEnd(LocalDateTime.now());
+        List<ItemScore> itemScoreList = getItemScoreList(popupId, endTime);
 
-        Map<Long, Integer> popularityMap = getItemPopularityScores(popupId, endTime);
-        Map<Long, Integer> salesMap = getItemSalesVolumes(popupId);
-
-        Set<Long> allItemIds = collectAllItemIds(popularityMap, salesMap);
-
-        if (allItemIds.isEmpty()) {
+        if (itemScoreList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        updateItemAnalysis(allItemIds, popularityMap, salesMap);
-
-        List<ItemAnalysis> topItems = findTopItems(popupId);
-
-        if (topItems.isEmpty()) {
-            return Collections.emptyList();
+        List<ItemAnalysis> itemAnalysisList = new ArrayList<>();
+        for (ItemScore itemScore : itemScoreList) {
+            ItemAnalysis itemAnalysis = createOrUpdateItemAnalysis(itemScore);
+            if (itemAnalysis != null) {
+                itemAnalysisList.add(itemAnalysis);
+            }
         }
 
-        return convertToResponse(topItems);
+        return itemAnalysisList;
+    }
+
+    @Override
+    public void saveItemAnalysisList(List<ItemAnalysis> itemAnalysisList) {
+        List<ItemAnalysis> validItems = itemAnalysisList.stream().filter(Objects::nonNull).toList();
+
+        if (!validItems.isEmpty()) {
+            itemAnalysisRepository.bulkInsertOrUpdate(validItems);
+        }
+    }
+
+    private List<Popup> findActivePopups() {
+        return popupRepository.findAll().stream()
+                .filter(popup -> popup.getPopupEndDate().isAfter(LocalDate.now().minusDays(1)))
+                .toList();
     }
 
     private Popup findPopupById(Long popupId) {
@@ -81,76 +109,87 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
         int hour = currentTime.getHour();
 
         // 오전 6시부터 8시 사이인 경우, 직전 타임은 전날 22:00~23:59:59
-        if (hour >= 6 && hour < 8) {
+        if (hour >= 6 && hour < 7) {
             return LocalDateTime.of(
                     currentTime.toLocalDate().minusDays(1), LocalTime.of(23, 59, 59));
         } else {
             // 직전 타임 계산 (2시간 간격)
-            int previousTimeBlockEnd = ((hour - 6) / 2) * 2 + 6;
+            int previousTimeBlockEnd = hour - 1;
             return currentTime
                     .withHour(previousTimeBlockEnd)
-                    .withMinute(0)
-                    .withSecond(0)
+                    .withMinute(59)
+                    .withSecond(59)
                     .withNano(0);
         }
     }
 
-    // 팝업의 아이템별 인기도 점수 조회
-    private Map<Long, Integer> getItemPopularityScores(Long popupId, LocalDateTime endTime) {
-        List<PopupEventResponse> events = dynamoDBRepository.getEventsUntilTime(popupId, endTime);
-        return events.stream()
-                .filter(event -> event.getItemId() != null && event.getScore() > 0)
-                .collect(
-                        Collectors.groupingBy(
-                                PopupEventResponse::getItemId,
-                                Collectors.summingInt(PopupEventResponse::getScore)));
-    }
+    private List<ItemScore> getItemScoreList(Long popupId, LocalDateTime endTime) {
+        List<Item> itemList = itemRepository.findItemsByPopupId(popupId);
 
-    // 팝업의 아이템별 판매량 조회
-    private Map<Long, Integer> getItemSalesVolumes(Long popupId) {
-        List<ItemSalesStats> itemSalesStats = itemSalesStatsRepository.findByPopupId(popupId);
-        return itemSalesStats.stream()
-                .collect(
-                        Collectors.toMap(
-                                ItemSalesStats::getItemId,
-                                ItemSalesStats::getSalesVolume,
-                                (v1, v2) -> v1));
-    }
+        List<ItemAnalysis> existingAnalysisList = itemAnalysisRepository.findAllByPopupId(popupId);
+        Map<Long, ItemAnalysis> analysisMap =
+                existingAnalysisList.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        analysis -> analysis.getItem().getId(),
+                                        analysis -> analysis));
 
-    private Set<Long> collectAllItemIds(
-            Map<Long, Integer> popularityMap, Map<Long, Integer> salesMap) {
         Set<Long> allItemIds = new HashSet<>();
-        allItemIds.addAll(popularityMap.keySet());
-        allItemIds.addAll(salesMap.keySet());
-        return allItemIds;
-    }
+        Map<Long, Integer> popularityScoreMap = new HashMap<>();
 
-    private void updateItemAnalysis(
-            Set<Long> itemIds, Map<Long, Integer> popularityMap, Map<Long, Integer> salesMap) {
-        for (Long itemId : itemIds) {
-            Item item = itemRepository.findById(itemId).orElse(null);
-            if (item == null) continue;
+        // 인기도 점수 계산 (DynamoDB)
+        for (Item item : itemList) {
+            Long itemId = item.getId();
+            allItemIds.add(itemId);
 
-            int popularityScore = popularityMap.getOrDefault(itemId, 0);
-            int salesVolume = salesMap.getOrDefault(itemId, 0);
+            ItemAnalysis analysis = analysisMap.get(itemId);
+            int previousScore = analysis != null ? analysis.getPopularityScore() : 0;
+            LocalDateTime startTime = analysis != null ? analysis.getUpdatedAt() : null;
 
-            ItemAnalysis analysis =
-                    itemAnalysisRepository
-                            .findByItemId(itemId)
-                            .orElse(ItemAnalysis.createItemAnalysis(item, 0, 0.0, 0));
+            List<PopupEventResponse> events =
+                    dynamoDbClient.getEventsBetweenTimes(popupId, startTime, endTime);
 
-            analysis.updateScores(popularityScore, salesVolume);
-            itemAnalysisRepository.save(analysis);
+            int additionalScore = 0;
+            for (PopupEventResponse event : events) {
+                if (event.getItemId() != null
+                        && event.getItemId().equals(itemId)
+                        && event.getScore() > 0) {
+                    additionalScore += event.getScore();
+                }
+            }
+
+            int totalScore = previousScore + additionalScore;
+            popularityScoreMap.put(itemId, totalScore);
         }
+
+        Map<Long, Integer> salesVolumeMap = new HashMap<>();
+        List<ItemSalesStats> salesStats = itemSalesStatsRepository.findByPopupId(popupId);
+        for (ItemSalesStats stat : salesStats) {
+            Long itemId = stat.getItemId();
+            allItemIds.add(itemId);
+            salesVolumeMap.put(itemId, stat.getSalesVolume());
+        }
+
+        List<ItemScore> result = new ArrayList<>(allItemIds.size());
+        for (Long itemId : allItemIds) {
+            int popularityScore = popularityScoreMap.getOrDefault(itemId, 0);
+            int salesVolume = salesVolumeMap.getOrDefault(itemId, 0);
+            result.add(ItemScore.of(itemId, popularityScore, salesVolume));
+        }
+
+        return result;
     }
 
-    private List<ItemAnalysis> findTopItems(Long popupId) {
-        return itemAnalysisRepository.findTop3ItemsByPopupId(popupId);
-    }
+    private ItemAnalysis createOrUpdateItemAnalysis(ItemScore score) {
+        Item item = itemRepository.findById(score.itemId()).orElse(null);
+        if (item == null) return null;
 
-    private List<ItemTrendingResponse> convertToResponse(List<ItemAnalysis> topItems) {
-        return topItems.stream()
-                .map(analysis -> ItemTrendingResponse.from(analysis.getItem()))
-                .collect(Collectors.toList());
+        ItemAnalysis itemAnalysis =
+                itemAnalysisRepository
+                        .findByItemId(score.itemId())
+                        .orElse(ItemAnalysis.createItemAnalysis(item, 0, 0.0, 0));
+
+        itemAnalysis.updateScores(score.popularityScore(), score.salesVolume());
+        return itemAnalysis;
     }
 }

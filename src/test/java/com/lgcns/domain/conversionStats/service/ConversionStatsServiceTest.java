@@ -57,7 +57,13 @@ class ConversionStatsServiceTest extends IntegrationTest {
 
             setAuthentication(manager);
 
-            Popup popup = popupRepository.save(createTestPopup(manager, "popup1"));
+            Popup popup =
+                    popupRepository.save(
+                            createTestPopup(
+                                    manager,
+                                    "popup1",
+                                    LocalDate.of(2025, 6, 1),
+                                    LocalDate.of(2025, 7, 1)));
 
             List<Item> items = new ArrayList<>();
             for (int i = 1; i <= 24; i++) {
@@ -136,8 +142,16 @@ class ConversionStatsServiceTest extends IntegrationTest {
             manager = managerRepository.save(Manager.createManager("testManager", "testPassword"));
             popupRepository.saveAll(
                     List.of(
-                            createTestPopup(manager, "popup1"),
-                            createTestPopup(manager, "popup2")));
+                            createTestPopup(
+                                    manager,
+                                    "popup1",
+                                    LocalDate.of(2025, 6, 1),
+                                    LocalDate.of(2025, 7, 1)),
+                            createTestPopup(
+                                    manager,
+                                    "popup2",
+                                    LocalDate.of(2025, 5, 1),
+                                    LocalDate.of(2025, 6, 1))));
 
             for (long i = 1; i <= 3; i++) {
                 itemRepository.save(
@@ -165,7 +179,7 @@ class ConversionStatsServiceTest extends IntegrationTest {
         }
 
         @Test
-        void 정상적으로_통계_데이터를_저장한다() throws JsonProcessingException {
+        void 운영_중인_팝업만_통계_데이터가_저장된다() throws JsonProcessingException {
             // given
             when(dynamoDbInterestedUserCounter.countInterestedUsers(anyLong(), anyLong()))
                     .thenReturn(150L);
@@ -206,7 +220,7 @@ class ConversionStatsServiceTest extends IntegrationTest {
             // then
             List<ConversionStats> stats = conversionStatsRepository.findAll();
 
-            assertThat(stats).hasSize(6);
+            assertThat(stats).hasSize(3);
 
             assertThat(stats)
                     .extracting(
@@ -214,22 +228,18 @@ class ConversionStatsServiceTest extends IntegrationTest {
                             ConversionStats::getItemId,
                             ConversionStats::getBuyerCount)
                     .containsExactlyInAnyOrder(
-                            tuple(1L, 1L, 100),
-                            tuple(1L, 2L, 80),
-                            tuple(1L, 3L, 60),
-                            tuple(2L, 4L, 40),
-                            tuple(2L, 5L, 20),
-                            tuple(2L, 6L, 10));
+                            tuple(1L, 1L, 100), tuple(1L, 2L, 80), tuple(1L, 3L, 60));
         }
     }
 
-    private Popup createTestPopup(Manager manager, String name) {
+    private Popup createTestPopup(
+            Manager manager, String name, LocalDate popupStartDate, LocalDate popupEndDate) {
         return Popup.createPopup(
                 manager,
                 name,
                 "https://bucket/이미지.jpg",
-                LocalDate.now().minusMonths(1),
-                LocalDate.parse("2025-05-01"),
+                popupStartDate,
+                popupEndDate,
                 LocalDateTime.of(LocalDate.now().minusMonths(1), LocalTime.of(6, 0)),
                 LocalDateTime.parse("2025-05-01T22:00:00"),
                 LocalTime.parse("06:00:00"),

@@ -51,7 +51,7 @@ public class ConversionStatsServiceImpl implements ConversionStatsService {
 
     @Override
     public void createConversionStats() {
-        List<Long> popupIds = popupRepository.findAllPopupIds();
+        List<Long> popupIds = popupRepository.findOperatingPopupIds();
 
         List<ConversionStats> statsList = new ArrayList<>();
 

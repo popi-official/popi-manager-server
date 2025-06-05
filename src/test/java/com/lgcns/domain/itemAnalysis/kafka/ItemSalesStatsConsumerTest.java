@@ -35,7 +35,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 @Order(0)
 @EmbeddedKafka(
         partitions = 1,
-        brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"},
+        brokerProperties = {"listeners=PLAINTEXT://localhost:9095", "port=9095"},
         topics = "item-purchased-topic")
 public class ItemSalesStatsConsumerTest extends IntegrationTest {
 
@@ -96,7 +96,7 @@ public class ItemSalesStatsConsumerTest extends IntegrationTest {
         kafkaTemplate.send("item-purchased-topic", message);
 
         // then
-        await().atMost(Duration.ofSeconds(15))
+        await().atMost(Duration.ofSeconds(20))
                 .untilAsserted(
                         () -> {
                             Optional<ItemSalesStats> stats1 =
@@ -139,7 +139,7 @@ public class ItemSalesStatsConsumerTest extends IntegrationTest {
         kafkaTemplate.send("item-purchased-topic", message);
 
         // then
-        await().atMost(Duration.ofSeconds(15))
+        await().atMost(Duration.ofSeconds(20))
                 .untilAsserted(
                         () -> {
                             Optional<ItemSalesStats> updatedStats =

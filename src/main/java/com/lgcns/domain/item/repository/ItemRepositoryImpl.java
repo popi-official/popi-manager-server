@@ -5,6 +5,7 @@ import static com.querydsl.core.types.dsl.Expressions.*;
 
 import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
 import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
+import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -119,5 +120,10 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         }
 
         return new SliceImpl<>(results, PageRequest.of(0, pageSize), hasNext);
+    }
+
+    @Override
+    public List<Item> findItemsByPopupId(Long popupId) {
+        return queryFactory.selectFrom(item).where(item.popup.id.eq(popupId)).fetch();
     }
 }

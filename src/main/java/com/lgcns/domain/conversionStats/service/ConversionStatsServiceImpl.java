@@ -13,7 +13,6 @@ import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import com.lgcns.infra.client.payment.PaymentServiceClient;
 import com.lgcns.infra.dynamodb.conversionStats.DynamoDbInterestedUserCounter;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -63,7 +62,9 @@ public class ConversionStatsServiceImpl implements ConversionStatsService {
 
                 for (ItemBuyerCountResponse count : counts) {
                     int interestedCount =
-                            (int) dynamoDbInterestedUserCounter.countInterestedUsers(popupId, count.itemId());
+                            (int)
+                                    dynamoDbInterestedUserCounter.countInterestedUsers(
+                                            popupId, count.itemId());
                     int buyerCount = count.buyerCount();
                     int conversionRate = Math.round((float) buyerCount / interestedCount * 100);
 

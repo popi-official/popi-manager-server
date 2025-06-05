@@ -32,7 +32,10 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 @Order(0)
-@EmbeddedKafka(partitions = 1, topics = "item-purchased-topic")
+@EmbeddedKafka(
+        partitions = 1,
+        brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"},
+        topics = "item-purchased-topic")
 class ItemPurchasedConsumerTest extends IntegrationTest {
 
     @Autowired private EmbeddedKafkaBroker embeddedKafkaBroker;
@@ -96,7 +99,7 @@ class ItemPurchasedConsumerTest extends IntegrationTest {
         kafkaTemplate.send("item-purchased-topic", message);
 
         // then
-        await().atMost(Duration.ofSeconds(30))
+        await().atMost(Duration.ofSeconds(15))
                 .untilAsserted(
                         () -> {
                             assertThat(itemRepository.findById(1L).orElseThrow().getStock())

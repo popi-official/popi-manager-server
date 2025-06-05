@@ -51,7 +51,9 @@ class PaymentStatsServiceTest extends IntegrationTest {
 
             setAuthentication(manager);
 
-            popupRepository.save(createTestPopup(manager, "popup1"));
+            popupRepository.save(
+                    createTestPopup(
+                            manager, "popup1", LocalDate.of(2025, 6, 1), LocalDate.of(2025, 7, 1)));
             paymentStatsRepository.saveAll(
                     List.of(
                             createTestPaymentStats(50000, AveragePeriod.TOTAL),
@@ -95,7 +97,12 @@ class PaymentStatsServiceTest extends IntegrationTest {
         @Test
         void 다른_매니저의_팝업에_접근하면_예외가_발생한다() {
             // given
-            popupRepository.save(createTestPopup(otherManager, "popup2"));
+            popupRepository.save(
+                    createTestPopup(
+                            otherManager,
+                            "popup2",
+                            LocalDate.of(2025, 6, 1),
+                            LocalDate.of(2025, 7, 1)));
 
             // when & then
             assertThatThrownBy(() -> paymentStatsService.findLatestAverageAmount(2L))
@@ -112,12 +119,20 @@ class PaymentStatsServiceTest extends IntegrationTest {
             manager = managerRepository.save(Manager.createManager("testManager1", "testPassword"));
             popupRepository.saveAll(
                     List.of(
-                            createTestPopup(manager, "popup1"),
-                            createTestPopup(manager, "popup2")));
+                            createTestPopup(
+                                    manager,
+                                    "popup1",
+                                    LocalDate.of(2025, 6, 1),
+                                    LocalDate.of(2025, 7, 1)),
+                            createTestPopup(
+                                    manager,
+                                    "popup2",
+                                    LocalDate.of(2025, 5, 1),
+                                    LocalDate.of(2025, 6, 1))));
         }
 
         @Test
-        void 정상적으로_통계_데이터를_저장한다() throws JsonProcessingException {
+        void 운영_중인_팝업만_통계_데이터가_저장된다() throws JsonProcessingException {
             // given
             String expectedResponse1 =
                     objectMapper.writeValueAsString(
@@ -149,7 +164,7 @@ class PaymentStatsServiceTest extends IntegrationTest {
             // then
             List<PaymentStats> stats = paymentStatsRepository.findAll();
 
-            assertThat(stats).hasSize(4);
+            assertThat(stats).hasSize(2);
             assertThat(stats)
                     .extracting(
                             PaymentStats::getPopupId,
@@ -157,19 +172,18 @@ class PaymentStatsServiceTest extends IntegrationTest {
                             PaymentStats::getPeriod)
                     .containsExactlyInAnyOrder(
                             tuple(1L, 300_000, AveragePeriod.TOTAL),
-                            tuple(1L, 100_000, AveragePeriod.TODAY),
-                            tuple(2L, 200_000, AveragePeriod.TOTAL),
-                            tuple(2L, 150_000, AveragePeriod.TODAY));
+                            tuple(1L, 100_000, AveragePeriod.TODAY));
         }
     }
 
-    private Popup createTestPopup(Manager manager, String name) {
+    private Popup createTestPopup(
+            Manager manager, String name, LocalDate popupStartDate, LocalDate popupEndDate) {
         return Popup.createPopup(
                 manager,
                 name,
                 "https://bucket/이미지.jpg",
-                LocalDate.now().minusMonths(1),
-                LocalDate.parse("2025-05-01"),
+                popupStartDate,
+                popupEndDate,
                 LocalDateTime.of(LocalDate.now().minusMonths(1), LocalTime.of(6, 0)),
                 LocalDateTime.parse("2025-05-01T22:00:00"),
                 LocalTime.parse("06:00:00"),

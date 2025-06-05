@@ -32,7 +32,10 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 @Order(0)
-@EmbeddedKafka(partitions = 1, topics = "item-purchased-topic")
+@EmbeddedKafka(
+        partitions = 1,
+        brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"},
+        topics = "item-purchased-topic")
 class ItemPurchasedConsumerTest extends IntegrationTest {
 
     @Autowired private EmbeddedKafkaBroker embeddedKafkaBroker;

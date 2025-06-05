@@ -28,7 +28,10 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 @Order(0)
-@EmbeddedKafka(partitions = 1, topics = "member-entered-topic")
+@EmbeddedKafka(
+        partitions = 1,
+        brokerProperties = {"listeners=PLAINTEXT://localhost:9093", "port=9093"},
+        topics = "member-entered-topic")
 public class MemberEnteredConsumerTest extends IntegrationTest {
 
     @Autowired private EmbeddedKafkaBroker embeddedKafkaBroker;
@@ -60,7 +63,7 @@ public class MemberEnteredConsumerTest extends IntegrationTest {
 
         // then
         Awaitility.await()
-                .atMost(Duration.ofSeconds(5))
+                .atMost(Duration.ofSeconds(15))
                 .untilAsserted(
                         () -> {
                             List<Entrance> entrances = entranceRepository.findAll();

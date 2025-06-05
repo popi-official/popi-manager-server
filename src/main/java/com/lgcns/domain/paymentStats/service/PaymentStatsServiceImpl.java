@@ -1,7 +1,6 @@
 package com.lgcns.domain.paymentStats.service;
 
 import com.lgcns.domain.manager.domain.Manager;
-import com.lgcns.domain.paymentStats.client.PaymentServiceClient;
 import com.lgcns.domain.paymentStats.domain.AveragePeriod;
 import com.lgcns.domain.paymentStats.domain.PaymentStats;
 import com.lgcns.domain.paymentStats.dto.response.AverageAmountResponse;
@@ -11,6 +10,7 @@ import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
+import com.lgcns.infra.client.payment.PaymentServiceClient;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;

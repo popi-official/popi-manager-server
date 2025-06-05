@@ -43,7 +43,7 @@ public class PaymentStatsServiceImpl implements PaymentStatsService {
 
     @Override
     public void createPaymentStats() {
-        List<Long> popupIds = popupRepository.findAllPopupIds();
+        List<Long> popupIds = popupRepository.findOperatingPopupIds();
 
         List<PaymentStats> statsList = new ArrayList<>();
 

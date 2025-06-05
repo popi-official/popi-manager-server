@@ -36,4 +36,8 @@ public class ItemSalesStats {
                 .salesVolume(salesVolume)
                 .build();
     }
+
+    public void addSalesVolume(int quantity) {
+        this.salesVolume += quantity;
+    }
 }

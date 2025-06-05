@@ -1,6 +1,7 @@
 package com.lgcns.domain.itemAnalysis.domain;
 
 import com.lgcns.domain.item.domain.Item;
+import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ItemAnalysis {
+public class ItemAnalysis extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

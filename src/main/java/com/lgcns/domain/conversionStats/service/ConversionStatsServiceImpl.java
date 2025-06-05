@@ -1,7 +1,6 @@
 package com.lgcns.domain.conversionStats.service;
 
 import com.lgcns.domain.conversionStats.domain.ConversionStats;
-import com.lgcns.domain.conversionStats.domain.PopupEvent;
 import com.lgcns.domain.conversionStats.dto.response.ConversionItem;
 import com.lgcns.domain.conversionStats.dto.response.ConversionItemsResponse;
 import com.lgcns.domain.conversionStats.dto.response.ItemBuyerCountResponse;
@@ -13,7 +12,8 @@ import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import com.lgcns.infra.client.payment.PaymentServiceClient;
-import com.lgcns.infra.dynamodb.DynamoDbProperties;
+import com.lgcns.infra.dynamodb.conversionStats.DynamoDbInterestedUserCounter;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -22,11 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 @Slf4j
 @Service
@@ -38,8 +33,7 @@ public class ConversionStatsServiceImpl implements ConversionStatsService {
     private final PopupRepository popupRepository;
     private final ConversionStatsRepository conversionStatsRepository;
     private final PaymentServiceClient paymentServiceClient;
-    private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
-    private final DynamoDbProperties dynamoDbProperties;
+    private final DynamoDbInterestedUserCounter dynamoDbInterestedUserCounter;
 
     @Override
     @Transactional(readOnly = true)
@@ -69,7 +63,7 @@ public class ConversionStatsServiceImpl implements ConversionStatsService {
 
                 for (ItemBuyerCountResponse count : counts) {
                     int interestedCount =
-                            countInterestedUsersByItem(popupId, count.itemId()).intValue();
+                            (int) dynamoDbInterestedUserCounter.countInterestedUsers(popupId, count.itemId());
                     int buyerCount = count.buyerCount();
                     int conversionRate = Math.round((float) buyerCount / interestedCount * 100);
 
@@ -94,20 +88,6 @@ public class ConversionStatsServiceImpl implements ConversionStatsService {
         if (!statsList.isEmpty()) {
             conversionStatsRepository.bulkInsertConversionStats(statsList);
         }
-    }
-
-    private Long countInterestedUsersByItem(Long popupId, Long targetItemId) {
-        DynamoDbTable<PopupEvent> table =
-                dynamoDbEnhancedClient.table(
-                        dynamoDbProperties.tableName(), TableSchema.fromBean(PopupEvent.class));
-
-        QueryConditional condition =
-                QueryConditional.keyEqualTo(
-                        Key.builder().partitionValue(popupId.toString()).build());
-
-        return table.query(r -> r.queryConditional(condition)).items().stream()
-                .filter(i -> i.getItemId().equals(targetItemId))
-                .count();
     }
 
     private Popup findPopupById(Long popupId) {

@@ -1,4 +1,4 @@
-package com.lgcns.domain.conversionStats.domain;
+package com.lgcns.infra.dynamodb.conversionStats;
 
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;

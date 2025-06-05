@@ -44,9 +44,12 @@ public class VisitorStatsJobManager {
     public Step createVisitorStatsStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
-            ItemReader<Long> createVisitorStatsItemReader,
-            ItemProcessor<Long, VisitorStats> createVisitorStatsItemProcessor,
-            ItemWriter<VisitorStats> createVisitorStatsItemWriter,
+            @Qualifier(VisitorStatsStepManager.CREATE_VISITOR_STATS_ITEM_READER)
+                    ItemReader<Long> createVisitorStatsItemReader,
+            @Qualifier(VisitorStatsStepManager.CREATE_VISITOR_STATS_ITEM_PROCESSOR)
+                    ItemProcessor<Long, VisitorStats> createVisitorStatsItemProcessor,
+            @Qualifier(VisitorStatsStepManager.CREATE_VISITOR_STATS_ITEM_WRITER)
+                    ItemWriter<VisitorStats> createVisitorStatsItemWriter,
             @Qualifier(VISITOR_STATS_TASK_EXECUTOR) TaskExecutor taskExecutor) {
         return new StepBuilder(CREATE_VISITOR_STATS_STEP, jobRepository)
                 .<Long, VisitorStats>chunk(CHUNK_SIZE, transactionManager)

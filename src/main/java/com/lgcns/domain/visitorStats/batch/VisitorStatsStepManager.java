@@ -18,10 +18,10 @@ import org.springframework.context.annotation.Configuration;
 public class VisitorStatsStepManager {
 
     private final VisitorStatsService visitorStatsService;
-    private static final String CREATE_VISITOR_STATS_ITEM_READER = "createVisitorStatsItemReader";
-    private static final String CREATE_VISITOR_STATS_ITEM_PROCESSOR =
+    public static final String CREATE_VISITOR_STATS_ITEM_READER = "createVisitorStatsItemReader";
+    public static final String CREATE_VISITOR_STATS_ITEM_PROCESSOR =
             "createVisitorStatsItemProcessor";
-    private static final String CREATE_VISITOR_STATS_ITEM_WRITER = "createVisitorStatsItemWriter";
+    public static final String CREATE_VISITOR_STATS_ITEM_WRITER = "createVisitorStatsItemWriter";
 
     @Bean(name = CREATE_VISITOR_STATS_ITEM_READER)
     @StepScope

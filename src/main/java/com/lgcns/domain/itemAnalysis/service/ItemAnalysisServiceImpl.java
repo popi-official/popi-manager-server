@@ -46,10 +46,10 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
 
         validatePopupOwnership(currentManager, popup);
 
-        List<ItemTrendingResponse> trendingItems =
+        List<ItemAnalysis> topItems =
                 itemAnalysisRepository.findTopItemsByPopupId(popupId, DASHBOARD_HOT_ITEM_SIZE);
 
-        return trendingItems.isEmpty() ? Collections.emptyList() : trendingItems;
+        return topItems.isEmpty() ? Collections.emptyList() : convertToResponse(topItems);
     }
 
     @Override
@@ -189,5 +189,11 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
 
         itemAnalysis.updateScores(score.popularityScore(), score.salesVolume());
         return itemAnalysis;
+    }
+
+    private List<ItemTrendingResponse> convertToResponse(List<ItemAnalysis> topItems) {
+        return topItems.stream()
+                .map(analysis -> ItemTrendingResponse.from(analysis.getItem()))
+                .collect(Collectors.toList());
     }
 }

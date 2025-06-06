@@ -4,8 +4,6 @@ import static com.lgcns.domain.item.domain.QItem.item;
 import static com.lgcns.domain.itemAnalysis.domain.QItemAnalysis.itemAnalysis;
 
 import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
-import com.lgcns.domain.itemAnalysis.dto.response.ItemTrendingResponse;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -22,21 +20,14 @@ public class ItemAnalysisRepositoryCustomImpl implements ItemAnalysisRepositoryC
     private static final int CHUNK_SIZE = 500;
 
     @Override
-    public List<ItemTrendingResponse> findTopItemsByPopupId(Long popupId, int limit) {
+    public List<ItemAnalysis> findTopItemsByPopupId(Long popupId, int limit) {
         NumberExpression<Integer> totalScore =
                 itemAnalysis.popularityScore.add(itemAnalysis.salesVolume);
 
         return queryFactory
-                .select(
-                        Projections.constructor(
-                                ItemTrendingResponse.class,
-                                item.id,
-                                item.name,
-                                item.imageUrl,
-                                item.price,
-                                item.stock))
-                .from(itemAnalysis)
+                .selectFrom(itemAnalysis)
                 .join(itemAnalysis.item, item)
+                .fetchJoin()
                 .where(item.popup.id.eq(popupId))
                 .orderBy(totalScore.desc())
                 .limit(limit)

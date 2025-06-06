@@ -35,6 +35,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
+    private static final int TOP_ITEMS_LIMIT = 3;
+
     @Override
     @Transactional(readOnly = true)
     public List<NotificationResponse> findNotificationList(Long popupId) {
@@ -50,7 +52,8 @@ public class NotificationServiceImpl implements NotificationService {
         final Long managerId = popup.getManager().getId();
         final Long popupId = popup.getId();
 
-        List<ItemAnalysis> top3Items = itemAnalysisRepository.findTop3ItemsByPopupId(popupId);
+        List<ItemAnalysis> top3Items =
+                itemAnalysisRepository.findTopItemsByPopupId(popupId, TOP_ITEMS_LIMIT);
 
         boolean isHot =
                 top3Items.stream()

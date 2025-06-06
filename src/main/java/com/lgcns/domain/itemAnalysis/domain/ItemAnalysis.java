@@ -22,11 +22,11 @@ public class ItemAnalysis extends BaseTimeEntity {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    private int popularityScore = 0;
+    private int popularityScore;
 
-    private double preSurveyPopularity = 0.0;
+    private double preSurveyPopularity;
 
-    private int salesVolume = 0;
+    private int salesVolume;
 
     @Builder
     private ItemAnalysis(Item item) {

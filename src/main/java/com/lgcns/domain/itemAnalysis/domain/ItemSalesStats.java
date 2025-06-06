@@ -20,7 +20,7 @@ public class ItemSalesStats {
 
     private Long itemId;
 
-    private int salesVolume = 0;
+    private int salesVolume;
 
     @Builder
     private ItemSalesStats(Long popupId, Long itemId) {

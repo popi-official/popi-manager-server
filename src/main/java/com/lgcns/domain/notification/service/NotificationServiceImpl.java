@@ -1,9 +1,13 @@
 package com.lgcns.domain.notification.service;
 
+import static com.lgcns.domain.notification.domain.Popularity.HOT;
+import static com.lgcns.domain.notification.domain.Popularity.NORMAL;
+
 import com.lgcns.domain.item.domain.Item;
+import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
+import com.lgcns.domain.itemAnalysis.repository.ItemAnalysisRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.notification.domain.Notification;
-import com.lgcns.domain.notification.domain.Popularity;
 import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.repository.NotificationRepository;
 import com.lgcns.domain.popup.domain.Popup;
@@ -24,9 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class NotificationServiceImpl implements NotificationService {
 
-    private final NotificationRepository notificationRepository;
-    private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;
+    private final PopupRepository popupRepository;
+    private final NotificationRepository notificationRepository;
+    private final ItemAnalysisRepository itemAnalysisRepository;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -45,13 +50,19 @@ public class NotificationServiceImpl implements NotificationService {
         final Long managerId = popup.getManager().getId();
         final Long popupId = popup.getId();
 
+        List<ItemAnalysis> top3Items = itemAnalysisRepository.findTop3ItemsByPopupId(popupId);
+
+        boolean isHot =
+                top3Items.stream()
+                        .anyMatch(analysis -> analysis.getItem().getId().equals(item.getId()));
+
         Notification notification =
                 Notification.createNotification(
                         managerId,
                         popupId,
                         item.getId(),
                         item.getName(),
-                        Popularity.NORMAL,
+                        isHot ? HOT : NORMAL,
                         item.getMinStock());
 
         notificationRepository.save(notification);

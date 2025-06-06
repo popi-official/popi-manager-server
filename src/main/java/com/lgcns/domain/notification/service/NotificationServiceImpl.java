@@ -1,6 +1,13 @@
 package com.lgcns.domain.notification.service;
 
+import static com.lgcns.domain.notification.domain.Popularity.HOT;
+import static com.lgcns.domain.notification.domain.Popularity.NORMAL;
+
+import com.lgcns.domain.item.domain.Item;
+import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
+import com.lgcns.domain.itemAnalysis.repository.ItemAnalysisRepository;
 import com.lgcns.domain.manager.domain.Manager;
+import com.lgcns.domain.notification.domain.Notification;
 import com.lgcns.domain.notification.dto.response.NotificationResponse;
 import com.lgcns.domain.notification.repository.NotificationRepository;
 import com.lgcns.domain.popup.domain.Popup;
@@ -10,17 +17,23 @@ import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class NotificationServiceImpl implements NotificationService {
 
-    private final NotificationRepository notificationRepository;
-    private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;
+    private final PopupRepository popupRepository;
+    private final NotificationRepository notificationRepository;
+    private final ItemAnalysisRepository itemAnalysisRepository;
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -30,6 +43,39 @@ public class NotificationServiceImpl implements NotificationService {
         validatePopupOwnership(currentManager, popup);
 
         return notificationRepository.findByManagerIdAndPopupId(currentManager.getId(), popupId);
+    }
+
+    @Override
+    public void sendLowStockMessage(Popup popup, Item item) {
+        final Long managerId = popup.getManager().getId();
+        final Long popupId = popup.getId();
+
+        List<ItemAnalysis> top3Items = itemAnalysisRepository.findTop3ItemsByPopupId(popupId);
+
+        boolean isHot =
+                top3Items.stream()
+                        .anyMatch(analysis -> analysis.getItem().getId().equals(item.getId()));
+
+        Notification notification =
+                Notification.createNotification(
+                        managerId,
+                        popupId,
+                        item.getId(),
+                        item.getName(),
+                        isHot ? HOT : NORMAL,
+                        item.getMinStock());
+
+        notificationRepository.save(notification);
+
+        NotificationResponse response =
+                NotificationResponse.of(
+                        notification.getId(),
+                        notification.getPopularity(),
+                        notification.getItemName(),
+                        notification.getMinStock(),
+                        notification.getCreatedAt());
+
+        messagingTemplate.convertAndSend("/topic/" + managerId + "/popup/" + popupId, response);
     }
 
     private Popup findPopupById(Long popupId) {

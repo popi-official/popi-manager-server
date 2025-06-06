@@ -101,6 +101,12 @@ dependencies {
     // Batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     testImplementation 'org.springframework.batch:spring-batch-test'
+
+    // WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // WebSocket Security
+    implementation 'org.springframework.security:spring-security-messaging'
 }
 
 dependencyManagement {

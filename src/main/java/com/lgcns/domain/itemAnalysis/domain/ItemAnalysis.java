@@ -22,29 +22,19 @@ public class ItemAnalysis extends BaseTimeEntity {
     @JoinColumn(name = "item_id")
     private Item item;
 
-    private int popularityScore;
+    private int popularityScore = 0;
 
-    private double preSurveyPopularity;
+    private double preSurveyPopularity = 0.0;
 
-    private int salesVolume;
+    private int salesVolume = 0;
 
     @Builder
-    private ItemAnalysis(
-            Item item, int popularityScore, double preSurveyPopularity, int salesVolume) {
+    private ItemAnalysis(Item item) {
         this.item = item;
-        this.popularityScore = popularityScore;
-        this.preSurveyPopularity = preSurveyPopularity;
-        this.salesVolume = salesVolume;
     }
 
-    public static ItemAnalysis createItemAnalysis(
-            Item item, int popularityScore, double preSurveyPopularity, int salesVolume) {
-        return ItemAnalysis.builder()
-                .item(item)
-                .popularityScore(popularityScore)
-                .preSurveyPopularity(preSurveyPopularity)
-                .salesVolume(salesVolume)
-                .build();
+    public static ItemAnalysis createItemAnalysis(Item item) {
+        return ItemAnalysis.builder().item(item).build();
     }
 
     public void updateScores(int popularityScore, int salesVolume) {

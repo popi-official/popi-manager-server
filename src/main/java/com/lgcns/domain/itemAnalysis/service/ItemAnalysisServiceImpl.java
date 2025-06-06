@@ -55,7 +55,7 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
     @Override
     public List<Long> findTargetPopupIds() {
         List<Popup> activePopups = findActivePopups();
-        return activePopups.stream().map(Popup::getId).collect(Collectors.toList());
+        return activePopups.stream().map(Popup::getId).toList();
     }
 
     @Override
@@ -185,7 +185,7 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
         ItemAnalysis itemAnalysis =
                 itemAnalysisRepository
                         .findByItemId(score.itemId())
-                        .orElse(ItemAnalysis.createItemAnalysis(item, 0, 0.0, 0));
+                        .orElse(ItemAnalysis.createItemAnalysis(item));
 
         itemAnalysis.updateScores(score.popularityScore(), score.salesVolume());
         return itemAnalysis;

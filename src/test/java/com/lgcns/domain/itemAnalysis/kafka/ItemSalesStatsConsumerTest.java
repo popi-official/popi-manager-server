@@ -126,7 +126,8 @@ public class ItemSalesStatsConsumerTest extends IntegrationTest {
         KafkaTemplate<String, ItemPurchasedMessage> kafkaTemplate =
                 new KafkaTemplate<>(producerFactory);
 
-        ItemSalesStats existingStats = ItemSalesStats.createItemSalesStats(1L, 1L, 5);
+        ItemSalesStats existingStats = ItemSalesStats.createItemSalesStats(1L, 1L);
+        existingStats.addSalesVolume(5);
         itemSalesStatsRepository.save(existingStats);
 
         List<ItemPurchasedMessage.Item> items = List.of(new ItemPurchasedMessage.Item(1L, 3));

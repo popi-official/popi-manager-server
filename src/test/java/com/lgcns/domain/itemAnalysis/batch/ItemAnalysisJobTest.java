@@ -129,8 +129,8 @@ public class ItemAnalysisJobTest extends IntegrationTest {
             // 판매량 데이터 준비
             itemSalesStatsRepository.saveAll(
                     List.of(
-                            ItemSalesStats.createItemSalesStats(popupId, item1.getId(), 30),
-                            ItemSalesStats.createItemSalesStats(popupId, item2.getId(), 20)));
+                            createItemSalesStatsWithVolume(popupId, item1.getId(), 30),
+                            createItemSalesStatsWithVolume(popupId, item2.getId(), 20)));
 
             // DynamoDB 이벤트 모킹
             List<PopupEventResponse> mockEvents =
@@ -165,12 +165,14 @@ public class ItemAnalysisJobTest extends IntegrationTest {
             itemRepository.save(item1);
 
             // 기존 분석 데이터
-            ItemAnalysis existingAnalysis = ItemAnalysis.createItemAnalysis(item1, 50, 0.0, 20);
+            ItemAnalysis existingAnalysis = ItemAnalysis.createItemAnalysis(item1);
+            existingAnalysis.updateScores(50, 20);
             itemAnalysisRepository.save(existingAnalysis);
 
             // 판매량 데이터
-            itemSalesStatsRepository.save(
-                    ItemSalesStats.createItemSalesStats(popupId, item1.getId(), 35));
+            ItemSalesStats stats = ItemSalesStats.createItemSalesStats(popupId, item1.getId());
+            stats.addSalesVolume(35);
+            itemSalesStatsRepository.save(stats);
 
             List<PopupEventResponse> mockEvents = createMockPopupEvents(popupId, item1.getId());
             when(dynamoDbClient.getEventsBetweenTimes(eq(popupId), any(), any()))
@@ -208,8 +210,9 @@ public class ItemAnalysisJobTest extends IntegrationTest {
                             runningPopup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
             itemRepository.save(item1);
 
-            itemSalesStatsRepository.save(
-                    ItemSalesStats.createItemSalesStats(popupId, item1.getId(), 25));
+            ItemSalesStats stats = ItemSalesStats.createItemSalesStats(popupId, item1.getId());
+            stats.addSalesVolume(25);
+            itemSalesStatsRepository.save(stats);
 
             when(dynamoDbClient.getEventsBetweenTimes(eq(popupId), any(), any()))
                     .thenReturn(new ArrayList<>());
@@ -232,6 +235,12 @@ public class ItemAnalysisJobTest extends IntegrationTest {
             assertThat(savedAnalysis.getPopularityScore()).isEqualTo(0);
             assertThat(savedAnalysis.getSalesVolume()).isEqualTo(25);
         }
+    }
+
+    private ItemSalesStats createItemSalesStatsWithVolume(Long popupId, Long itemId, int volume) {
+        ItemSalesStats stats = ItemSalesStats.createItemSalesStats(popupId, itemId);
+        stats.addSalesVolume(volume);
+        return stats;
     }
 
     private JobParameters buildJobParameters() {

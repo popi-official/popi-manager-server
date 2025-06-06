@@ -26,7 +26,7 @@ public class ItemSalesStatsConsumer {
                             .orElseGet(
                                     () ->
                                             ItemSalesStats.createItemSalesStats(
-                                                    message.popupId(), item.itemId(), 0));
+                                                    message.popupId(), item.itemId()));
 
             stats.addSalesVolume(item.quantity());
             itemSalesStatsRepository.save(stats);

@@ -74,9 +74,9 @@ class ItemAnalysisServiceTest extends IntegrationTest {
         void setUpForTrendingItems() {
             itemAnalysisRepository.saveAll(
                     List.of(
-                            ItemAnalysis.createItemAnalysis(item1, 100, 0.0, 50),
-                            ItemAnalysis.createItemAnalysis(item2, 80, 0.0, 30),
-                            ItemAnalysis.createItemAnalysis(item3, 60, 0.0, 20)));
+                            createItemAnalysisWithScores(item1, 100, 50),
+                            createItemAnalysisWithScores(item2, 80, 30),
+                            createItemAnalysisWithScores(item3, 60, 20)));
         }
 
         @Test
@@ -133,6 +133,13 @@ class ItemAnalysisServiceTest extends IntegrationTest {
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }
+    }
+
+    private ItemAnalysis createItemAnalysisWithScores(
+            Item item, int popularityScore, int salesVolume) {
+        ItemAnalysis analysis = ItemAnalysis.createItemAnalysis(item);
+        analysis.updateScores(popularityScore, salesVolume);
+        return analysis;
     }
 
     private Popup createTestPopup(Manager manager, String startDate, String endDate) {

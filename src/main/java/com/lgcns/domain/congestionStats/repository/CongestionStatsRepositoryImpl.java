@@ -9,6 +9,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
@@ -94,6 +95,25 @@ public class CongestionStatsRepositoryImpl implements CongestionStatsRepositoryC
                 responseMap.get(DayOfWeek.FRIDAY),
                 responseMap.get(DayOfWeek.SATURDAY),
                 responseMap.get(DayOfWeek.SUNDAY));
+    }
+
+    @Override
+    public List<Long> findPopupIdsWithoutCongestionStats(
+            List<Long> popupIds, LocalDate nowDate, LocalTime nowTime) {
+        List<Long> existingIds =
+                queryFactory
+                        .select(congestionStats.popupId)
+                        .distinct()
+                        .from(congestionStats)
+                        .where(
+                                congestionStats.popupId.in(popupIds),
+                                congestionStats.analyzedDate.eq(nowDate),
+                                congestionStats.analyzedTime.hour().eq(nowTime.getHour()))
+                        .fetch();
+
+        return popupIds.stream()
+                .filter(id -> !existingIds.contains(id))
+                .collect(Collectors.toList());
     }
 
     private List<Integer> generateHourlyTimeList(LocalTime startTime, LocalTime endTime) {

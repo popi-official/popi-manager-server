@@ -108,13 +108,11 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
     private LocalDateTime calculatePreviousTimeEnd(LocalDateTime currentTime) {
         int hour = currentTime.getHour();
 
-        // 오전 6시부터 8시 사이인 경우, 직전 타임은 전날 22:00~23:59:59
         if (hour >= 6 && hour < 7) {
             return LocalDateTime.of(
                     currentTime.toLocalDate().minusDays(1), LocalTime.of(23, 59, 59));
         } else {
-            // 직전 타임 계산 (2시간 간격)
-            int previousTimeBlockEnd = hour - 1;
+            int previousTimeBlockEnd = (hour - 1 + 24) % 24;
             return currentTime
                     .withHour(previousTimeBlockEnd)
                     .withMinute(59)
@@ -137,27 +135,27 @@ public class ItemAnalysisServiceImpl implements ItemAnalysisService {
         Set<Long> allItemIds = new HashSet<>();
         Map<Long, Integer> popularityScoreMap = new HashMap<>();
 
+        List<PopupEventResponse> allEvents =
+                dynamoDbClient.getEventsBetweenTimes(popupId, null, endTime);
+
+        Map<Long, List<PopupEventResponse>> groupedEvents =
+                allEvents.stream()
+                        .filter(e -> e.getItemId() != null && e.getScore() > 0)
+                        .collect(Collectors.groupingBy(PopupEventResponse::getItemId));
+
         // 인기도 점수 계산 (DynamoDB)
         for (Item item : itemList) {
             Long itemId = item.getId();
             allItemIds.add(itemId);
 
             ItemAnalysis analysis = analysisMap.get(itemId);
+
+            List<PopupEventResponse> itemEvents =
+                    groupedEvents.getOrDefault(itemId, Collections.emptyList());
+
+            int additionalScore = itemEvents.stream().mapToInt(PopupEventResponse::getScore).sum();
+
             int previousScore = analysis != null ? analysis.getPopularityScore() : 0;
-            LocalDateTime startTime = analysis != null ? analysis.getUpdatedAt() : null;
-
-            List<PopupEventResponse> events =
-                    dynamoDbClient.getEventsBetweenTimes(popupId, startTime, endTime);
-
-            int additionalScore = 0;
-            for (PopupEventResponse event : events) {
-                if (event.getItemId() != null
-                        && event.getItemId().equals(itemId)
-                        && event.getScore() > 0) {
-                    additionalScore += event.getScore();
-                }
-            }
-
             int totalScore = previousScore + additionalScore;
             popularityScoreMap.put(itemId, totalScore);
         }

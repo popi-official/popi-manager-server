@@ -20,20 +20,19 @@ public class ItemSalesStats {
 
     private Long itemId;
 
-    private int salesVolume = 0;
+    private int salesVolume;
 
     @Builder
-    private ItemSalesStats(Long popupId, Long itemId, int salesVolume) {
+    private ItemSalesStats(Long popupId, Long itemId) {
         this.popupId = popupId;
         this.itemId = itemId;
-        this.salesVolume = salesVolume;
     }
 
-    public static ItemSalesStats createItemSalesStats(Long popupId, Long itemId, int salesVolume) {
-        return ItemSalesStats.builder()
-                .popupId(popupId)
-                .itemId(itemId)
-                .salesVolume(salesVolume)
-                .build();
+    public static ItemSalesStats createItemSalesStats(Long popupId, Long itemId) {
+        return ItemSalesStats.builder().popupId(popupId).itemId(itemId).build();
+    }
+
+    public void addSalesVolume(int quantity) {
+        this.salesVolume += quantity;
     }
 }

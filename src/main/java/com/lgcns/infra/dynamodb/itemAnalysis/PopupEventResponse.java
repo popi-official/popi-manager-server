@@ -1,4 +1,4 @@
-package com.lgcns.domain.itemAnalysis.dto.response;
+package com.lgcns.infra.dynamodb.itemAnalysis;
 
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;

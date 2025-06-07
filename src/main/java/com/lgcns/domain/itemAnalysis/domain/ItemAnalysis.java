@@ -1,6 +1,7 @@
 package com.lgcns.domain.itemAnalysis.domain;
 
 import com.lgcns.domain.item.domain.Item;
+import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ItemAnalysis {
+public class ItemAnalysis extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,22 +29,12 @@ public class ItemAnalysis {
     private int salesVolume;
 
     @Builder
-    private ItemAnalysis(
-            Item item, int popularityScore, double preSurveyPopularity, int salesVolume) {
+    private ItemAnalysis(Item item) {
         this.item = item;
-        this.popularityScore = popularityScore;
-        this.preSurveyPopularity = preSurveyPopularity;
-        this.salesVolume = salesVolume;
     }
 
-    public static ItemAnalysis createItemAnalysis(
-            Item item, int popularityScore, double preSurveyPopularity, int salesVolume) {
-        return ItemAnalysis.builder()
-                .item(item)
-                .popularityScore(popularityScore)
-                .preSurveyPopularity(preSurveyPopularity)
-                .salesVolume(salesVolume)
-                .build();
+    public static ItemAnalysis createItemAnalysis(Item item) {
+        return ItemAnalysis.builder().item(item).build();
     }
 
     public void updateScores(int popularityScore, int salesVolume) {

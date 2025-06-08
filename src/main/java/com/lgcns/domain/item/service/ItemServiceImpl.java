@@ -47,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 public class ItemServiceImpl implements ItemService {
 
+    private static final int HOT_ITEMS_LIMIT = 3;
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;

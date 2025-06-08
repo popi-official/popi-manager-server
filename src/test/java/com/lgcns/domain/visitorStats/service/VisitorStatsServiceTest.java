@@ -331,7 +331,7 @@ class VisitorStatsServiceTest extends IntegrationTest {
 
         @Test
         @Transactional
-        void 방문자가_없으면_팝업_ID_방문자_통계_조회에_성공한다() {
+        void 방문자가_없으면_빈_리스트_반환에_성공한다() {
             // given
             Long popup2Id = popup2.getId();
 

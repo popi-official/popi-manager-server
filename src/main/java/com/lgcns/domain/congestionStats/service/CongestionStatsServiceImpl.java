@@ -1,5 +1,6 @@
 package com.lgcns.domain.congestionStats.service;
 
+import com.lgcns.domain.congestionStats.domain.CongestionStats;
 import com.lgcns.domain.congestionStats.dto.response.CongestionStatsResponse;
 import com.lgcns.domain.congestionStats.repository.CongestionStatsRepository;
 import com.lgcns.domain.entrance.repository.EntranceRepository;
@@ -7,6 +8,7 @@ import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.domain.popup.repository.PopupRepository;
+import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import jakarta.transaction.Transactional;
@@ -52,6 +54,22 @@ public class CongestionStatsServiceImpl implements CongestionStatsService {
         return new ArrayList<>(
                 congestionStatsRepository.findPopupIdsWithoutCongestionStats(
                         popupIdsWithEntrances, nowDate, nowTime));
+    }
+
+    @Override
+    public CongestionStats convertCongestionStats(Long popupId) {
+        LocalDate nowDate = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+        java.time.DayOfWeek dayOfWeek = nowDate.getDayOfWeek();
+
+        Long hourlyCount = entranceRepository.findHourlyEntranceCount(popupId, nowDate, nowTime);
+
+        return CongestionStats.createCongestionStats(
+                popupId,
+                hourlyCount.intValue(),
+                DayOfWeek.valueOf(dayOfWeek.name()),
+                nowDate,
+                nowTime);
     }
 
     private void validatePopupOwnership(Manager manager, Popup popup) {

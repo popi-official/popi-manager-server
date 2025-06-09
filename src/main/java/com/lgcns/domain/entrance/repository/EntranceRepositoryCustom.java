@@ -14,4 +14,6 @@ public interface EntranceRepositoryCustom {
             Long popupId, LocalDate nowDate, LocalTime nowTime);
 
     List<Long> findPopupIdsWithEntrances(List<Long> popupIds);
+
+    Long findHourlyEntranceCount(Long popupId, LocalDate nowDate, LocalTime nowTime);
 }

@@ -7,7 +7,9 @@ import com.lgcns.domain.congestionStats.dto.response.DailyCongestionStatsRespons
 import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -48,18 +50,22 @@ public class CongestionStatsRepositoryImpl implements CongestionStatsRepositoryC
                         .then(6)
                         .otherwise(7);
 
+        NumberTemplate<Integer> groupedHour =
+                Expressions.numberTemplate(
+                        Integer.class, "FLOOR(HOUR({0}) / 2) * 2", congestionStats.analyzedTime);
+
         List<DailyCongestionStatsResponse> result =
                 queryFactory
                         .select(
                                 Projections.constructor(
                                         DailyCongestionStatsResponse.class,
                                         congestionStats.dayOfWeek,
-                                        congestionStats.analyzedTime.hour(),
+                                        groupedHour,
                                         congestionStats.entrantCount.avg().intValue()))
                         .from(congestionStats)
                         .where(congestionStats.popupId.eq(popupId))
-                        .groupBy(congestionStats.dayOfWeek, congestionStats.analyzedTime)
-                        .orderBy(dayOfWeekOrder.asc(), congestionStats.analyzedTime.asc())
+                        .groupBy(congestionStats.dayOfWeek, groupedHour)
+                        .orderBy(dayOfWeekOrder.asc(), groupedHour.asc())
                         .fetch();
 
         Map<DayOfWeek, Map<Integer, DailyCongestionStatsResponse>> statsMap =

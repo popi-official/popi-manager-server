@@ -9,10 +9,12 @@ management:
         exclude: "*"
     web:
       exposure:
-        include: health
+        include: health, prometheus
       base-path: /manager-actuator
     access:
       default: none
   endpoint:
     health:
+      access: unrestricted
+    prometheus:
       access: unrestricted

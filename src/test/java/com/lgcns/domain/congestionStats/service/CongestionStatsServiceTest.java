@@ -9,6 +9,10 @@ import com.lgcns.domain.congestionStats.domain.CongestionStats;
 import com.lgcns.domain.congestionStats.dto.response.CongestionStatsResponse;
 import com.lgcns.domain.congestionStats.dto.response.DailyCongestionStatsResponse;
 import com.lgcns.domain.congestionStats.repository.CongestionStatsRepository;
+import com.lgcns.domain.entrance.domain.Entrance;
+import com.lgcns.domain.entrance.domain.MemberAge;
+import com.lgcns.domain.entrance.domain.MemberGender;
+import com.lgcns.domain.entrance.repository.EntranceRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
@@ -20,6 +24,8 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +39,7 @@ public class CongestionStatsServiceTest extends IntegrationTest {
 
     @Autowired ManagerRepository managerRepository;
     @Autowired PopupRepository popupRepository;
+    @Autowired EntranceRepository entranceRepository;
 
     private Manager ownerManager;
     private Manager otherManager;
@@ -139,6 +146,196 @@ public class CongestionStatsServiceTest extends IntegrationTest {
         }
     }
 
+    @Nested
+    class 진행_중인_팝업_id_리스트를_조회할_때 {
+
+        @Test
+        void 운영_중이고_입장_내역이_존재하며_중복된_혼잡도_분석이_없는_팝업이_존재하면_조회에_성공한다() {
+            // given
+            Popup popup = createRunningPopup();
+            popupRepository.save(popup);
+            Long popupId = popup.getId();
+
+            entranceRepository.save(
+                    Entrance.createPopupEnter(
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.TWENTIES,
+                            LocalDate.now(),
+                            LocalTime.parse("10:00:00")));
+
+            // when
+            List<Long> result = congestionStatsService.findTargetPopupIds();
+
+            // then
+            assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result).hasSize(1),
+                    () -> assertThat(result.get(0)).isEqualTo(popupId));
+        }
+
+        @Test
+        void 운영_중인_팝업이_없으면_빈_리스트가_조회된다() {
+            // given
+            Popup popup = createClosedPopup();
+            popupRepository.save(popup);
+
+            // when
+            List<Long> result = congestionStatsService.findTargetPopupIds();
+
+            // then
+            assertAll(() -> assertThat(result).isNotNull(), () -> assertThat(result).hasSize(0));
+        }
+
+        @Test
+        void 운영_중인_팝업에_대해_입장_내역이_없으면_조회에_포함되지_않는다() {
+            // given
+            Popup popup = createRunningPopup();
+            popupRepository.save(popup);
+
+            // when
+            List<Long> result = congestionStatsService.findTargetPopupIds();
+
+            // then
+            assertAll(() -> assertThat(result).isNotNull(), () -> assertThat(result).hasSize(0));
+        }
+
+        @Test
+        void 운영_중인_팝업에_대해_중복된_혼잡도_분석이_존재하면_조회에_포함되지_않는다() {
+            // given
+            Popup popup = createRunningPopup();
+            popupRepository.save(popup);
+            Long popupId = popup.getId();
+
+            entranceRepository.save(
+                    Entrance.createPopupEnter(
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.TWENTIES,
+                            LocalDate.now(),
+                            LocalTime.parse("10:00:00")));
+
+            LocalDate nowDate = LocalDate.now();
+            LocalTime nowTime = LocalTime.now();
+
+            congestionStatsRepository.save(
+                    CongestionStats.createCongestionStats(
+                            popupId, 1, DayOfWeek.MONDAY, nowDate, nowTime));
+
+            // when
+            List<Long> result = congestionStatsService.findTargetPopupIds();
+
+            // then
+            assertAll(() -> assertThat(result).isNotNull(), () -> assertThat(result).hasSize(0));
+        }
+    }
+
+    @Nested
+    class 혼잡도_분석을_생성할_때 {
+
+        @Test
+        void 한_시간_전_입장_내역이_존재하면_생성에_성공한다() {
+            // given
+            Popup popup = createRunningPopup();
+            popupRepository.save(popup);
+            Long popupId = popup.getId();
+
+            LocalDate nowDate = LocalDate.now();
+            LocalTime nowTime = LocalTime.now();
+
+            entranceRepository.save(
+                    Entrance.createPopupEnter(
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.TEENAGER,
+                            nowDate,
+                            nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
+            entranceRepository.save(
+                    Entrance.createPopupEnter(
+                            popupId,
+                            MemberGender.FEMALE,
+                            MemberAge.TWENTIES,
+                            nowDate,
+                            nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
+            entranceRepository.save(
+                    Entrance.createPopupEnter(
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.THIRTIES,
+                            nowDate,
+                            nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
+            entranceRepository.save(
+                    Entrance.createPopupEnter(
+                            popupId,
+                            MemberGender.FEMALE,
+                            MemberAge.FORTIES_AND_ABOVE,
+                            nowDate,
+                            nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
+            entranceRepository.save(
+                    Entrance.createPopupEnter(
+                            popupId,
+                            MemberGender.MALE,
+                            MemberAge.TWENTIES,
+                            nowDate,
+                            nowTime.minusHours(1).truncatedTo(ChronoUnit.HOURS)));
+
+            // when
+            CongestionStats result = congestionStatsService.convertCongestionStats(popupId);
+
+            // then
+            assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result.getPopupId()).isEqualTo(popupId),
+                    () -> assertThat(result.getEntrantCount()).isEqualTo(5),
+                    () ->
+                            assertThat(result.getDayOfWeek())
+                                    .isEqualTo(DayOfWeek.valueOf(nowDate.getDayOfWeek().name())),
+                    () -> assertThat(result.getAnalyzedDate()).isEqualTo(nowDate),
+                    () ->
+                            assertThat(result.getAnalyzedTime().truncatedTo(ChronoUnit.SECONDS))
+                                    .isEqualTo(nowTime.truncatedTo(ChronoUnit.SECONDS)));
+        }
+    }
+
+    @Nested
+    class 혼잡도_분석_리스트를_저장할_때 {
+
+        @Test
+        void 혼잡도_분석_리스트가_존재하면_저장에_성공한다() {
+            // given
+            Popup popup = createRunningPopup();
+            popupRepository.save(popup);
+            Long popupId = popup.getId();
+
+            List<CongestionStats> congestionStatsList = createCongestionStatsList(popupId);
+
+            // when
+            congestionStatsService.createCongestionStats(congestionStatsList);
+
+            // then
+            List<CongestionStats> result = congestionStatsRepository.findAll();
+
+            assertAll(
+                    () -> assertThat(result).isNotEmpty(),
+                    () -> assertThat(result).hasSize(3),
+                    () ->
+                            assertThat(result.get(0).getPopupId())
+                                    .isEqualTo(congestionStatsList.get(0).getPopupId()),
+                    () ->
+                            assertThat(result.get(0).getEntrantCount())
+                                    .isEqualTo(congestionStatsList.get(0).getEntrantCount()),
+                    () ->
+                            assertThat(result.get(0).getDayOfWeek())
+                                    .isEqualTo(congestionStatsList.get(0).getDayOfWeek()),
+                    () ->
+                            assertThat(result.get(0).getAnalyzedDate())
+                                    .isEqualTo(congestionStatsList.get(0).getAnalyzedDate()),
+                    () ->
+                            assertThat(result.get(0).getAnalyzedTime())
+                                    .isEqualTo(congestionStatsList.get(0).getAnalyzedTime()));
+        }
+    }
+
     private void createCongestionStats(Popup popup) {
         Long popupId = popup.getId();
         LocalDate startDate = LocalDate.of(2025, 5, 17);
@@ -162,5 +359,82 @@ public class CongestionStatsServiceTest extends IntegrationTest {
                 congestionStatsRepository.save(stats);
             }
         }
+    }
+
+    private Popup createClosedPopup() {
+        return Popup.createPopup(
+                ownerManager,
+                "testPopup",
+                "https://bucket/이미지.jpg",
+                LocalDate.parse("2020-01-01"),
+                LocalDate.parse("2020-01-31"),
+                LocalDateTime.parse("2025-01-01T10:00:00"),
+                LocalDateTime.parse("2025-01-31T20:00:00"),
+                LocalTime.parse("10:00:00"),
+                LocalTime.parse("20:00:00"),
+                100,
+                20,
+                "서울특별시 강남구 테헤란로 123",
+                "3층 A호",
+                37.123456,
+                127.123456);
+    }
+
+    private Popup createRunningPopup() {
+        LocalDate nowDate = LocalDate.now();
+
+        return Popup.createPopup(
+                ownerManager,
+                "testPopup",
+                "https://bucket/이미지.jpg",
+                nowDate,
+                nowDate.plusMonths(5),
+                LocalDateTime.parse("2025-01-01T10:00:00"),
+                LocalDateTime.parse("2025-01-31T20:00:00"),
+                LocalTime.parse("00:00:00"),
+                LocalTime.parse("23:59:59"),
+                100,
+                20,
+                "서울특별시 강남구 테헤란로 123",
+                "3층 A호",
+                37.123456,
+                127.123456);
+    }
+
+    private List<CongestionStats> createCongestionStatsList(Long popupId) {
+        List<CongestionStats> congestionStatsList = new ArrayList<>();
+
+        LocalDate date = LocalDate.of(2025, 6, 10);
+        java.time.DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+        CongestionStats stats1 =
+                CongestionStats.createCongestionStats(
+                        popupId,
+                        20,
+                        DayOfWeek.valueOf(dayOfWeek.name()),
+                        date,
+                        LocalTime.of(10, 0));
+
+        CongestionStats stats2 =
+                CongestionStats.createCongestionStats(
+                        popupId,
+                        35,
+                        DayOfWeek.valueOf(dayOfWeek.name()),
+                        date,
+                        LocalTime.of(11, 0));
+
+        CongestionStats stats3 =
+                CongestionStats.createCongestionStats(
+                        popupId,
+                        42,
+                        DayOfWeek.valueOf(dayOfWeek.name()),
+                        date,
+                        LocalTime.of(12, 0));
+
+        congestionStatsList.add(stats1);
+        congestionStatsList.add(stats2);
+        congestionStatsList.add(stats3);
+
+        return congestionStatsList;
     }
 }

@@ -1,7 +1,9 @@
 package com.lgcns.domain.reservationStats.client;
 
 import com.lgcns.domain.reservationStats.client.dto.DailyMemberReservationCountResponse;
+import com.lgcns.domain.reservationStats.client.dto.DayOfWeekReservationStatsResponse;
 import com.lgcns.global.config.feign.FeignConfig;
+import java.util.Map;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,4 +17,7 @@ public interface ReservationServiceClient {
     @GetMapping("/internal/{popupId}/daily-count")
     DailyMemberReservationCountResponse findDailyMemberReservationCount(
             @PathVariable(name = "popupId") Long popupId);
+
+    @GetMapping("/internal/day-of-week-count")
+    Map<Long, DayOfWeekReservationStatsResponse> getAllDayOfWeekReservationStats();
 }

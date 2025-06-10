@@ -1,6 +1,7 @@
 package com.lgcns.domain.popup.repository;
 
 import com.lgcns.domain.popup.dto.response.*;
+import com.querydsl.core.Tuple;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -27,4 +28,6 @@ public interface PopupRepositoryCustom {
     List<PopupInfoResponse> findRandomPopups(List<Long> excludeIds, int size);
 
     List<Long> findAllPopupIdsAfterPopupStartTime(LocalDate nowDate, LocalTime nowTime);
+
+    List<Tuple> findAllPopupIdsAndRemainingDays(LocalDate nowDate, LocalTime nowTime);
 }

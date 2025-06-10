@@ -9,8 +9,10 @@ import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,8 @@ import org.springframework.util.StringUtils;
 public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager entityManager;
+    private static final int CHUNK_SIZE = 500;
 
     @Override
     public List<ItemLocationResponse> findItemsWithSplitLocation(Long popupId) {
@@ -103,6 +107,35 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Item> findTopItemsByPopupId(Long popupId, int limit) {
+        NumberExpression<Integer> totalScore = item.popularityScore.add(item.sales);
+
+        return queryFactory
+                .selectFrom(item)
+                .where(item.popup.id.eq(popupId))
+                .orderBy(totalScore.desc())
+                .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<Item> findAllByPopupId(Long popupId) {
+        return queryFactory.selectFrom(item).where(item.popup.id.eq(popupId)).fetch();
+    }
+
+    @Override
+    public void bulkUpdate(List<Item> itemList) {
+        if (itemList.isEmpty()) return;
+
+        for (int i = 0; i < itemList.size(); i += CHUNK_SIZE) {
+            int end = Math.min(i + CHUNK_SIZE, itemList.size());
+            List<Item> chunk = itemList.subList(i, end);
+
+            bulkUpdateChunk(chunk);
+        }
+    }
+
     private BooleanExpression checkItemSearchName(String searchName) {
         return StringUtils.hasText(searchName) ? item.name.contains(searchName) : null;
     }
@@ -122,8 +155,39 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         return new SliceImpl<>(results, PageRequest.of(0, pageSize), hasNext);
     }
 
-    @Override
-    public List<Item> findItemsByPopupId(Long popupId) {
-        return queryFactory.selectFrom(item).where(item.popup.id.eq(popupId)).fetch();
+    private void bulkUpdateChunk(List<Item> chunk) {
+        if (chunk.isEmpty()) return;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE item SET ").append("popularity_score = CASE item_id ");
+
+        for (Item item : chunk) {
+            sb.append("WHEN ")
+                    .append(item.getId())
+                    .append(" THEN ")
+                    .append(item.getPopularityScore())
+                    .append(" ");
+        }
+
+        sb.append("END, sales = CASE item_id ");
+
+        for (Item item : chunk) {
+            sb.append("WHEN ")
+                    .append(item.getId())
+                    .append(" THEN ")
+                    .append(item.getSales())
+                    .append(" ");
+        }
+
+        sb.append("END, updated_at = NOW() WHERE item_id IN (");
+
+        for (int i = 0; i < chunk.size(); i++) {
+            sb.append(chunk.get(i).getId());
+            if (i < chunk.size() - 1) sb.append(", ");
+        }
+
+        sb.append(")");
+
+        entityManager.createNativeQuery(sb.toString()).executeUpdate();
     }
 }

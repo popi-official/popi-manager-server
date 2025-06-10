@@ -118,7 +118,7 @@ public class PopupServiceImpl implements PopupService {
 
         return choices.entrySet().stream()
                 .map(choice -> SurveyChoiceResponse.of(choice.getKey(), choice.getValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

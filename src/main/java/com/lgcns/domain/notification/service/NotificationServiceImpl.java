@@ -4,8 +4,7 @@ import static com.lgcns.domain.notification.domain.Popularity.HOT;
 import static com.lgcns.domain.notification.domain.Popularity.NORMAL;
 
 import com.lgcns.domain.item.domain.Item;
-import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
-import com.lgcns.domain.itemAnalysis.repository.ItemAnalysisRepository;
+import com.lgcns.domain.item.repository.ItemRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.notification.domain.Notification;
 import com.lgcns.domain.notification.dto.response.NotificationResponse;
@@ -31,7 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final ManagerUtil managerUtil;
     private final PopupRepository popupRepository;
     private final NotificationRepository notificationRepository;
-    private final ItemAnalysisRepository itemAnalysisRepository;
+    private final ItemRepository itemRepository;
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -52,12 +51,10 @@ public class NotificationServiceImpl implements NotificationService {
         final Long managerId = popup.getManager().getId();
         final Long popupId = popup.getId();
 
-        List<ItemAnalysis> top3Items =
-                itemAnalysisRepository.findTopItemsByPopupId(popupId, TOP_ITEMS_LIMIT);
+        List<Item> top3Items = itemRepository.findTopItemsByPopupId(popupId, TOP_ITEMS_LIMIT);
 
         boolean isHot =
-                top3Items.stream()
-                        .anyMatch(analysis -> analysis.getItem().getId().equals(item.getId()));
+                top3Items.stream().anyMatch(topItem -> topItem.getId().equals(item.getId()));
 
         Notification notification =
                 Notification.createNotification(

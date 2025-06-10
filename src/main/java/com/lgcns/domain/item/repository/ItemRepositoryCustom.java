@@ -17,5 +17,9 @@ public interface ItemRepositoryCustom {
 
     List<ItemForPaymentResponse> findItemsForPayment(Long popupId, List<Long> itemIds);
 
-    List<Item> findItemsByPopupId(Long popupId);
+    List<Item> findTopItemsByPopupId(Long popupId, int limit);
+
+    List<Item> findAllByPopupId(Long popupId);
+
+    void bulkUpdate(List<Item> itemList);
 }

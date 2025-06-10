@@ -1,10 +1,14 @@
 package com.lgcns.domain.item.domain;
 
 import com.lgcns.domain.item.exception.ItemErrorCode;
+import com.lgcns.domain.orderItem.domian.OrderItem;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +40,18 @@ public class Item extends BaseTimeEntity {
 
     private String location;
 
+    private int popularityScore;
+    private int sales;
+    private int averageSales;
+
+    private LocalDateTime lastRestockDateTime;
+
+    private int recommendCount;
+    private Boolean isAlarmed;
+
+    @OneToMany(mappedBy = "item")
+    private List<OrderItem> orderItemList = new ArrayList<>();
+
     @Builder(access = AccessLevel.PRIVATE)
     public Item(
             Popup popup,
@@ -52,6 +68,9 @@ public class Item extends BaseTimeEntity {
         this.stock = stock;
         this.minStock = minStock;
         this.location = location;
+        this.lastRestockDateTime = LocalDateTime.now();
+        this.recommendCount = stock;
+        this.isAlarmed = false;
     }
 
     public static Item createItem(
@@ -77,10 +96,29 @@ public class Item extends BaseTimeEntity {
         this.minStock = minStock;
     }
 
-    public void decreaseStock(int quantity) {
+    public void updatePopularityScore(int popularityScore) {
+        this.popularityScore = popularityScore;
+    }
+
+    public void decreaseStockAndIncreaseSales(int quantity) {
         if (this.stock < quantity) {
             throw new CustomException(ItemErrorCode.INSUFFICIENT_STOCK);
         }
         this.stock -= quantity;
+        this.sales += quantity;
+    }
+
+    public void updateIsAlarmed(Boolean isAlarmed) {
+        this.isAlarmed = isAlarmed;
+    }
+
+    public void updateRecommendCount(int recommendCount) {
+        if (recommendCount >= 0) {
+            this.recommendCount = recommendCount;
+        }
+    }
+
+    public Boolean checkOutOfStockAndAlarmed() {
+        return this.stock <= this.minStock + this.averageSales && !this.isAlarmed;
     }
 }

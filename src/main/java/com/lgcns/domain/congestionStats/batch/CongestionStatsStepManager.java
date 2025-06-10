@@ -18,11 +18,12 @@ import org.springframework.context.annotation.Configuration;
 public class CongestionStatsStepManager {
 
     private final CongestionStatsService congestionStatsService;
-    private static final String CREATE_CONGESTION_STATS_ITEM_READER =
+
+    public static final String CREATE_CONGESTION_STATS_ITEM_READER =
             "createCongestionStatsItemReader";
-    private static final String CREATE_CONGESTION_STATS_ITEM_PROCESSOR =
+    public static final String CREATE_CONGESTION_STATS_ITEM_PROCESSOR =
             "createCongestionStatsItemProcessor";
-    private static final String CREATE_CONGESTION_STATS_ITEM_WRITER =
+    public static final String CREATE_CONGESTION_STATS_ITEM_WRITER =
             "createCongestionStatsItemWriter";
 
     @Bean(name = CREATE_CONGESTION_STATS_ITEM_READER)

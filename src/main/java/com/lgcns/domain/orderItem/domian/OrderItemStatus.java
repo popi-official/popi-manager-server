@@ -1,15 +1,16 @@
 package com.lgcns.domain.orderItem.domian;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum OrderItemStatus {
     PENDING("PENDING"),
     COMPLETED("COMPLETED"),
     CANCELLED("CANCELLED");
 
     private final String description;
-
-    OrderItemStatus(String description) {
-        this.description = description;
-    }
 
     public String getDescription() {
         return description;

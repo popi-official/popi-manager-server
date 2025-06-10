@@ -295,6 +295,33 @@ public class CongestionStatsServiceTest extends IntegrationTest {
                             assertThat(result.getAnalyzedTime().truncatedTo(ChronoUnit.SECONDS))
                                     .isEqualTo(nowTime.truncatedTo(ChronoUnit.SECONDS)));
         }
+
+        @Test
+        void 한_시간_전_입장_내역이_없으면_입장자_카운트에_0이_저장된다() {
+            // given
+            Popup popup = createRunningPopup();
+            popupRepository.save(popup);
+            Long popupId = popup.getId();
+
+            LocalDate nowDate = LocalDate.now();
+            LocalTime nowTime = LocalTime.now();
+
+            // when
+            CongestionStats result = congestionStatsService.convertCongestionStats(popupId);
+
+            // then
+            assertAll(
+                    () -> assertThat(result).isNotNull(),
+                    () -> assertThat(result.getPopupId()).isEqualTo(popupId),
+                    () -> assertThat(result.getEntrantCount()).isEqualTo(0),
+                    () ->
+                            assertThat(result.getDayOfWeek())
+                                    .isEqualTo(DayOfWeek.valueOf(nowDate.getDayOfWeek().name())),
+                    () -> assertThat(result.getAnalyzedDate()).isEqualTo(nowDate),
+                    () ->
+                            assertThat(result.getAnalyzedTime().truncatedTo(ChronoUnit.SECONDS))
+                                    .isEqualTo(nowTime.truncatedTo(ChronoUnit.SECONDS)));
+        }
     }
 
     @Nested

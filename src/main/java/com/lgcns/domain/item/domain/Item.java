@@ -115,6 +115,12 @@ public class Item extends BaseTimeEntity {
         this.isAlarmed = isAlarmed;
     }
 
+    public void updateRecommendCount(int recommendCount) {
+        if (recommendCount >= 0) {
+            this.recommendCount = recommendCount;
+        }
+    }
+
     public Boolean checkOutOfStockAndAlarmed() {
         return this.stock <= this.minStock + this.averageSales && !this.isAlarmed;
     }

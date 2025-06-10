@@ -7,6 +7,7 @@ import static com.lgcns.domain.survey.domain.QSurvey.survey;
 import com.lgcns.domain.popup.dto.response.*;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
 import com.lgcns.global.error.exception.CustomException;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -229,6 +230,20 @@ public class PopupRepositoryImpl implements PopupRepositoryCustom {
                         popup.popupEndDate.goe(nowDate),
                         popup.runOpenTime.loe(nowTime),
                         popup.runCloseTime.goe(nowTime))
+                .fetch();
+    }
+
+    @Override
+    public List<Tuple> findAllPopupIdsAndRemainingDays(LocalDate nowDate, LocalTime nowTime) {
+        return jpaQueryFactory
+                .select(popup.id, popup.popupEndDate)
+                .from(popup)
+                .where(
+                        popup.popupStartDate.loe(nowDate),
+                        popup.popupEndDate.goe(nowDate),
+                        popup.runOpenTime.loe(nowTime),
+                        popup.runCloseTime.goe(nowTime))
+                .orderBy(popup.id.asc())
                 .fetch();
     }
 

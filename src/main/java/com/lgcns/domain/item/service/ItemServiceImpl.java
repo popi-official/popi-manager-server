@@ -22,11 +22,13 @@ import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
 import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventDynamoDbClient;
 import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventResponse;
+import com.querydsl.core.Tuple;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -180,7 +182,49 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void updateItemRecommendCount() {}
+    public void updateItemRecommendCount() {
+        LocalDate today = LocalDate.now();
+        LocalTime nowTime = LocalTime.now();
+
+        List<Tuple> allPopupIdsAndRemainingDays =
+                popupRepository.findAllPopupIdsAndRemainingDays(today.minusDays(1), nowTime);
+
+        for (Tuple tuple : allPopupIdsAndRemainingDays) {
+            Long popupId = tuple.get(0, Long.class);
+            LocalDate popupEndDate = Objects.requireNonNull(tuple.get(1, LocalDate.class));
+            int remainingDays = (int) ChronoUnit.DAYS.between(today, popupEndDate);
+
+            List<Item> items = itemRepository.findAllByPopupId(popupId);
+
+            int maxPopularity = items.stream().mapToInt(Item::getPopularityScore).max().orElse(1);
+
+            for (Item item : items) {
+                double normalizedPopularity =
+                        (maxPopularity == 0)
+                                ? 0.0
+                                : (double) item.getPopularityScore() / maxPopularity;
+                int avgSales = item.getAverageSales();
+
+                int currentRecommendCount = item.getRecommendCount();
+
+                int expectedNeed = avgSales * remainingDays;
+                int shortfall = expectedNeed - currentRecommendCount;
+
+                if (shortfall < 0) {
+                    double reduceFactor = normalizedPopularity * 0.3 + 0.7;
+                    int adjustedRecommend =
+                            (int) Math.max(Math.round(expectedNeed * reduceFactor), 1);
+                    item.updateRecommendCount(adjustedRecommend);
+                } else {
+                    double increaseFactor = normalizedPopularity * 0.3 + 1.0;
+                    int adjustedRecommend =
+                            (int) Math.max(Math.round(expectedNeed * increaseFactor), 1);
+                    item.updateRecommendCount(adjustedRecommend);
+                }
+            }
+            itemRepository.saveAll(items);
+        }
+    }
 
     @Override
     public List<ItemTrendingResponse> getTrendingItems(Long popupId) {

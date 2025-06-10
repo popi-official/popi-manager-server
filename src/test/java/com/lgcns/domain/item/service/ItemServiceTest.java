@@ -59,11 +59,6 @@ class ItemServiceTest extends IntegrationTest {
     private Item item2;
     private Item item3;
 
-    private Item createTestItem() {
-        return itemRepository.save(
-                Item.createItem(popup, "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1"));
-    }
-
     @BeforeEach
     void setUp() {
         ownerManager =
@@ -938,24 +933,10 @@ class ItemServiceTest extends IntegrationTest {
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }
+    }
 
-        private Popup createTestPopup(Manager manager, String startDate, String endDate) {
-            return Popup.createPopup(
-                    manager,
-                    "testPopup",
-                    "https://bucket/이미지.jpg",
-                    LocalDate.parse(startDate),
-                    LocalDate.parse(endDate),
-                    LocalDateTime.parse("2025-01-01T10:00:00"),
-                    LocalDateTime.parse("2025-01-31T20:00:00"),
-                    LocalTime.parse("10:00:00"),
-                    LocalTime.parse("20:00:00"),
-                    100,
-                    20,
-                    "서울특별시 강남구 테헤란로 123",
-                    "3층 A호",
-                    37.123456,
-                    127.123456);
-        }
+    private Item createTestItem() {
+        return itemRepository.save(
+                Item.createItem(popup, "테스트 상품", "https://bucket/item.jpg", 10000, 100, 10, "a1"));
     }
 }

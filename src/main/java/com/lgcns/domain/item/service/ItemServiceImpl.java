@@ -361,6 +361,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private List<ItemTrendingResponse> convertToResponse(List<Item> topItems) {
-        return topItems.stream().map(ItemTrendingResponse::from).collect(Collectors.toList());
+        return topItems.stream().map(ItemTrendingResponse::from).toList();
     }
 }

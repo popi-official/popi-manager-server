@@ -10,7 +10,6 @@ import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,9 +52,7 @@ public class VisitorStatsRepositoryImpl implements VisitorStatsRepositoryCustom 
                                 visitorStats.analyzedTime.hour().eq(nowTime.getHour()))
                         .fetch();
 
-        return popupIds.stream()
-                .filter(id -> !existingIds.contains(id))
-                .collect(Collectors.toList());
+        return popupIds.stream().filter(id -> !existingIds.contains(id)).toList();
     }
 
     @Override

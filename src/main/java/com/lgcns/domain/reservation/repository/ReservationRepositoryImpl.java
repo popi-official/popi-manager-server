@@ -94,7 +94,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
         return grouped.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> DailyReservation.of(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private TimeSlot mapToTimeSlot(Tuple tuple) {

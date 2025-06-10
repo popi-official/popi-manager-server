@@ -72,6 +72,11 @@ public class CongestionStatsServiceImpl implements CongestionStatsService {
                 nowTime);
     }
 
+    @Override
+    public void createCongestionStats(List<CongestionStats> congestionStatsList) {
+        congestionStatsRepository.bulkInsertCongestionStats(congestionStatsList);
+    }
+
     private void validatePopupOwnership(Manager manager, Popup popup) {
         if (!popup.getManager().equals(manager)) {
             throw new CustomException(PopupErrorCode.POPUP_UNAUTHORIZED);

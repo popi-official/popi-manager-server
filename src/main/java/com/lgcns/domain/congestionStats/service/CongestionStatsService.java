@@ -11,4 +11,6 @@ public interface CongestionStatsService {
     List<Long> findTargetPopupIds();
 
     CongestionStats convertCongestionStats(Long popupId);
+
+    void createCongestionStats(List<CongestionStats> congestionStatsList);
 }

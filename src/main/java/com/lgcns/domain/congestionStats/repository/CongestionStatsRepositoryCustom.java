@@ -1,5 +1,6 @@
 package com.lgcns.domain.congestionStats.repository;
 
+import com.lgcns.domain.congestionStats.domain.CongestionStats;
 import com.lgcns.domain.congestionStats.dto.response.CongestionStatsResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,4 +13,6 @@ public interface CongestionStatsRepositoryCustom {
 
     List<Long> findPopupIdsWithoutCongestionStats(
             List<Long> popupIds, LocalDate nowDate, LocalTime nowTime);
+
+    void bulkInsertCongestionStats(List<CongestionStats> congestionStatsList);
 }

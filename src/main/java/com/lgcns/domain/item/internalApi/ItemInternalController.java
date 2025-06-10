@@ -3,6 +3,7 @@ package com.lgcns.domain.item.internalApi;
 import com.lgcns.domain.item.client.dto.request.ItemIdsForPaymentRequest;
 import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
 import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
+import com.lgcns.domain.item.dto.response.ItemTrendingResponse;
 import com.lgcns.domain.item.service.ItemService;
 import com.lgcns.global.common.response.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,9 +63,9 @@ public class ItemInternalController {
 
     @GetMapping("/popularity")
     @Operation(summary = "인기 상품 목록 조회", description = "카메라 점수 및 실구매율 기반 인기 상품 3개를 조회합니다.")
-    public List<ItemInfoResponse> itemFindPopularity(
+    public List<ItemTrendingResponse> itemFindPopularity(
             @Parameter(description = "팝업 ID", example = "1") @PathVariable(name = "popupId")
                     Long popupId) {
-        return itemService.findItemsPopularity(popupId);
+        return itemService.getTrendingItems(popupId);
     }
 }

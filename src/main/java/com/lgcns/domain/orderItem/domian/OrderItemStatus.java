@@ -11,8 +11,4 @@ public enum OrderItemStatus {
     CANCELLED("CANCELLED");
 
     private final String description;
-
-    public String getDescription() {
-        return description;
-    }
 }

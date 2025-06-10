@@ -1,4 +1,4 @@
-package com.lgcns.domain.itemAnalysis.dto.response;
+package com.lgcns.domain.item.dto.response;
 
 import com.lgcns.domain.item.domain.Item;
 import io.swagger.v3.oas.annotations.media.Schema;

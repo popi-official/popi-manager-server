@@ -4,11 +4,13 @@ import com.lgcns.domain.item.client.dto.request.ItemIdsForPaymentRequest;
 import com.lgcns.domain.item.client.dto.response.ItemForPaymentResponse;
 import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
+import com.lgcns.domain.item.dto.ItemScore;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
 import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemLocationResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
+import com.lgcns.domain.item.dto.response.ItemTrendingResponse;
 import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
 import com.lgcns.domain.manager.domain.Manager;
@@ -18,11 +20,14 @@ import com.lgcns.domain.popup.repository.PopupRepository;
 import com.lgcns.global.common.response.SliceResponse;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
+import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventDynamoDbClient;
+import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -43,6 +48,9 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
     private final ManagerUtil managerUtil;
+    private final PopupEventDynamoDbClient dynamoDbClient;
+
+    private final int DASHBOARD_HOT_ITEM_SIZE = 3;
 
     @Override
     public void createItem(Long popupId, ItemCreateRequest request) {
@@ -172,14 +180,51 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void calculateItemAverageSales() {
-        itemRepository.bulkUpdateAverageSalesForOperatingPopups();
+    public void updateItemRecommendCount() {}
+
+    @Override
+    public List<ItemTrendingResponse> getTrendingItems(Long popupId) {
+        final Manager currentManager = managerUtil.getCurrentManager();
+        final Popup popup = findPopupById(popupId);
+
+        validatePopupOwnership(currentManager, popup);
+
+        List<Item> topItems =
+                itemRepository.findTopItemsByPopupId(popupId, DASHBOARD_HOT_ITEM_SIZE);
+
+        return topItems.isEmpty() ? Collections.emptyList() : convertToResponse(topItems);
     }
 
-    private Popup findPopupById(Long popupId) {
-        return popupRepository
-                .findById(popupId)
-                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    @Override
+    public List<Long> findTargetPopupIds() {
+        List<Popup> activePopups = findActivePopups();
+        return activePopups.stream().map(Popup::getId).toList();
+    }
+
+    @Override
+    public List<Item> processPopupItemAnalysis(Long popupId) {
+        LocalDateTime endTime = calculatePreviousTimeEnd(LocalDateTime.now());
+        List<ItemScore> itemScoreList = getItemScoreList(popupId, endTime);
+
+        if (itemScoreList.isEmpty()) return Collections.emptyList();
+
+        List<Item> itemList = new ArrayList<>();
+        for (ItemScore itemScore : itemScoreList) {
+            Item item = itemScore.item();
+            item.updatePopularityScore(itemScore.popularityScore());
+            itemList.add(item);
+        }
+
+        return itemList;
+    }
+
+    @Override
+    public void updateItemAnalysisList(List<Item> itemList) {
+        List<Item> validItems = itemList.stream().filter(Objects::nonNull).toList();
+
+        if (!validItems.isEmpty()) {
+            itemRepository.bulkUpdate(validItems);
+        }
     }
 
     private Map<String, List<ItemPreviewResponse>> groupItemsByLocation(
@@ -215,5 +260,63 @@ public class ItemServiceImpl implements ItemService {
         if (minStock > item.getStock()) {
             throw new CustomException(ItemErrorCode.MIN_STOCK_EXCEEDED);
         }
+    }
+
+    private List<Popup> findActivePopups() {
+        return popupRepository.findAll().stream()
+                .filter(popup -> popup.getPopupEndDate().isAfter(LocalDate.now().minusDays(1)))
+                .toList();
+    }
+
+    private Popup findPopupById(Long popupId) {
+        return popupRepository
+                .findById(popupId)
+                .orElseThrow(() -> new CustomException(PopupErrorCode.POPUP_NOT_FOUND));
+    }
+
+    private LocalDateTime calculatePreviousTimeEnd(LocalDateTime currentTime) {
+        int hour = currentTime.getHour();
+
+        if (hour == 6) {
+            return LocalDateTime.of(
+                    currentTime.toLocalDate().minusDays(1), LocalTime.of(23, 59, 59));
+        } else {
+            int previousTimeBlockEnd = (hour - 1 + 24) % 24;
+            return currentTime
+                    .withHour(previousTimeBlockEnd)
+                    .withMinute(59)
+                    .withSecond(59)
+                    .withNano(0);
+        }
+    }
+
+    private List<ItemScore> getItemScoreList(Long popupId, LocalDateTime endTime) {
+        List<Item> items = itemRepository.findAllByPopupId(popupId);
+
+        Map<Long, List<PopupEventResponse>> eventsByItem = getGroupedPopupEvents(popupId, endTime);
+
+        return items.stream()
+                .map(item -> toItemScore(item, eventsByItem.get(item.getId())))
+                .toList();
+    }
+
+    private Map<Long, List<PopupEventResponse>> getGroupedPopupEvents(
+            Long popupId, LocalDateTime endTime) {
+        return dynamoDbClient.getEventsBetweenTimes(popupId, null, endTime).stream()
+                .filter(e -> e.getItemId() != null && e.getScore() > 0)
+                .collect(Collectors.groupingBy(PopupEventResponse::getItemId));
+    }
+
+    private ItemScore toItemScore(Item item, List<PopupEventResponse> events) {
+        int previousScore = item.getPopularityScore();
+        int additionalScore =
+                events != null ? events.stream().mapToInt(PopupEventResponse::getScore).sum() : 0;
+        int totalScore = previousScore + additionalScore;
+
+        return ItemScore.of(item, totalScore);
+    }
+
+    private List<ItemTrendingResponse> convertToResponse(List<Item> topItems) {
+        return topItems.stream().map(ItemTrendingResponse::from).collect(Collectors.toList());
     }
 }

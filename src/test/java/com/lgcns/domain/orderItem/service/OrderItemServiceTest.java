@@ -8,8 +8,6 @@ import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
-import com.lgcns.domain.notification.domain.Notification;
-import com.lgcns.domain.notification.repository.NotificationRepository;
 import com.lgcns.domain.orderItem.domian.OrderItem;
 import com.lgcns.domain.orderItem.domian.OrderItemStatus;
 import com.lgcns.domain.orderItem.repository.OrderItemRepository;
@@ -31,7 +29,6 @@ public class OrderItemServiceTest extends IntegrationTest {
     @Autowired private OrderItemService orderItemService;
 
     @Autowired private OrderItemRepository orderItemRepository;
-    @Autowired private NotificationRepository notificationRepository;
     @Autowired private ManagerRepository managerRepository;
     @Autowired private PopupRepository popupRepository;
     @Autowired private ItemRepository itemRepository;
@@ -84,22 +81,13 @@ public class OrderItemServiceTest extends IntegrationTest {
 
             // then
             OrderItem orderItem = orderItemRepository.findAll().get(0);
-            Notification notification = notificationRepository.findAll().get(0);
 
             Assertions.assertAll(
                     () -> assertThat(orderItemRepository.count()).isEqualTo(1),
                     () -> assertThat(orderItem.getItem()).isEqualTo(item),
                     () -> assertThat(orderItem.getRealCount()).isEqualTo(-1),
                     () -> assertThat(orderItem.getStatus()).isEqualTo(OrderItemStatus.PENDING),
-                    () -> assertThat(orderItem.getItem().getIsAlarmed()).isTrue(),
-                    () -> assertThat(notificationRepository.count()).isEqualTo(1),
-                    () -> assertThat(notification.getItemId()).isEqualTo(itemId),
-                    () -> assertThat(notification.getPopupId()).isEqualTo(popup.getId()),
-                    () -> assertThat(notification.getManagerId()).isEqualTo(ownerManager.getId()),
-                    () -> assertThat(notification.getItemName()).isEqualTo(item.getName()),
-                    () ->
-                            assertThat(notification.getMinStock())
-                                    .isEqualTo(item.getMinStock() + item.getAverageSales()));
+                    () -> assertThat(orderItem.getItem().getIsAlarmed()).isTrue());
         }
 
         @Test

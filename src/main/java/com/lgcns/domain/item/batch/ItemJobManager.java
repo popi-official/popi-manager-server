@@ -1,6 +1,6 @@
-package com.lgcns.domain.itemAnalysis.batch;
+package com.lgcns.domain.item.batch;
 
-import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
+import com.lgcns.domain.item.domain.Item;
 import com.lgcns.global.error.exception.CustomException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
-public class ItemAnalysisJobManager {
+public class ItemJobManager {
 
     public static final Integer CHUNK_SIZE = 100;
     public static final Integer TASK_POOL_SIZE = 2;
     public static final String ITEM_ANALYSIS_JOB = "itemAnalysisJob";
     public static final String UPDATE_ITEM_ANALYSIS_STEP = "updateItemAnalysisStep";
-    public static final String ITEM_ANALYSIS_TASK_EXECUTOR = "itemAnalysisTaskExecutor";
+    public static final String ITEM_TASK_EXECUTOR = "itemTaskExecutor";
 
     @Bean(name = ITEM_ANALYSIS_JOB)
     public Job itemAnalysisJob(
@@ -47,18 +47,18 @@ public class ItemAnalysisJobManager {
     public Step updateItemAnalysisStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
-            @Qualifier(ItemAnalysisStepManager.UPDATE_ITEM_ANALYSIS_ITEM_READER)
-                    ItemReader<Long> updateItemAnalysisItemReader,
-            @Qualifier(ItemAnalysisStepManager.UPDATE_ITEM_ANALYSIS_ITEM_PROCESSOR)
-                    ItemProcessor<Long, List<ItemAnalysis>> updateItemAnalysisItemProcessor,
-            @Qualifier(ItemAnalysisStepManager.UPDATE_ITEM_ANALYSIS_ITEM_WRITER)
-                    ItemWriter<List<ItemAnalysis>> updateItemAnalysisItemWriter,
-            @Qualifier(ITEM_ANALYSIS_TASK_EXECUTOR) TaskExecutor taskExecutor) {
+            @Qualifier(ItemStepManager.UPDATE_ITEM_ANALYSIS_READER)
+                    ItemReader<Long> updateItemAnalysisReader,
+            @Qualifier(ItemStepManager.UPDATE_ITEM_ANALYSIS_PROCESSOR)
+                    ItemProcessor<Long, List<Item>> updateItemAnalysisProcessor,
+            @Qualifier(ItemStepManager.UPDATE_ITEM_ANALYSIS_WRITER)
+                    ItemWriter<List<Item>> updateItemAnalysisWriter,
+            @Qualifier(ITEM_TASK_EXECUTOR) TaskExecutor taskExecutor) {
         return new StepBuilder(UPDATE_ITEM_ANALYSIS_STEP, jobRepository)
-                .<Long, List<ItemAnalysis>>chunk(CHUNK_SIZE, transactionManager)
-                .reader(updateItemAnalysisItemReader)
-                .processor(updateItemAnalysisItemProcessor)
-                .writer(updateItemAnalysisItemWriter)
+                .<Long, List<Item>>chunk(CHUNK_SIZE, transactionManager)
+                .reader(updateItemAnalysisReader)
+                .processor(updateItemAnalysisProcessor)
+                .writer(updateItemAnalysisWriter)
                 .faultTolerant()
                 .retryLimit(3)
                 .retry(DataAccessException.class)
@@ -68,8 +68,8 @@ public class ItemAnalysisJobManager {
                 .build();
     }
 
-    @Bean(name = ITEM_ANALYSIS_TASK_EXECUTOR)
-    public TaskExecutor itemAnalysisTaskExecutor() {
+    @Bean(name = ITEM_TASK_EXECUTOR)
+    public TaskExecutor itemTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
 
         taskExecutor.setCorePoolSize(TASK_POOL_SIZE);

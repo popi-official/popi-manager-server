@@ -10,8 +10,6 @@ import org.springframework.data.domain.Slice;
 public interface ItemRepositoryCustom {
     List<ItemLocationResponse> findItemsWithSplitLocation(Long popupId);
 
-    Item findItemWithPopupAndMember(Long itemId);
-
     Slice<ItemInfoResponse> findItemsByNameWithPagination(
             Long popupId, String keyword, Long lastItemId, int size);
 
@@ -19,5 +17,9 @@ public interface ItemRepositoryCustom {
 
     List<ItemForPaymentResponse> findItemsForPayment(Long popupId, List<Long> itemIds);
 
-    List<Item> findItemsByPopupId(Long popupId);
+    List<Item> findTopItemsByPopupId(Long popupId, int limit);
+
+    List<Item> findAllByPopupId(Long popupId);
+
+    void bulkUpdate(List<Item> itemList);
 }

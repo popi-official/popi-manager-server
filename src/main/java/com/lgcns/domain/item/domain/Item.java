@@ -40,6 +40,7 @@ public class Item extends BaseTimeEntity {
 
     private String location;
 
+    private int popularityScore;
     private int sales;
     private int averageSales;
 
@@ -67,6 +68,7 @@ public class Item extends BaseTimeEntity {
         this.stock = stock;
         this.minStock = minStock;
         this.location = location;
+        this.popularityScore = 0;
         this.sales = 0;
         this.averageSales = 0;
         this.lastRestockDateTime = LocalDateTime.now();
@@ -97,6 +99,10 @@ public class Item extends BaseTimeEntity {
         this.minStock = minStock;
     }
 
+    public void updatePopularityScore(int popularityScore) {
+        this.popularityScore = popularityScore;
+    }
+
     public void decreaseStockAndIncreaseSales(int quantity) {
         if (this.stock < quantity) {
             throw new CustomException(ItemErrorCode.INSUFFICIENT_STOCK);
@@ -112,5 +118,4 @@ public class Item extends BaseTimeEntity {
     public Boolean checkOutOfStockAndAlarmed() {
         return this.stock <= this.minStock + this.averageSales && !this.isAlarmed;
     }
-
 }

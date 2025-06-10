@@ -1,4 +1,4 @@
-package com.lgcns.domain.itemAnalysis.batch;
+package com.lgcns.domain.item.batch;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -9,10 +9,6 @@ import static org.mockito.Mockito.when;
 import com.lgcns.IntegrationTest;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.repository.ItemRepository;
-import com.lgcns.domain.itemAnalysis.domain.ItemAnalysis;
-import com.lgcns.domain.itemAnalysis.domain.ItemSalesStats;
-import com.lgcns.domain.itemAnalysis.repository.ItemAnalysisRepository;
-import com.lgcns.domain.itemAnalysis.repository.ItemSalesStatsRepository;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.manager.repository.ManagerRepository;
 import com.lgcns.domain.popup.domain.Popup;
@@ -24,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,8 +40,6 @@ public class ItemAnalysisJobTest extends IntegrationTest {
     @Autowired private ItemRepository itemRepository;
     @Autowired private PopupRepository popupRepository;
     @Autowired private ManagerRepository managerRepository;
-    @Autowired private ItemSalesStatsRepository itemSalesStatsRepository;
-    @Autowired private ItemAnalysisRepository itemAnalysisRepository;
 
     @MockitoBean private PopupEventDynamoDbClient dynamoDbClient;
 
@@ -106,53 +101,6 @@ public class ItemAnalysisJobTest extends IntegrationTest {
         }
 
         @Test
-        void 진행_중인_팝업에_상품과_판매량_데이터가_있으면_분석_데이터를_생성한다() throws Exception {
-            // given
-            Popup runningPopup = createRunningPopup();
-            popupRepository.save(runningPopup);
-            Long popupId = runningPopup.getId();
-
-            Item item1 =
-                    Item.createItem(
-                            runningPopup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
-            Item item2 =
-                    Item.createItem(
-                            runningPopup,
-                            "제니 포토카드",
-                            "https://bucket/jennie.jpg",
-                            15000,
-                            100,
-                            10,
-                            "a2");
-            itemRepository.saveAll(List.of(item1, item2));
-
-            // 판매량 데이터 준비
-            itemSalesStatsRepository.saveAll(
-                    List.of(
-                            createItemSalesStatsWithVolume(popupId, item1.getId(), 30),
-                            createItemSalesStatsWithVolume(popupId, item2.getId(), 20)));
-
-            // DynamoDB 이벤트 모킹
-            List<PopupEventResponse> mockEvents =
-                    createMockPopupEvents(popupId, item1.getId(), item2.getId());
-            when(dynamoDbClient.getEventsBetweenTimes(eq(popupId), any(), any()))
-                    .thenReturn(mockEvents);
-
-            JobParameters jobParameters = buildJobParameters();
-
-            // when
-            JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
-            StepExecution stepExecution = jobExecution.getStepExecutions().iterator().next();
-
-            // then
-            assertAll(
-                    () -> assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED),
-                    () -> assertThat(stepExecution.getReadCount()).isEqualTo(1),
-                    () -> assertThat(stepExecution.getWriteCount()).isEqualTo(1),
-                    () -> assertThat(stepExecution.getSkipCount()).isEqualTo(0));
-        }
-
-        @Test
         void 기존_분석_데이터가_있는_경우_업데이트한다() throws Exception {
             // given
             Popup runningPopup = createRunningPopup();
@@ -162,17 +110,8 @@ public class ItemAnalysisJobTest extends IntegrationTest {
             Item item1 =
                     Item.createItem(
                             runningPopup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            item1.updatePopularityScore(50);
             itemRepository.save(item1);
-
-            // 기존 분석 데이터
-            ItemAnalysis existingAnalysis = ItemAnalysis.createItemAnalysis(item1);
-            existingAnalysis.updateScores(50, 20);
-            itemAnalysisRepository.save(existingAnalysis);
-
-            // 판매량 데이터
-            ItemSalesStats stats = ItemSalesStats.createItemSalesStats(popupId, item1.getId());
-            stats.addSalesVolume(35);
-            itemSalesStatsRepository.save(stats);
 
             List<PopupEventResponse> mockEvents = createMockPopupEvents(popupId, item1.getId());
             when(dynamoDbClient.getEventsBetweenTimes(eq(popupId), any(), any()))
@@ -192,55 +131,11 @@ public class ItemAnalysisJobTest extends IntegrationTest {
                     () -> assertThat(stepExecution.getSkipCount()).isEqualTo(0));
 
             // 업데이트된 분석 데이터 검증
-            ItemAnalysis updatedAnalysis =
-                    itemAnalysisRepository.findByItemId(item1.getId()).orElseThrow();
-            assertThat(updatedAnalysis.getPopularityScore()).isEqualTo(90); // 기존 50 + 새로운 40
-            assertThat(updatedAnalysis.getSalesVolume()).isEqualTo(35);
+            Item item = itemRepository.findById(item1.getId()).orElseThrow();
+            Assertions.assertAll(
+                    () -> assertThat(item.getPopularityScore()).isEqualTo(90),
+                    () -> assertThat(item.getSales()).isEqualTo(0));
         }
-
-        @Test
-        void DynamoDB_이벤트가_없어도_판매량_데이터로_분석_데이터를_생성한다() throws Exception {
-            // given
-            Popup runningPopup = createRunningPopup();
-            popupRepository.save(runningPopup);
-            Long popupId = runningPopup.getId();
-
-            Item item1 =
-                    Item.createItem(
-                            runningPopup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
-            itemRepository.save(item1);
-
-            ItemSalesStats stats = ItemSalesStats.createItemSalesStats(popupId, item1.getId());
-            stats.addSalesVolume(25);
-            itemSalesStatsRepository.save(stats);
-
-            when(dynamoDbClient.getEventsBetweenTimes(eq(popupId), any(), any()))
-                    .thenReturn(new ArrayList<>());
-
-            JobParameters jobParameters = buildJobParameters();
-
-            // when
-            JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
-            StepExecution stepExecution = jobExecution.getStepExecutions().iterator().next();
-
-            // then
-            assertAll(
-                    () -> assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED),
-                    () -> assertThat(stepExecution.getReadCount()).isEqualTo(1),
-                    () -> assertThat(stepExecution.getWriteCount()).isEqualTo(1),
-                    () -> assertThat(stepExecution.getSkipCount()).isEqualTo(0));
-
-            ItemAnalysis savedAnalysis =
-                    itemAnalysisRepository.findByItemId(item1.getId()).orElseThrow();
-            assertThat(savedAnalysis.getPopularityScore()).isEqualTo(0);
-            assertThat(savedAnalysis.getSalesVolume()).isEqualTo(25);
-        }
-    }
-
-    private ItemSalesStats createItemSalesStatsWithVolume(Long popupId, Long itemId, int volume) {
-        ItemSalesStats stats = ItemSalesStats.createItemSalesStats(popupId, itemId);
-        stats.addSalesVolume(volume);
-        return stats;
     }
 
     private JobParameters buildJobParameters() {

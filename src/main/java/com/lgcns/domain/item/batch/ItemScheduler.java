@@ -1,4 +1,4 @@
-package com.lgcns.domain.itemAnalysis.batch;
+package com.lgcns.domain.item.batch;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,16 +15,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ItemAnalysisScheduler {
+public class ItemScheduler {
 
     public static final String ITEM_ANALYSIS_JOB = "itemAnalysisJob";
 
     private final JobLauncher jobLauncher;
-    private final Job itemAnalysisJob;
+    private final Job itemJob;
 
-    public ItemAnalysisScheduler(
+    public ItemScheduler(
             @Qualifier(ITEM_ANALYSIS_JOB) Job itemAnalysisJob, JobLauncher jobLauncher) {
-        this.itemAnalysisJob = itemAnalysisJob;
+        this.itemJob = itemAnalysisJob;
         this.jobLauncher = jobLauncher;
     }
 
@@ -40,6 +40,6 @@ public class ItemAnalysisScheduler {
         JobParameters jobParameters =
                 new JobParametersBuilder().addString("dateHour", dateHour).toJobParameters();
 
-        jobLauncher.run(itemAnalysisJob, jobParameters);
+        jobLauncher.run(itemJob, jobParameters);
     }
 }

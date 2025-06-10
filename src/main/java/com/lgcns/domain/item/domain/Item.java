@@ -68,9 +68,6 @@ public class Item extends BaseTimeEntity {
         this.stock = stock;
         this.minStock = minStock;
         this.location = location;
-        this.popularityScore = 0;
-        this.sales = 0;
-        this.averageSales = 0;
         this.lastRestockDateTime = LocalDateTime.now();
         this.recommendCount = stock;
         this.isAlarmed = false;

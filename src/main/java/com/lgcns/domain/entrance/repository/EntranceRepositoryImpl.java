@@ -76,6 +76,18 @@ public class EntranceRepositoryImpl implements EntranceRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public Long findHourlyEntranceCount(Long popupId, LocalDate nowDate, LocalTime nowTime) {
+        return queryFactory
+                .select(entrance.count())
+                .from(entrance)
+                .where(
+                        entrance.popupId.eq(popupId),
+                        entrance.reservationDate.eq(nowDate),
+                        entrance.reservationTime.eq(getPreviousHour(nowTime)))
+                .fetchOne();
+    }
+
     private NumberExpression<Integer> createGenderCountCase(MemberGender gender) {
         return new CaseBuilder().when(entrance.gender.eq(gender)).then(1).otherwise(0).sum();
     }

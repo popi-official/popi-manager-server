@@ -2,25 +2,32 @@ package com.lgcns.domain.congestionStats.repository;
 
 import static com.lgcns.domain.congestionStats.domain.QCongestionStats.congestionStats;
 
+import com.lgcns.domain.congestionStats.domain.CongestionStats;
 import com.lgcns.domain.congestionStats.dto.response.CongestionStatsResponse;
 import com.lgcns.domain.congestionStats.dto.response.DailyCongestionStatsResponse;
 import com.lgcns.domain.reservationStats.dto.response.DayOfWeek;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
 public class CongestionStatsRepositoryImpl implements CongestionStatsRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager em;
 
     @Override
     public CongestionStatsResponse findDailyCongestionStats(
@@ -47,18 +54,22 @@ public class CongestionStatsRepositoryImpl implements CongestionStatsRepositoryC
                         .then(6)
                         .otherwise(7);
 
+        NumberTemplate<Integer> groupedHour =
+                Expressions.numberTemplate(
+                        Integer.class, "FLOOR(HOUR({0}) / 2) * 2", congestionStats.analyzedTime);
+
         List<DailyCongestionStatsResponse> result =
                 queryFactory
                         .select(
                                 Projections.constructor(
                                         DailyCongestionStatsResponse.class,
                                         congestionStats.dayOfWeek,
-                                        congestionStats.analyzedTime.hour(),
+                                        groupedHour,
                                         congestionStats.entrantCount.avg().intValue()))
                         .from(congestionStats)
                         .where(congestionStats.popupId.eq(popupId))
-                        .groupBy(congestionStats.dayOfWeek, congestionStats.analyzedTime)
-                        .orderBy(dayOfWeekOrder.asc(), congestionStats.analyzedTime.asc())
+                        .groupBy(congestionStats.dayOfWeek, groupedHour)
+                        .orderBy(dayOfWeekOrder.asc(), groupedHour.asc())
                         .fetch();
 
         Map<DayOfWeek, Map<Integer, DailyCongestionStatsResponse>> statsMap =
@@ -94,6 +105,61 @@ public class CongestionStatsRepositoryImpl implements CongestionStatsRepositoryC
                 responseMap.get(DayOfWeek.FRIDAY),
                 responseMap.get(DayOfWeek.SATURDAY),
                 responseMap.get(DayOfWeek.SUNDAY));
+    }
+
+    @Override
+    public List<Long> findPopupIdsWithoutCongestionStats(
+            List<Long> popupIds, LocalDate nowDate, LocalTime nowTime) {
+        List<Long> existingIds =
+                queryFactory
+                        .select(congestionStats.popupId)
+                        .distinct()
+                        .from(congestionStats)
+                        .where(
+                                congestionStats.popupId.in(popupIds),
+                                congestionStats.analyzedDate.eq(nowDate),
+                                congestionStats.analyzedTime.hour().eq(nowTime.getHour()))
+                        .fetch();
+
+        return popupIds.stream()
+                .filter(id -> !existingIds.contains(id))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void bulkInsertCongestionStats(List<CongestionStats> statsList) {
+        if (statsList.isEmpty()) return;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO congestion_stats ")
+                .append(
+                        "(popup_id, entrant_count, day_of_week, analyzed_date, analyzed_time) VALUES ");
+
+        for (int i = 0; i < statsList.size(); i++) {
+            CongestionStats s = statsList.get(i);
+
+            sb.append("(")
+                    .append(s.getPopupId())
+                    .append(", ")
+                    .append(s.getEntrantCount())
+                    .append(", ")
+                    .append("'")
+                    .append(s.getDayOfWeek().name())
+                    .append("', ")
+                    .append("'")
+                    .append(s.getAnalyzedDate())
+                    .append("', ")
+                    .append("'")
+                    .append(s.getAnalyzedTime())
+                    .append("')");
+
+            if (i < statsList.size() - 1) {
+                sb.append(", ");
+            }
+        }
+
+        em.createNativeQuery(sb.toString()).executeUpdate();
     }
 
     private List<Integer> generateHourlyTimeList(LocalTime startTime, LocalTime endTime) {

@@ -23,7 +23,7 @@ public class MemberEnteredConsumerConfig {
     private String bootstrapServers;
 
     @Bean
-    public ConsumerFactory<String, MemberEnteredMessage> memberEnteredMessageConsumerFactory() {
+    public ConsumerFactory<String, MemberEnteredMessage> memberEnteredConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -44,7 +44,7 @@ public class MemberEnteredConsumerConfig {
             memberEnteredMessageConcurrentKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, MemberEnteredMessage>
                 kafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<>();
-        kafkaListenerContainerFactory.setConsumerFactory(memberEnteredMessageConsumerFactory());
+        kafkaListenerContainerFactory.setConsumerFactory(memberEnteredConsumerFactory());
         return kafkaListenerContainerFactory;
     }
 }

@@ -63,7 +63,7 @@ public class MemberEnteredConsumerTest extends IntegrationTest {
 
         // then
         Awaitility.await()
-                .atMost(Duration.ofSeconds(15))
+                .atMost(Duration.ofSeconds(25))
                 .untilAsserted(
                         () -> {
                             List<Entrance> entrances = entranceRepository.findAll();

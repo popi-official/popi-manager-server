@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/popups/{popupId}/dashboard/congestion")
-@Tag(name = "14. 혼잡도 분석 API", description = "혼잡도 분석 관련 API 입니다.")
+@Tag(name = "09. 혼잡도 분석 API", description = "혼잡도 분석 관련 API 입니다.")
 public class CongestionStatsController {
 
     private final CongestionStatsService congestionStatsService;

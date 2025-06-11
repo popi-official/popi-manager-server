@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/popups/{popupId}/dashboard/surveys")
 @RequiredArgsConstructor
-@Tag(name = "8. 설문지 분석 API", description = "설문지 분석 관련 API 입니다.")
+@Tag(name = "13. 설문지 분석 API", description = "설문지 분석 관련 API 입니다.")
 public class SurveyController {
 
     private final SurveyService surveyService;

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("internal/reservations")
 @RequiredArgsConstructor
-@Tag(name = "15. 예약 Internal API", description = "예약 관련 Internal API입니다.")
+@Tag(name = "05. 예약 Internal API", description = "예약 관련 Internal API입니다.")
 public class ReservationInternalController {
 
     private final ReservationService reservationService;

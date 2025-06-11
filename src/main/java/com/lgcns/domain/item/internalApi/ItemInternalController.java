@@ -59,4 +59,12 @@ public class ItemInternalController {
             @RequestBody ItemIdsForPaymentRequest request) {
         return itemService.findItemsForPayment(popupId, request);
     }
+
+    @GetMapping("/popularity")
+    @Operation(summary = "인기 상품 목록 조회", description = "카메라 점수 및 실구매율 기반 인기 상품 3개를 조회합니다.")
+    public List<ItemInfoResponse> findItemPopularity(
+            @Parameter(description = "팝업 ID", example = "1") @PathVariable(name = "popupId")
+                    Long popupId) {
+        return itemService.getTrendingItemsByUser(popupId);
+    }
 }

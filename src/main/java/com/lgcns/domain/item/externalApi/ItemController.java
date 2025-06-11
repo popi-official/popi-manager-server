@@ -71,6 +71,6 @@ public class ItemController {
             summary = "실시간 인기 상품 조회",
             description = "팝업 오픈부터 직전 타임까지의 관심도와 판매량을 기준으로 상위 3개의 인기 상품을 조회합니다.")
     public List<ItemTrendingResponse> TrendingItemFind(@PathVariable Long popupId) {
-        return itemService.getTrendingItems(popupId);
+        return itemService.getTrendingItemsByManager(popupId);
     }
 }

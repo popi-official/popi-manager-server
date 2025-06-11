@@ -4,10 +4,9 @@ import com.lgcns.domain.orderItem.event.dto.OrderItemEvent;
 import com.lgcns.domain.orderItem.service.OrderItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
@@ -17,7 +16,7 @@ public class OrderItemEventHandler {
     private final OrderItemService orderItemService;
 
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @EventListener
     public void handleOrderItemCreatedEvent(OrderItemEvent event) {
         orderItemService.createOrderItem(event.itemId());
     }

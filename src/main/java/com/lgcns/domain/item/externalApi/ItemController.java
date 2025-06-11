@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/popups/{popupId}")
 @RequiredArgsConstructor
-@Tag(name = "4-1. 상품 API", description = "상품 관련 API 입니다.")
+@Tag(name = "04-1. 상품 API", description = "상품 관련 API 입니다.")
 public class ItemController {
 
     private final ItemService itemService;

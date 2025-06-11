@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/popups/{popupId}/dashboard")
 @RequiredArgsConstructor
-@Tag(name = "12. 구매전환율 분석 API", description = "구매전환율 분석 관련 API 입니다.")
+@Tag(name = "10. 구매전환율 분석 API", description = "구매전환율 분석 관련 API 입니다.")
 public class ConversionStatsController {
 
     private final ConversionStatsService conversionStatsService;

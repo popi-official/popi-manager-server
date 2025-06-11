@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/popups/{popupId}/dashboard/entrants")
 @RequiredArgsConstructor
-@Tag(name = "6-1. 입장 API", description = "입장 관련 API 입니다.")
+@Tag(name = "06. 입장 API", description = "입장 관련 API 입니다.")
 public class EntranceController {
 
     private final EntranceService entranceService;

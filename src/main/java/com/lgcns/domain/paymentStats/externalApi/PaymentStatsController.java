@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/popups/{popupId}/dashboard")
 @RequiredArgsConstructor
-@Tag(name = "5. 1인 평균 구매액 분석 API", description = "1인 평균 구매액 분석 관련 API 입니다.")
+@Tag(name = "14. 1인 평균 구매액 분석 API", description = "1인 평균 구매액 분석 관련 API 입니다.")
 public class PaymentStatsController {
 
     private final PaymentStatsService paymentStatsService;

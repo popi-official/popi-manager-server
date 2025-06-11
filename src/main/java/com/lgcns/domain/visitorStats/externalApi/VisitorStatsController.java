@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/popups/{popupId}/dashboard")
 @RequiredArgsConstructor
-@Tag(name = "7. 방문자 분석 API", description = "대시보드에서 방문자 분석을 위한 API입니다.")
+@Tag(name = "10. 방문자 분석 API", description = "대시보드에서 방문자 분석을 위한 API입니다.")
 public class VisitorStatsController {
 
     private final VisitorStatsService visitorStatsService;

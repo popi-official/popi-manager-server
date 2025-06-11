@@ -189,6 +189,7 @@ public class OrderItemServiceTest extends IntegrationTest {
             assertThat(updatedOrderItem.getRealCount()).isEqualTo(10);
             assertThat(updatedOrderItem.getStatus()).isEqualTo(OrderItemStatus.COMPLETED);
             assertThat(updatedOrderItem.getItem().getIsAlarmed()).isFalse();
+            assertThat(updatedOrderItem.getItem().getStock()).isEqualTo(15);
         }
 
         @Test

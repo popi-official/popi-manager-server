@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/popups/{popupId}/notifications")
 @RequiredArgsConstructor
-@Tag(name = "11. 알림 API", description = "알림 관련 API입니다.")
+@Tag(name = "07. 알림 API", description = "알림 관련 API입니다.")
 public class NotificationController {
 
     private final NotificationService notificationService;

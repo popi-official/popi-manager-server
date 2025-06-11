@@ -126,7 +126,7 @@ public class Item extends BaseTimeEntity {
         if (stock < 0) {
             throw new CustomException(ItemErrorCode.INVALID_RESTOCK);
         }
-        this.stock = stock;
+        this.stock += stock;
         this.lastRestockDateTime = LocalDateTime.now();
     }
 }

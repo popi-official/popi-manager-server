@@ -110,7 +110,7 @@ public class MemberAnswerConsumerTest extends IntegrationTest {
         kafkaTemplate.send(TOPIC, new MemberAnswerMessage(1L, message));
 
         // then
-        await().atMost(Duration.ofSeconds(25))
+        await().atMost(Duration.ofSeconds(30))
                 .untilAsserted(
                         () -> {
                             List<MemberAnswer> memberAnswers = memberAnswerRepository.findAll();

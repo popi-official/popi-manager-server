@@ -1,12 +1,15 @@
 package com.lgcns.domain.orderItem.externalApi;
 
+import com.lgcns.domain.orderItem.dto.request.OrderItemUpdateRequest;
 import com.lgcns.domain.orderItem.dto.response.OrderItemResponse;
 import com.lgcns.domain.orderItem.service.OrderItemService;
 import com.lgcns.global.common.response.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,5 +31,14 @@ public class OrderItemController {
                     @RequestParam(defaultValue = "8")
                     int size) {
         return orderItemService.findOrderItemsByPopupId(popupId, lastOrderItemId, size);
+    }
+
+    @PatchMapping("/status/{orderItemId}")
+    @Operation(summary = "발주 상태 변경", description = "주어진 발주 ID에 대한 발주 상태를 변경합니다.")
+    public ResponseEntity<Void> orderItemUpdate(
+            @PathVariable Long orderItemId,
+            @Valid @RequestBody OrderItemUpdateRequest orderItemUpdateRequest) {
+        orderItemService.updateOrderItem(orderItemId, orderItemUpdateRequest);
+        return ResponseEntity.ok().build();
     }
 }

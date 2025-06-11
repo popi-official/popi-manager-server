@@ -38,7 +38,9 @@ public interface ItemService {
     List<ItemForPaymentResponse> findItemsForPayment(
             Long popupId, ItemIdsForPaymentRequest request);
 
-    List<ItemTrendingResponse> getTrendingItems(Long popupId);
+    List<ItemTrendingResponse> getTrendingItemsByManager(Long popupId);
+
+    List<ItemInfoResponse> getTrendingItemsByUser(Long popupId);
 
     List<Long> findTargetPopupIds();
 

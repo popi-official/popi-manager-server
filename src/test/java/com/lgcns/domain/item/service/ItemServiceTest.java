@@ -883,7 +883,8 @@ class ItemServiceTest extends IntegrationTest {
             Long popupId = popup.getId();
 
             // when
-            List<ItemTrendingResponse> trendingItems = itemService.getTrendingItems(popupId);
+            List<ItemTrendingResponse> trendingItems =
+                    itemService.getTrendingItemsByManager(popupId);
 
             // then
             AssertionsForClassTypes.assertThat(trendingItems).isNotNull();
@@ -903,7 +904,8 @@ class ItemServiceTest extends IntegrationTest {
             Long popupId = otherPopup.getId();
 
             // when
-            List<ItemTrendingResponse> trendingItems = itemService.getTrendingItems(popupId);
+            List<ItemTrendingResponse> trendingItems =
+                    itemService.getTrendingItemsByManager(popupId);
 
             // then
             AssertionsForClassTypes.assertThat(trendingItems).isNotNull();
@@ -917,7 +919,8 @@ class ItemServiceTest extends IntegrationTest {
             setAuthentication(otherManager);
 
             // when & then
-            AssertionsForClassTypes.assertThatThrownBy(() -> itemService.getTrendingItems(popupId))
+            AssertionsForClassTypes.assertThatThrownBy(
+                            () -> itemService.getTrendingItemsByManager(popupId))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
         }
@@ -929,7 +932,85 @@ class ItemServiceTest extends IntegrationTest {
 
             // when & then
             AssertionsForClassTypes.assertThatThrownBy(
-                            () -> itemService.getTrendingItems(nonExistentPopupId))
+                            () -> itemService.getTrendingItemsByManager(nonExistentPopupId))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
+        }
+    }
+
+    @Nested
+    class 내부용_인기_상품_조회할_때 {
+        @BeforeEach
+        void setUp() {
+            item1 =
+                    Item.createItem(
+                            popup, "지수 포토카드", "https://bucket/jisoo.jpg", 5000, 50, 5, "a1");
+            item2 =
+                    Item.createItem(
+                            popup, "제니 포토카드", "https://bucket/jennie.jpg", 15000, 100, 10, "a2");
+            item3 =
+                    Item.createItem(
+                            popup, "로제 포토카드", "https://bucket/rose.jpg", 15000, 100, 10, "b1");
+
+            itemRepository.save(item1);
+            itemRepository.save(item2);
+            itemRepository.save(item3);
+        }
+
+        @BeforeEach
+        void setUpForTrendingItems() {
+            item1.updatePopularityScore(100);
+            item2.updatePopularityScore(80);
+            item3.updatePopularityScore(60);
+            item1.decreaseStockAndIncreaseSales(50);
+            item2.decreaseStockAndIncreaseSales(30);
+            item3.decreaseStockAndIncreaseSales(20);
+            itemRepository.saveAll(List.of(item1, item2, item3));
+        }
+
+        @Test
+        void 정상적으로_인기_상품_TOP3를_조회한다() {
+            // given
+            Long popupId = popup.getId();
+
+            // when
+            List<ItemTrendingResponse> trendingItems =
+                    itemService.getTrendingItemsByManager(popupId);
+
+            // then
+            AssertionsForClassTypes.assertThat(trendingItems).isNotNull();
+            AssertionsForClassTypes.assertThat(trendingItems.size()).isEqualTo(3); // 3개 상품만 있음
+
+            AssertionsForClassTypes.assertThat(trendingItems.get(0).itemId())
+                    .isEqualTo(item1.getId());
+            AssertionsForClassTypes.assertThat(trendingItems.get(1).itemId())
+                    .isEqualTo(item2.getId());
+            AssertionsForClassTypes.assertThat(trendingItems.get(2).itemId())
+                    .isEqualTo(item3.getId());
+        }
+
+        @Test
+        void 상품_분석_데이터가_없으면_빈_리스트를_반환한다() {
+            // given
+            Long popupId = otherPopup.getId();
+
+            // when
+            List<ItemTrendingResponse> trendingItems =
+                    itemService.getTrendingItemsByManager(popupId);
+
+            // then
+            AssertionsForClassTypes.assertThat(trendingItems).isNotNull();
+            AssertionsForClassTypes.assertThat(trendingItems.size()).isEqualTo(0);
+        }
+
+        @Test
+        void 존재하지_않는_팝업에_대해_인기_상품을_조회하면_예외가_발생한다() {
+            // given
+            Long nonExistentPopupId = 9999L;
+
+            // when & then
+            AssertionsForClassTypes.assertThatThrownBy(
+                            () -> itemService.getTrendingItemsByManager(nonExistentPopupId))
                     .isInstanceOf(CustomException.class)
                     .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
         }

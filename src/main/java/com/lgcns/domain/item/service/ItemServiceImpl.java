@@ -228,7 +228,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemTrendingResponse> getTrendingItems(Long popupId) {
+    public List<ItemTrendingResponse> getTrendingItemsByManager(Long popupId) {
         final Manager currentManager = managerUtil.getCurrentManager();
         final Popup popup = findPopupById(popupId);
 
@@ -238,6 +238,24 @@ public class ItemServiceImpl implements ItemService {
                 itemRepository.findTopItemsByPopupId(popupId, DASHBOARD_HOT_ITEM_SIZE);
 
         return topItems.isEmpty() ? Collections.emptyList() : convertToResponse(topItems);
+    }
+
+    @Override
+    public List<ItemInfoResponse> getTrendingItemsByUser(Long popupId) {
+        findPopupById(popupId);
+
+        List<Item> topItems =
+                itemRepository.findTopItemsByPopupId(popupId, DASHBOARD_HOT_ITEM_SIZE);
+
+        return topItems.stream()
+                .map(
+                        item ->
+                                ItemInfoResponse.of(
+                                        item.getId(),
+                                        item.getName(),
+                                        item.getImageUrl(),
+                                        item.getPrice()))
+                .toList();
     }
 
     @Override

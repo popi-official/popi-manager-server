@@ -49,5 +49,6 @@ public class OrderItem extends BaseTimeEntity {
 
         if (status == OrderItemStatus.CANCELED || status == OrderItemStatus.COMPLETED)
             this.status = status;
+        item.updateIsAlarmed(false);
     }
 }

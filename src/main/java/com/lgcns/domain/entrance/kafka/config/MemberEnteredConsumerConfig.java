@@ -41,7 +41,7 @@ public class MemberEnteredConsumerConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, MemberEnteredMessage>
-            memberEnteredMessageConcurrentKafkaListenerContainerFactory() {
+            memberEnteredConcurrentKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, MemberEnteredMessage>
                 kafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         kafkaListenerContainerFactory.setConsumerFactory(memberEnteredConsumerFactory());

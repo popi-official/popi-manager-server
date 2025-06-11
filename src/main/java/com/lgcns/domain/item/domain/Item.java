@@ -121,4 +121,12 @@ public class Item extends BaseTimeEntity {
     public Boolean checkOutOfStockAndAlarmed() {
         return this.stock <= this.minStock + this.averageSales && !this.isAlarmed;
     }
+
+    public void updateStock(int stock) {
+        if (stock < 0) {
+            throw new CustomException(ItemErrorCode.INVALID_RESTOCK);
+        }
+        this.stock = stock;
+        this.lastRestockDateTime = LocalDateTime.now();
+    }
 }

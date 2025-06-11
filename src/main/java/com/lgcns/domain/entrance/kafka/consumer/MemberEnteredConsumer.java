@@ -20,7 +20,7 @@ public class MemberEnteredConsumer {
     @KafkaListener(
             topics = TOPIC,
             groupId = "member-entered",
-            containerFactory = "memberEnteredMessageConcurrentKafkaListenerContainerFactory")
+            containerFactory = "memberEnteredConcurrentKafkaListenerContainerFactory")
     public void createEntrance(MemberEnteredMessage message) {
 
         Entrance entrance =

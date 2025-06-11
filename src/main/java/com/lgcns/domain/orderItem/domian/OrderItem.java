@@ -1,6 +1,8 @@
 package com.lgcns.domain.orderItem.domian;
 
 import com.lgcns.domain.item.domain.Item;
+import com.lgcns.domain.item.exception.ItemErrorCode;
+import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -36,5 +38,17 @@ public class OrderItem extends BaseTimeEntity {
 
     public static OrderItem createOrderItem(Item item) {
         return OrderItem.builder().item(item).build();
+    }
+
+    public void updateOrderItem(Integer realCount, OrderItemStatus status) {
+        if (status == OrderItemStatus.COMPLETED && realCount < 0) {
+            throw new CustomException(ItemErrorCode.INVALID_RESTOCK);
+        }
+
+        if (status == OrderItemStatus.COMPLETED) this.realCount = realCount;
+
+        if (status == OrderItemStatus.CANCELED || status == OrderItemStatus.COMPLETED)
+            this.status = status;
+        item.updateIsAlarmed(false);
     }
 }

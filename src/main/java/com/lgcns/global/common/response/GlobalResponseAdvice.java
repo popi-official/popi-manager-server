@@ -26,7 +26,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
             "com.lgcns.domain.reservation.externalApi",
             "com.lgcns.domain.reservationStats.externalApi",
             "com.lgcns.domain.survey.externalApi",
-            "com.lgcns.domain.visitorStats.externalApi"
+            "com.lgcns.domain.visitorStats.externalApi",
+            "com.lgcns.domain.orderItem.externalApi"
         })
 public class GlobalResponseAdvice implements ResponseBodyAdvice {
 

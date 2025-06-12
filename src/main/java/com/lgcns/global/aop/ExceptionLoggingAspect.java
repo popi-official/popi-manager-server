@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -14,19 +15,22 @@ import org.springframework.stereotype.Component;
 public class ExceptionLoggingAspect {
 
     @AfterThrowing(pointcut = "execution(* com.lgcns.domain..service..*(..))", throwing = "e")
-    public void logException(JoinPoint joinPoint, Exception e) {
+    public void serviceExceptionLogging(JoinPoint joinPoint, Exception e) {
         String method = joinPoint.getSignature().toShortString();
+        String traceId = MDC.get("traceId");
 
         if (e instanceof CustomException customException) {
             ErrorCode errorCode = customException.getErrorCode();
             log.info(
-                    "[CustomException] Method: {}, Code: {}, Message: {}",
+                    "[CustomException] TraceId: {}, Method: {}, Code: {}, Message: {}",
+                    traceId,
                     method,
                     errorCode,
                     customException.getMessage());
         } else {
             log.error(
-                    "[UnhandledException] Method: {}, Exception: {}, Message: {}",
+                    "[UnhandledException] TraceId: {}, Method: {}, Exception: {}, Message: {}",
+                    traceId,
                     method,
                     e.getClass().getSimpleName(),
                     e.getMessage(),

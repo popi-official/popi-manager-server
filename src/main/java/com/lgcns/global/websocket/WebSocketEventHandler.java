@@ -1,6 +1,5 @@
 package com.lgcns.global.websocket;
 
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -23,7 +22,12 @@ public class WebSocketEventHandler {
         StompHeaderAccessor accessor =
                 MessageHeaderAccessor.getAccessor(event.getMessage(), StompHeaderAccessor.class);
 
-        Authentication authentication = (Authentication) Objects.requireNonNull(accessor.getUser());
+        Authentication authentication = (Authentication) accessor.getUser();
+        if (authentication == null) {
+            log.warn("WebSocket connected without authentication");
+            return;
+        }
+
         String username = authentication.getName();
         String userRole =
                 authentication.getAuthorities().stream()

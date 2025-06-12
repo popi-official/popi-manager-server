@@ -107,6 +107,9 @@ dependencies {
 
     // WebSocket Security
     implementation 'org.springframework.security:spring-security-messaging'
+
+    // AOP
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 }
 
 dependencyManagement {

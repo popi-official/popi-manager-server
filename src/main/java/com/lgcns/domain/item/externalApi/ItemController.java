@@ -2,6 +2,7 @@ package com.lgcns.domain.item.externalApi;
 
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
+import com.lgcns.domain.item.dto.response.ItemBulkCreateResponse;
 import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.dto.response.ItemTrendingResponse;
@@ -9,11 +10,9 @@ import com.lgcns.domain.item.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,12 +35,12 @@ public class ItemController {
     }
 
     @PostMapping("/items/excel")
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "excel 상품 파일 등록", description = "excel 파일을 업로드하여 상품 리스트를 등록합니다.")
-    public ResponseEntity<Void> itemCreateByExcel(
-            @PathVariable Long popupId, @RequestPart(value = "itemFile") MultipartFile itemFile)
-            throws IOException, InvalidFormatException {
-        itemService.createItemByExcel(popupId, itemFile);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ItemBulkCreateResponse itemCreateByExcel(
+            @PathVariable Long popupId, @RequestParam("itemFile") MultipartFile itemFile) {
+
+        return itemService.createItemByExcel(popupId, itemFile);
     }
 
     @GetMapping("/items")

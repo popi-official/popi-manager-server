@@ -14,7 +14,10 @@ public enum ItemErrorCode implements ErrorCode {
 
     INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "요청한 수량이 현재 재고보다 많습니다."),
     INVALID_RESTOCK(HttpStatus.BAD_REQUEST, "재고 수량은 0 이상이어야 합니다."),
-    ;
+
+    EXCEL_FILE_INVALID(HttpStatus.BAD_REQUEST, "엑셀 파일이 올바르지 않습니다."),
+    EXCEL_DATA_INVALID(HttpStatus.BAD_REQUEST, "엑셀 데이터가 올바르지 않습니다."),
+    EXCEL_PROCESSING_FAILED(HttpStatus.BAD_REQUEST, "엑셀 파일 처리에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

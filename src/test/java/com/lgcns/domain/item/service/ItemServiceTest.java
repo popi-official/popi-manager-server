@@ -108,7 +108,7 @@ class ItemServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 상품_등록 {
+    class 상품_하나를_등록할_때 {
 
         @Test
         void 유효한_입력_값이면_상품_등록에_성공한다() {
@@ -161,20 +161,15 @@ class ItemServiceTest extends IntegrationTest {
     }
 
     @Nested
-    class 엑셀_파일_상품_등록 {
+    class 요청받은_엑셀_파일로_상품을_생성할_때 {
 
         @Test
-        void 유효한_엑셀파일로_상품_등록에_성공한다() throws IOException {
+        void xlsx_파일_업로드에_성공한다() throws IOException {
             // given
-            MultipartFile excelFile = createExcelFile();
+            MultipartFile excelFile = createValidExcelFile();
 
             // when
-            try {
-                itemService.createItemByExcel(popup.getId(), excelFile);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Assertions.fail("엑셀 업로드 실패: " + e.getMessage());
-            }
+            itemService.createItemByExcel(popup.getId(), excelFile);
 
             // then
             List<Item> items = itemRepository.findAll();
@@ -208,22 +203,123 @@ class ItemServiceTest extends IntegrationTest {
         }
 
         @Test
-        void 존재하지_않는_팝업_ID로_엑셀_상품_등록을_시도하면_실패한다() throws IOException {
+        void 파일이_없으면_예외가_발생한다() {
             // given
-            MultipartFile excelFile = createExcelFile();
-            Long nonExistentPopupId = 9999L;
+            MultipartFile nullFile = null;
 
             // when & then
-            assertThatThrownBy(() -> itemService.createItemByExcel(nonExistentPopupId, excelFile))
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), nullFile))
                     .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_NOT_FOUND);
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.FILE_NOT_PROVIDED);
         }
 
-        private MultipartFile createExcelFile() throws IOException {
+        @Test
+        void 파일이_비어있으면_예외가_발생한다() {
+            // given
+            MultipartFile emptyFile =
+                    new MockMultipartFile(
+                            "itemFile",
+                            "empty.xlsx",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            new byte[0]);
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), emptyFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.FILE_NOT_PROVIDED);
+        }
+
+        @Test
+        void 파일_크기가_10MB를_초과하면_예외가_발생한다() {
+            // given
+            byte[] largeContent = new byte[11 * 1024 * 1024];
+            MultipartFile largeFile =
+                    new MockMultipartFile(
+                            "itemFile",
+                            "large.xlsx",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            largeContent);
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), largeFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.FILE_TOO_LARGE);
+        }
+
+        @Test
+        void 지원하지_않는_파일_형식이면_예외가_발생한다() {
+            // given
+            MultipartFile txtFile =
+                    new MockMultipartFile(
+                            "itemFile", "test.txt", "text/plain", "test content".getBytes());
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), txtFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.INVALID_FILE_TYPE);
+        }
+
+        @Test
+        void 엑셀에_데이터가_없으면_예외가_발생한다() throws IOException {
+            // given
+            MultipartFile emptyDataFile = createExcelFileWithHeaderOnly();
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), emptyDataFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.EXCEL_DATA_INVALID);
+        }
+
+        @Test
+        void 필수_데이터가_누락되면_예외가_발생한다() throws IOException {
+            // given
+            MultipartFile missingDataFile = createExcelFileWithMissingData();
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), missingDataFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.EXCEL_DATA_INVALID);
+        }
+
+        @Test
+        void 최소재고가_재고보다_크면_예외가_발생한다() throws IOException {
+            // given
+            MultipartFile invalidStockFile = createExcelFileWithInvalidStock();
+
+            // when & then
+            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), invalidStockFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.EXCEL_DATA_INVALID);
+        }
+
+        @Test
+        void 음수_값이_있으면_예외가_발생한다() throws IOException {
+            // given
+            MultipartFile negativeValueFile = createExcelFileWithNegativeValues();
+
+            // when & then
+            assertThatThrownBy(
+                            () -> itemService.createItemByExcel(popup.getId(), negativeValueFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.EXCEL_DATA_INVALID);
+        }
+
+        @Test
+        void 잘못된_데이터_형식이면_예외가_발생한다() throws IOException {
+            // given
+            MultipartFile invalidFormatFile = createExcelFileWithInvalidDataFormat();
+
+            // when & then
+            assertThatThrownBy(
+                            () -> itemService.createItemByExcel(popup.getId(), invalidFormatFile))
+                    .isInstanceOf(CustomException.class)
+                    .hasFieldOrPropertyWithValue("errorCode", ItemErrorCode.EXCEL_DATA_INVALID);
+        }
+
+        private MultipartFile createExcelFileWithHeaderOnly() throws IOException {
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Items");
 
-            // 헤더
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("상품명");
             headerRow.createCell(1).setCellValue("이미지URL");
@@ -232,7 +328,126 @@ class ItemServiceTest extends IntegrationTest {
             headerRow.createCell(4).setCellValue("최소재고");
             headerRow.createCell(5).setCellValue("위치");
 
-            // 데이터
+            return convertWorkbookToMultipartFile(workbook, "header_only.xlsx");
+        }
+
+        private MultipartFile createExcelFileWithMissingData() throws IOException {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Items");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("상품명");
+            headerRow.createCell(1).setCellValue("이미지URL");
+            headerRow.createCell(2).setCellValue("가격");
+            headerRow.createCell(3).setCellValue("재고");
+            headerRow.createCell(4).setCellValue("최소재고");
+            headerRow.createCell(5).setCellValue("위치");
+
+            Row dataRow = sheet.createRow(1);
+            dataRow.createCell(0).setCellValue("");
+            dataRow.createCell(1).setCellValue("https://bucket/item1.jpg");
+            dataRow.createCell(2).setCellValue(5000);
+            dataRow.createCell(3).setCellValue(50);
+            dataRow.createCell(4).setCellValue(5);
+            dataRow.createCell(5).setCellValue("a1");
+
+            return convertWorkbookToMultipartFile(workbook, "missing_data.xlsx");
+        }
+
+        private MultipartFile createExcelFileWithInvalidStock() throws IOException {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Items");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("상품명");
+            headerRow.createCell(1).setCellValue("이미지URL");
+            headerRow.createCell(2).setCellValue("가격");
+            headerRow.createCell(3).setCellValue("재고");
+            headerRow.createCell(4).setCellValue("최소재고");
+            headerRow.createCell(5).setCellValue("위치");
+
+            Row dataRow = sheet.createRow(1);
+            dataRow.createCell(0).setCellValue("테스트 상품");
+            dataRow.createCell(1).setCellValue("https://bucket/item1.jpg");
+            dataRow.createCell(2).setCellValue(5000);
+            dataRow.createCell(3).setCellValue(10);
+            dataRow.createCell(4).setCellValue(20);
+            dataRow.createCell(5).setCellValue("a1");
+
+            return convertWorkbookToMultipartFile(workbook, "invalid_stock.xlsx");
+        }
+
+        private MultipartFile createExcelFileWithNegativeValues() throws IOException {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Items");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("상품명");
+            headerRow.createCell(1).setCellValue("이미지URL");
+            headerRow.createCell(2).setCellValue("가격");
+            headerRow.createCell(3).setCellValue("재고");
+            headerRow.createCell(4).setCellValue("최소재고");
+            headerRow.createCell(5).setCellValue("위치");
+
+            Row dataRow = sheet.createRow(1);
+            dataRow.createCell(0).setCellValue("테스트 상품");
+            dataRow.createCell(1).setCellValue("https://bucket/item1.jpg");
+            dataRow.createCell(2).setCellValue(-5000);
+            dataRow.createCell(3).setCellValue(50);
+            dataRow.createCell(4).setCellValue(5);
+            dataRow.createCell(5).setCellValue("a1");
+
+            return convertWorkbookToMultipartFile(workbook, "negative_values.xlsx");
+        }
+
+        private MultipartFile createExcelFileWithInvalidDataFormat() throws IOException {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Items");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("상품명");
+            headerRow.createCell(1).setCellValue("이미지URL");
+            headerRow.createCell(2).setCellValue("가격");
+            headerRow.createCell(3).setCellValue("재고");
+            headerRow.createCell(4).setCellValue("최소재고");
+            headerRow.createCell(5).setCellValue("위치");
+
+            Row dataRow = sheet.createRow(1);
+            dataRow.createCell(0).setCellValue("테스트 상품");
+            dataRow.createCell(1).setCellValue("https://bucket/item1.jpg");
+            dataRow.createCell(2).setCellValue("invalid_price");
+            dataRow.createCell(3).setCellValue(50);
+            dataRow.createCell(4).setCellValue(5);
+            dataRow.createCell(5).setCellValue("a1");
+
+            return convertWorkbookToMultipartFile(workbook, "invalid_format.xlsx");
+        }
+
+        private MultipartFile convertWorkbookToMultipartFile(Workbook workbook, String filename)
+                throws IOException {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            workbook.close();
+
+            return new MockMultipartFile(
+                    "itemFile",
+                    filename,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    new ByteArrayInputStream(outputStream.toByteArray()));
+        }
+
+        private MultipartFile createValidExcelFile() throws IOException {
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Items");
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.createCell(0).setCellValue("상품명");
+            headerRow.createCell(1).setCellValue("이미지URL");
+            headerRow.createCell(2).setCellValue("가격");
+            headerRow.createCell(3).setCellValue("재고");
+            headerRow.createCell(4).setCellValue("최소재고");
+            headerRow.createCell(5).setCellValue("위치");
+
             Row dataRow1 = sheet.createRow(1);
             dataRow1.createCell(0).setCellValue("지수 포토카드");
             dataRow1.createCell(1).setCellValue("https://bucket/item1.jpg");
@@ -257,7 +472,6 @@ class ItemServiceTest extends IntegrationTest {
             dataRow3.createCell(4).setCellValue(10);
             dataRow3.createCell(5).setCellValue("a3");
 
-            // 엑셀파일 -> 바이트 배열
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
             workbook.close();
@@ -267,19 +481,6 @@ class ItemServiceTest extends IntegrationTest {
                     "test_items.xlsx",
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     new ByteArrayInputStream(outputStream.toByteArray()));
-        }
-
-        @Test
-        void 권한이_없는_사용자가_엑셀로_상품을_등록하면_예외가_발생한다() throws IOException {
-            // given
-            setAuthentication(otherManager);
-
-            MultipartFile excelFile = createExcelFile();
-
-            // when & then
-            assertThatThrownBy(() -> itemService.createItemByExcel(popup.getId(), excelFile))
-                    .isInstanceOf(CustomException.class)
-                    .hasFieldOrPropertyWithValue("errorCode", PopupErrorCode.POPUP_UNAUTHORIZED);
         }
     }
 

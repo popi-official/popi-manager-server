@@ -38,7 +38,8 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "excel 상품 파일 등록", description = "excel 파일을 업로드하여 상품 리스트를 등록합니다.")
     public ItemBulkCreateResponse itemCreateByExcel(
-            @PathVariable Long popupId, @RequestParam(value = "itemFile") MultipartFile itemFile) {
+            @PathVariable Long popupId,
+            @RequestParam(value = "itemFile", required = false) MultipartFile itemFile) {
 
         return itemService.createItemByExcel(popupId, itemFile);
     }

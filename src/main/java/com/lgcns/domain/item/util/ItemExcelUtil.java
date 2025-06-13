@@ -4,6 +4,8 @@ import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.global.error.exception.CustomException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,21 +16,21 @@ public class ItemExcelUtil {
     // 엑셀 파일 기본 검증
     public static void validateExcelFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new CustomException(ItemErrorCode.EXCEL_FILE_INVALID);
+            throw new CustomException(ItemErrorCode.FILE_NOT_PROVIDED);
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new CustomException(ItemErrorCode.FILE_TOO_LARGE);
         }
 
         String fileName = file.getOriginalFilename();
         if (fileName == null || (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls"))) {
-            throw new CustomException(ItemErrorCode.EXCEL_FILE_INVALID);
-        }
-
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new CustomException(ItemErrorCode.EXCEL_FILE_INVALID);
+            throw new CustomException(ItemErrorCode.INVALID_FILE_TYPE);
         }
     }
 
     // 행 데이터를 Item 엔티티로 변환
-    public static Item parseRowToItem(Popup popup, Row row, int rowIndex) {
+    public static Item parseRowToItem(Popup popup, Row row, int rowIdx) {
         try {
             String name = getCellStringValue(row.getCell(0));
             String imageUrl = getCellStringValue(row.getCell(1));
@@ -38,13 +40,15 @@ public class ItemExcelUtil {
             String location = getCellStringValue(row.getCell(5));
 
             // 데이터 검증
-            validateItemData(name, imageUrl, price, stock, minStock, location);
+            validateItemData(name, imageUrl, price, stock, minStock, location, rowIdx);
 
             return Item.createItem(popup, name, imageUrl, price, stock, minStock, location);
 
+        } catch (CustomException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(
-                    String.format("Row %d 처리 중 오류: %s", rowIndex + 1, e.getMessage()));
+                    String.format("Row %d 처리 중 오류: %s", rowIdx + 1, e.getMessage()));
         }
     }
 
@@ -169,29 +173,67 @@ public class ItemExcelUtil {
 
     // 상품 데이터 검증
     public static void validateItemData(
-            String name, String imageUrl, int price, int stock, int minStock, String location) {
-        if (name.trim().isEmpty()) {
-            throw new IllegalArgumentException("상품명은 필수입니다");
+            String name,
+            String imageUrl,
+            int price,
+            int stock,
+            int minStock,
+            String location,
+            int rowIdx) {
+        List<String> errors = new ArrayList<>();
+        if (name == null || name.trim().isEmpty()) {
+            errors.add("상품명은 필수입니다");
         }
 
-        if (imageUrl.trim().isEmpty()) {
-            throw new IllegalArgumentException("이미지URL은 필수입니다");
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            errors.add("이미지 URL은 필수입니다");
         }
 
-        if (location.trim().isEmpty()) {
-            throw new IllegalArgumentException("위치는 필수입니다");
+        if (price < 0) {
+            errors.add("가격은 0 이상이어야 합니다");
+        }
+
+        if (stock < 0) {
+            errors.add("재고는 0 이상이어야 합니다");
+        }
+
+        if (minStock < 0) {
+            errors.add("최소재고는 0 이상이어야 합니다");
         }
 
         if (minStock > stock) {
-            throw new IllegalArgumentException(
-                    String.format("최소재고(%d)는 재고(%d)보다 클 수 없습니다", minStock, stock));
+            errors.add(String.format("최소재고(%d)는 재고(%d)보다 클 수 없습니다", minStock, stock));
+        }
+
+        if (location == null || location.trim().isEmpty()) {
+            errors.add("위치는 필수입니다");
+        }
+
+        if (!errors.isEmpty()) {
+            String errorMessage =
+                    String.format("Row %d: %s", rowIdx + 1, String.join(", ", errors));
+            throw new CustomException(ItemErrorCode.EXCEL_DATA_INVALID) {
+                @Override
+                public String getMessage() {
+                    return errorMessage;
+                }
+            };
         }
     }
 
     // 엑셀 시트 기본 검증
     public static void validateSheet(Sheet sheet) {
+        if (sheet == null) {
+            throw new CustomException(ItemErrorCode.EXCEL_FILE_INVALID);
+        }
+
         if (sheet.getPhysicalNumberOfRows() <= 1) {
-            throw new IllegalArgumentException("엑셀 파일에 데이터가 없습니다");
+            throw new CustomException(ItemErrorCode.EXCEL_DATA_INVALID) {
+                @Override
+                public String getMessage() {
+                    return "엑셀 파일에 데이터가 없습니다. 헤더 외에 최소 1개 이상의 데이터 행이 필요합니다.";
+                }
+            };
         }
     }
 }

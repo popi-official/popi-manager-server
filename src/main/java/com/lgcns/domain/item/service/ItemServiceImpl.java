@@ -7,12 +7,10 @@ import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.ItemScore;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
-import com.lgcns.domain.item.dto.response.ItemDetailResponse;
-import com.lgcns.domain.item.dto.response.ItemLocationResponse;
-import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
-import com.lgcns.domain.item.dto.response.ItemTrendingResponse;
+import com.lgcns.domain.item.dto.response.*;
 import com.lgcns.domain.item.exception.ItemErrorCode;
 import com.lgcns.domain.item.repository.ItemRepository;
+import com.lgcns.domain.item.util.ItemExcelUtil;
 import com.lgcns.domain.manager.domain.Manager;
 import com.lgcns.domain.popup.domain.Popup;
 import com.lgcns.domain.popup.exception.PopupErrorCode;
@@ -23,7 +21,6 @@ import com.lgcns.global.util.ManagerUtil;
 import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventDynamoDbClient;
 import com.lgcns.infra.dynamodb.itemAnalysis.PopupEventResponse;
 import com.querydsl.core.Tuple;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,8 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -41,6 +37,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.View;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +51,7 @@ public class ItemServiceImpl implements ItemService {
     private final PopupEventDynamoDbClient dynamoDbClient;
 
     private final int DASHBOARD_HOT_ITEM_SIZE = 3;
+    private final View error;
 
     @Override
     public void createItem(Long popupId, ItemCreateRequest request) {
@@ -76,45 +74,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public void createItemByExcel(Long popupId, MultipartFile itemFile)
-            throws InvalidFormatException, IOException {
+    public ItemBulkCreateResponse createItemByExcel(Long popupId, MultipartFile itemFile) {
+
+        ItemExcelUtil.validateExcelFile(itemFile);
+
         final Manager currentManager = managerUtil.getCurrentManager();
         final Popup popup = findPopupById(popupId);
-
         validatePopupOwnership(currentManager, popup);
 
-        // try-with-resources
-        try (InputStream inputStream = itemFile.getInputStream();
-                OPCPackage opcPackage = OPCPackage.open(inputStream);
-                XSSFWorkbook workbook = new XSSFWorkbook(opcPackage)) {
+        Sheet sheet = openExcelSheet(itemFile);
+        ItemExcelUtil.validateSheet(sheet);
 
-            // 첫 번째 sheet 읽기
-            String sheetName = workbook.getSheetName(0);
-            Sheet sheet = workbook.getSheet(sheetName);
+        List<Item> validItems = processExcelData(popup, sheet);
+        saveItems(validItems, popupId);
 
-            int rows = sheet.getPhysicalNumberOfRows();
-            List<Item> items = new ArrayList<>();
-
-            // row 0은 header
-            for (int rowIndex = 0; rowIndex <= rows; rowIndex++) {
-                Row row = sheet.getRow(rowIndex);
-
-                if (rowIndex == 0 || row == null) {
-                    continue;
-                }
-
-                String name = row.getCell(0).getStringCellValue();
-                String imageUrl = row.getCell(1).getStringCellValue();
-                int price = (int) row.getCell(2).getNumericCellValue();
-                int stock = (int) row.getCell(3).getNumericCellValue();
-                int minStock = (int) row.getCell(4).getNumericCellValue();
-                String location = row.getCell(5).getStringCellValue();
-
-                items.add(Item.createItem(popup, name, imageUrl, price, stock, minStock, location));
-            }
-
-            itemRepository.saveAll(items);
-        }
+        return ItemBulkCreateResponse.success(validItems.size());
     }
 
     @Override
@@ -287,6 +261,94 @@ public class ItemServiceImpl implements ItemService {
 
         if (!validItems.isEmpty()) {
             itemRepository.bulkUpdate(validItems);
+        }
+    }
+
+    private Sheet openExcelSheet(MultipartFile itemFile) {
+        try {
+            // 파일 확장자 확인
+            String originalFilename = itemFile.getOriginalFilename();
+            if (originalFilename == null) {
+                throw new CustomException(ItemErrorCode.EXCEL_FILE_INVALID);
+            }
+
+            InputStream inputStream = itemFile.getInputStream();
+
+            if (originalFilename.toLowerCase().endsWith(".xlsx")) {
+                // .xlsx 파일 처리
+                XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+                return workbook.getSheetAt(0);
+            } else if (originalFilename.toLowerCase().endsWith(".xls")) {
+                // .xls 파일 처리
+                HSSFWorkbook workbook = new HSSFWorkbook(inputStream);
+                return workbook.getSheetAt(0);
+            } else {
+                throw new CustomException(ItemErrorCode.EXCEL_FILE_INVALID);
+            }
+
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CustomException(ItemErrorCode.EXCEL_PROCESSING_FAILED);
+        }
+    }
+
+    private List<Item> processExcelData(Popup popup, Sheet sheet) {
+        int totalRows = sheet.getPhysicalNumberOfRows();
+        List<Item> validItems = new ArrayList<>();
+        List<String> errorMessages = new ArrayList<>();
+
+        int processedRows = 0;
+
+        for (int rowIdx = 1; rowIdx < totalRows; rowIdx++) {
+            Row row = sheet.getRow(rowIdx);
+
+            if (ItemExcelUtil.isEmptyRow(row)) {
+                continue;
+            }
+
+            processedRows++;
+
+            try {
+                Item item = ItemExcelUtil.parseRowToItem(popup, row, rowIdx);
+                validItems.add(item);
+            } catch (Exception e) {
+                String errorMessage = String.format("Row %d: %s", rowIdx + 1, e.getMessage());
+                errorMessages.add(errorMessage);
+            }
+        }
+
+        validateProcessingResult(processedRows, errorMessages);
+
+        return validItems;
+    }
+
+    private void validateProcessingResult(int processedRows, List<String> errorMessages) {
+        if (processedRows == 0) {
+            throw new CustomException(ItemErrorCode.EXCEL_DATA_INVALID);
+        }
+
+        if (!errorMessages.isEmpty()) {
+            String combinedMessage = String.join("; ", errorMessages);
+
+            throw new CustomException(ItemErrorCode.EXCEL_DATA_INVALID) {
+                @Override
+                public String getMessage() {
+                    return super.getMessage() + " 상세: " + combinedMessage;
+                }
+            };
+        }
+    }
+
+    private void saveItems(List<Item> validItems, Long popupId) {
+        if (validItems.isEmpty()) {
+            throw new CustomException(ItemErrorCode.EXCEL_DATA_INVALID);
+        }
+
+        try {
+            itemRepository.saveAll(validItems);
+        } catch (Exception e) {
+            throw new CustomException(ItemErrorCode.EXCEL_PROCESSING_FAILED);
         }
     }
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice(basePackages = "com.lgcns")
@@ -29,6 +30,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 GlobalResponse.fail(errorCode.getHttpStatus().value(), errorResponse);
 
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
+    }
+
+    // MultipartException 처리
+    @ExceptionHandler(MultipartException.class)
+    protected ResponseEntity<GlobalResponse> handleMultipartException(MultipartException e) {
+
+        String message = "파일 업로드 중 오류가 발생했습니다.";
+        String errorClassName = "MULTIPART_SYSTEM_ERROR";
+
+        final ErrorResponse errorResponse = ErrorResponse.of(errorClassName, message);
+        final GlobalResponse response =
+                GlobalResponse.fail(HttpStatus.INTERNAL_SERVER_ERROR.value(), errorResponse);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     /**

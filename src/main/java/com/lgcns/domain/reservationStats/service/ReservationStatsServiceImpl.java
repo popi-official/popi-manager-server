@@ -19,14 +19,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Slf4j
 public class ReservationStatsServiceImpl implements ReservationStatsService {
 
     private final PopupRepository popupRepository;
@@ -109,11 +107,9 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
         try {
             return reservationServiceClient.getAllDayOfWeekReservationStats();
         } catch (feign.RetryableException e) {
-            log.error("예약 서비스 연결 실패: {}", e.getMessage());
             throw new CustomException(
                     ReservationStatsErrorCode.RESERVATION_SERVICE_CONNECTION_FAILED);
         } catch (Exception e) {
-            log.error("예약 서비스 오류: {}", e.getMessage());
             throw new CustomException(ReservationStatsErrorCode.RESERVATION_SERVICE_ERROR);
         }
     }
@@ -137,9 +133,6 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
         if (!newEntities.isEmpty()) {
             dayOfWeekReservationCountRepository.saveAll(newEntities);
         }
-
-        log.info(
-                "요일별 통계 벌크 업데이트 완료: 업데이트 {}개, 삽입 {}개", existingPopupIds.size(), newEntities.size());
     }
 
     private void bulkUpdateExistingData(
@@ -181,14 +174,12 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
 
         Query query = entityManager.createQuery(jpql.toString());
 
-        // 파라미터 설정
         for (Long popupId : existingPopupIds) {
             query.setParameter("popupId" + popupId, popupId);
         }
         query.setParameter("existingPopupIds", existingPopupIds);
 
-        int updatedCount = query.executeUpdate();
-        log.debug("JPQL 벌크 업데이트 실행: {}개 레코드 업데이트", updatedCount);
+        query.executeUpdate();
     }
 
     private int getFieldValue(DayOfWeekReservationStatsResponse stats, String fieldName) {

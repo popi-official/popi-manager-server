@@ -2,8 +2,10 @@ package com.lgcns.domain.reservationStats.exception;
 
 import com.lgcns.global.error.exception.ErrorCode;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 @AllArgsConstructor
 public enum ReservationStatsErrorCode implements ErrorCode {
     RESERVATION_SERVICE_CONNECTION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "예약 서비스에 연결할 수 없습니다."),
@@ -11,14 +13,4 @@ public enum ReservationStatsErrorCode implements ErrorCode {
 
     private final HttpStatus httpStatus;
     private final String message;
-
-    @Override
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
-    }
 }

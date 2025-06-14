@@ -15,10 +15,9 @@ import com.lgcns.domain.reservationStats.exception.ReservationStatsErrorCode;
 import com.lgcns.domain.reservationStats.repository.DayOfWeekReservationCountRepository;
 import com.lgcns.global.error.exception.CustomException;
 import com.lgcns.global.util.ManagerUtil;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +33,7 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
     private final DayOfWeekReservationCountRepository dayOfWeekReservationCountRepository;
     private final ManagerUtil managerUtil;
     private final ReservationServiceClient reservationServiceClient;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional(readOnly = true)
@@ -56,10 +56,14 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
 
     @Override
     public void updateAllDayOfWeekReservationStats() {
-        List<Popup> allPopups = popupRepository.findAll();
         Map<Long, DayOfWeekReservationStatsResponse> allStatsMap =
                 getAllDayOfWeekStatsFromReservationService();
-        processPopupStatsUpdate(allPopups, allStatsMap);
+
+        if (allStatsMap.isEmpty()) {
+            return;
+        }
+
+        bulkUpsertWithCaseWhen(allStatsMap);
     }
 
     private Popup findPopupById(Long popupId) {
@@ -114,35 +118,95 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
         }
     }
 
-    private void processPopupStatsUpdate(
-            List<Popup> allPopups, Map<Long, DayOfWeekReservationStatsResponse> allStatsMap) {
+    private void bulkUpsertWithCaseWhen(Map<Long, DayOfWeekReservationStatsResponse> allStatsMap) {
+        List<Long> popupIds = new ArrayList<>(allStatsMap.keySet());
+        List<Long> existingPopupIds =
+                dayOfWeekReservationCountRepository.findExistingPopupIds(popupIds);
 
-        for (Popup popup : allPopups) {
-            try {
-                DayOfWeekReservationStatsResponse stats = allStatsMap.get(popup.getId());
-                updateSinglePopupStats(popup.getId(), stats);
-            } catch (Exception e) {
-                log.error("팝업 ID {}의 통계 업데이트 실패: {}", popup.getId(), e.getMessage());
+        if (!existingPopupIds.isEmpty()) {
+            bulkUpdateExistingData(allStatsMap, existingPopupIds);
+        }
+
+        Set<Long> existingSet = new HashSet<>(existingPopupIds);
+        List<DayOfWeekReservationCount> newEntities =
+                allStatsMap.values().stream()
+                        .filter(stats -> !existingSet.contains(stats.popupId()))
+                        .map(this::createNewCount)
+                        .toList();
+
+        if (!newEntities.isEmpty()) {
+            dayOfWeekReservationCountRepository.saveAll(newEntities);
+        }
+
+        log.info(
+                "요일별 통계 벌크 업데이트 완료: 업데이트 {}개, 삽입 {}개", existingPopupIds.size(), newEntities.size());
+    }
+
+    private void bulkUpdateExistingData(
+            Map<Long, DayOfWeekReservationStatsResponse> allStatsMap, List<Long> existingPopupIds) {
+
+        StringBuilder jpql = new StringBuilder();
+        jpql.append("UPDATE DayOfWeekReservationCount d SET ");
+
+        String[] fields = {
+            "mondayCount",
+            "tuesdayCount",
+            "wednesdayCount",
+            "thursdayCount",
+            "fridayCount",
+            "saturdayCount",
+            "sundayCount"
+        };
+
+        for (int i = 0; i < fields.length; i++) {
+            if (i > 0) jpql.append(", ");
+
+            jpql.append("d.").append(fields[i]).append(" = CASE d.popupId ");
+
+            for (Long popupId : existingPopupIds) {
+                DayOfWeekReservationStatsResponse stats = allStatsMap.get(popupId);
+                int value = getFieldValue(stats, fields[i]);
+                jpql.append("WHEN :popupId")
+                        .append(popupId)
+                        .append(" THEN ")
+                        .append(value)
+                        .append(" ");
             }
+
+            jpql.append("ELSE d.").append(fields[i]).append(" END");
         }
+
+        jpql.append(", d.updatedAt = CURRENT_TIMESTAMP ");
+        jpql.append("WHERE d.popupId IN :existingPopupIds");
+
+        Query query = entityManager.createQuery(jpql.toString());
+
+        // 파라미터 설정
+        for (Long popupId : existingPopupIds) {
+            query.setParameter("popupId" + popupId, popupId);
+        }
+        query.setParameter("existingPopupIds", existingPopupIds);
+
+        int updatedCount = query.executeUpdate();
+        log.debug("JPQL 벌크 업데이트 실행: {}개 레코드 업데이트", updatedCount);
     }
 
-    private void updateSinglePopupStats(Long popupId, DayOfWeekReservationStatsResponse stats) {
-        if (stats == null) {
-            return;
-        }
-
-        if (dayOfWeekReservationCountRepository.existsByPopupId(popupId)) {
-            updateExistingRecordDirectly(popupId, stats);
-        } else {
-            createNewRecord(stats);
-        }
+    private int getFieldValue(DayOfWeekReservationStatsResponse stats, String fieldName) {
+        return switch (fieldName) {
+            case "mondayCount" -> stats.mondayCount();
+            case "tuesdayCount" -> stats.tuesdayCount();
+            case "wednesdayCount" -> stats.wednesdayCount();
+            case "thursdayCount" -> stats.thursdayCount();
+            case "fridayCount" -> stats.fridayCount();
+            case "saturdayCount" -> stats.saturdayCount();
+            case "sundayCount" -> stats.sundayCount();
+            default -> throw new IllegalArgumentException("Unknown field: " + fieldName);
+        };
     }
 
-    private void updateExistingRecordDirectly(
-            Long popupId, DayOfWeekReservationStatsResponse stats) {
-        dayOfWeekReservationCountRepository.updateDayOfWeekCounts(
-                popupId,
+    private DayOfWeekReservationCount createNewCount(DayOfWeekReservationStatsResponse stats) {
+        return DayOfWeekReservationCount.createDayOfWeekReservationCount(
+                stats.popupId(),
                 stats.mondayCount(),
                 stats.tuesdayCount(),
                 stats.wednesdayCount(),
@@ -150,20 +214,5 @@ public class ReservationStatsServiceImpl implements ReservationStatsService {
                 stats.fridayCount(),
                 stats.saturdayCount(),
                 stats.sundayCount());
-    }
-
-    private void createNewRecord(DayOfWeekReservationStatsResponse stats) {
-        DayOfWeekReservationCount newRecord =
-                DayOfWeekReservationCount.createDayOfWeekReservationCount(
-                        stats.popupId(),
-                        stats.mondayCount(),
-                        stats.tuesdayCount(),
-                        stats.wednesdayCount(),
-                        stats.thursdayCount(),
-                        stats.fridayCount(),
-                        stats.saturdayCount(),
-                        stats.sundayCount());
-
-        dayOfWeekReservationCountRepository.save(newRecord);
     }
 }

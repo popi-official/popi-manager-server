@@ -44,8 +44,6 @@ public class ItemExcelUtil {
 
             return Item.createItem(popup, name, imageUrl, price, stock, minStock, location);
 
-        } catch (CustomException e) {
-            throw e;
         } catch (Exception e) {
             throw new RuntimeException(
                     String.format("Row %d 처리 중 오류: %s", rowIdx + 1, e.getMessage()));

@@ -286,8 +286,6 @@ public class ItemServiceImpl implements ItemService {
                 throw new CustomException(ItemErrorCode.EXCEL_FILE_INVALID);
             }
 
-        } catch (CustomException e) {
-            throw e;
         } catch (Exception e) {
             throw new CustomException(ItemErrorCode.EXCEL_PROCESSING_FAILED);
         }

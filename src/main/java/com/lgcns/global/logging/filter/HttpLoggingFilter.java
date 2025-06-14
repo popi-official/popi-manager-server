@@ -1,5 +1,8 @@
 package com.lgcns.global.logging.filter;
 
+import static com.lgcns.global.aop.util.LoggingUtil.clearMDC;
+import static com.lgcns.global.aop.util.LoggingUtil.setTraceId;
+
 import com.lgcns.global.logging.dto.HttpRequestLogInfo;
 import com.lgcns.global.logging.dto.HttpResponseLogInfo;
 import com.lgcns.global.logging.filter.wrapper.RequestWrapper;
@@ -11,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -24,14 +26,14 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        MDC.put("traceId", UUID.randomUUID().toString());
+        setTraceId(UUID.randomUUID().toString());
         if (isAsyncDispatch(request)) {
             filterChain.doFilter(request, response);
         } else {
             doFilterWrapped(
                     new RequestWrapper(request), new ResponseWrapper(response), filterChain);
         }
-        MDC.clear();
+        clearMDC();
     }
 
     protected void doFilterWrapped(

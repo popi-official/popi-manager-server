@@ -2,11 +2,11 @@ package com.lgcns.global.logging.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lgcns.global.aop.util.LoggingUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import org.slf4j.MDC;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -16,7 +16,7 @@ public record HttpResponseLogInfo(String traceId, String responseBody, Integer r
 
     public static HttpResponseLogInfo from(ContentCachingResponseWrapper response)
             throws IOException {
-        String traceId = MDC.get("traceId");
+        String traceId = LoggingUtil.getTraceId();
         String responseBody =
                 getContent(response.getContentType(), response.getContentInputStream());
         Integer responseStatus = response.getStatus();

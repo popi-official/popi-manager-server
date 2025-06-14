@@ -2,10 +2,13 @@ package com.lgcns.global.error.feign;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lgcns.global.aop.util.LoggingUtil;
 import com.lgcns.global.error.exception.CustomException;
+import feign.RequestInterceptor;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import java.io.InputStream;
+import org.springframework.context.annotation.Bean;
 
 public class FeignErrorDecoder implements ErrorDecoder {
 
@@ -26,5 +29,16 @@ public class FeignErrorDecoder implements ErrorDecoder {
         } catch (Exception e) {
             return defaultDecoder.decode(methodKey, response);
         }
+    }
+
+    @Bean
+    public RequestInterceptor feignRequestInterceptor() {
+        return template -> {
+            String traceId = LoggingUtil.getTraceId();
+            String memberId = LoggingUtil.getMemberId();
+
+            if (traceId != null) template.header("trace-id", traceId);
+            if (memberId != null) template.header("member-id", memberId);
+        };
     }
 }

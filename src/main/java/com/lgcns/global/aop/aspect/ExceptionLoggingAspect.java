@@ -1,12 +1,12 @@
-package com.lgcns.global.aop;
+package com.lgcns.global.aop.aspect;
 
+import com.lgcns.global.aop.util.LoggingUtil;
 import com.lgcns.global.error.exception.CustomException;
-import com.lgcns.global.error.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.MDC;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -14,18 +14,21 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ExceptionLoggingAspect {
 
-    @AfterThrowing(pointcut = "execution(* com.lgcns.domain..service..*(..))", throwing = "e")
+    @Pointcut("execution(public * com.lgcns.domain..service..*(..))")
+    public void serviceLayerMethods() {}
+
+    @AfterThrowing(pointcut = "serviceLayerMethods()", throwing = "e")
     public void serviceExceptionLogging(JoinPoint joinPoint, Exception e) {
         String method = joinPoint.getSignature().toShortString();
-        String traceId = MDC.get("traceId");
+        String traceId = LoggingUtil.getTraceId();
+        Long startTime = System.currentTimeMillis();
 
         if (e instanceof CustomException customException) {
-            ErrorCode errorCode = customException.getErrorCode();
             log.info(
                     "[CustomException] TraceId: {}, Method: {}, Code: {}, Message: {}",
                     traceId,
                     method,
-                    errorCode,
+                    customException.getErrorCode(),
                     customException.getMessage());
         } else {
             log.error(

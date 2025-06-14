@@ -2,8 +2,8 @@ package com.lgcns.global.logging.dto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lgcns.global.aop.util.LoggingUtil;
 import com.lgcns.global.logging.filter.wrapper.RequestWrapper;
-import org.slf4j.MDC;
 
 public record HttpRequestLogInfo(
         String traceId,
@@ -15,7 +15,7 @@ public record HttpRequestLogInfo(
 
     public static HttpRequestLogInfo from(RequestWrapper requestWrapper) {
         String queryString = requestWrapper.getQueryString();
-        String traceId = MDC.get("traceId");
+        String traceId = LoggingUtil.getTraceId();
         String requestMethod = requestWrapper.getMethod();
         String requestUri =
                 requestWrapper.getRequestURI() + (queryString == null ? "" : "?" + queryString);

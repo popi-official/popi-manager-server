@@ -1,14 +1,17 @@
 package com.lgcns.global.aop.aspect;
 
 import static com.lgcns.global.aop.util.LoggingUtil.calculateDuration;
+import static com.lgcns.global.aop.util.LoggingUtil.getShortErrorMessage;
 
 import com.lgcns.global.aop.util.LoggingUtil;
 import com.lgcns.global.error.exception.CustomException;
+import java.lang.reflect.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -18,72 +21,58 @@ public class EventLoggingAspect {
 
     @Pointcut(
             "execution(public * org.springframework.context.ApplicationEventPublisher+.publishEvent(..))")
-    public void publishEventMethod() {}
+    public void publishEventMethods() {}
 
     @Pointcut(
             "@annotation(org.springframework.context.event.EventListener) || "
                     + "@annotation(org.springframework.transaction.event.TransactionalEventListener)")
     public void eventListenerMethods() {}
 
-    @Around("publishEventMethod()")
+    @Around("publishEventMethods()")
     public Object logEventPublishing(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object event = joinPoint.getArgs()[0];
-        long start = System.currentTimeMillis();
-        String traceId = LoggingUtil.getTraceId();
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        String methodName = LoggingUtil.getMethodSignature(method);
 
+        long start = System.currentTimeMillis();
         try {
-            Object result = joinPoint.proceed();
-            log.info(
-                    "[EVENT-PUBLISH] TraceId: {}, Event: {}, Duration: {}ms",
-                    traceId,
-                    event,
-                    calculateDuration(start));
-            return result;
+            return joinPoint.proceed();
         } catch (Exception e) {
             log.error(
-                    "[EVENT-PUBLISH-ERROR] TraceId: {}, Event: {}, Exception: {}, Duration: {}ms",
-                    traceId,
-                    event,
-                    e.getMessage(),
+                    "[EVENT-PUBLISH-ERROR] Method: {}, Exception: {}, Message: {}, Duration: {}ms",
+                    methodName,
+                    e.getClass().getSimpleName(),
+                    getShortErrorMessage(e.getMessage()),
                     calculateDuration(start));
             throw e;
         }
     }
 
     @Around("eventListenerMethods()")
-    public Object logEventListener(ProceedingJoinPoint joinPoint) throws Throwable {
-        String method = joinPoint.getSignature().toShortString();
-        Object event = joinPoint.getArgs()[0];
-        String traceId = LoggingUtil.getTraceId();
+    public Object logEventHandlers(ProceedingJoinPoint joinPoint) throws Throwable {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        String methodName = LoggingUtil.getMethodSignature(method);
+
         long start = System.currentTimeMillis();
 
         try {
-            Object result = joinPoint.proceed();
-            log.info(
-                    "[EVENT-LISTENER] TraceId: {}, Method: {}, Event: {}, Duration: {}ms",
-                    traceId,
-                    method,
-                    event,
-                    calculateDuration(start));
-            return result;
+            return joinPoint.proceed();
         } catch (CustomException ce) {
-            log.info(
-                    "[EVENT-LISTENER-CUSTOM] TraceId: {}, Method: {}, Event: {}, Code: {}, Message: {}, Duration: {}ms",
-                    traceId,
-                    method,
-                    event,
+            log.warn(
+                    "[EVENT-LISTENER-CUSTOM] Method: {}, Code: {}, Message: {}, Duration: {}ms",
+                    methodName,
                     ce.getErrorCode(),
                     ce.getMessage(),
                     calculateDuration(start));
             throw ce;
+
         } catch (Exception e) {
             log.error(
-                    "[EVENT-LISTENER-ERROR] TraceId: {}, Method: {}, Event: {}, Exception: {}, Message: {}, Duration: {}ms",
-                    traceId,
-                    method,
-                    event,
+                    "[EVENT-LISTENER-ERROR] Method: {}, Exception: {}, Message: {}, Duration: {}ms",
+                    methodName,
                     e.getClass().getSimpleName(),
-                    e.getMessage(),
+                    getShortErrorMessage(e.getMessage()),
                     calculateDuration(start));
             throw e;
         }

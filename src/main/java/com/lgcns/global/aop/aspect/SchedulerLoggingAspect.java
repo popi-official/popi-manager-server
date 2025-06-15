@@ -1,6 +1,6 @@
 package com.lgcns.global.aop.aspect;
 
-import static com.lgcns.global.aop.util.LoggingUtil.clearMDC;
+import static com.lgcns.global.aop.util.LoggingUtil.*;
 
 import com.lgcns.global.aop.util.LoggingUtil;
 import com.lgcns.global.error.exception.CustomException;
@@ -34,37 +34,27 @@ public class SchedulerLoggingAspect {
         long start = System.currentTimeMillis();
 
         try {
-            Object result = joinPoint.proceed();
-            long duration = System.currentTimeMillis() - start;
-
-            log.info(
-                    "[SCHEDULER] TraceId: {}, Method: {}, Duration: {}ms",
-                    traceId,
-                    methodName,
-                    duration);
-            return result;
+            return joinPoint.proceed();
 
         } catch (CustomException ce) {
-            log.info(
-                    "[SCHEDULER-CUSTOM] TraceId: {}, Method: {}, Code: {}, Message: {}, Duration: {}ms",
-                    traceId,
+            log.warn(
+                    "[SCHEDULER-CUSTOM] Method: {}, Code: {}, Message: {}, Duration: {}ms",
                     methodName,
                     ce.getErrorCode(),
                     ce.getMessage(),
-                    System.currentTimeMillis() - start);
+                    calculateDuration(start));
             throw ce;
 
         } catch (Exception e) {
             log.error(
-                    "[SCHEDULER-ERROR] TraceId: {}, Method: {}, Exception: {}, Message: {}, Duration: {}ms",
-                    traceId,
+                    "[SCHEDULER-ERROR] Method: {}, Exception: {}, Message: {}, Duration: {}ms",
                     methodName,
                     e.getClass().getSimpleName(),
-                    e.getMessage(),
-                    System.currentTimeMillis() - start);
+                    getShortErrorMessage(e.getMessage()),
+                    calculateDuration(start));
             throw e;
         } finally {
-            clearMDC();
+            LoggingUtil.clearMDC();
         }
     }
 }

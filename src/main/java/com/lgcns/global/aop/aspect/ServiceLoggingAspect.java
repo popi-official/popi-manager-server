@@ -2,6 +2,9 @@ package com.lgcns.global.aop.aspect;
 
 import static com.lgcns.global.aop.util.LoggingUtil.*;
 
+import com.lgcns.global.aop.util.LoggingUtil;
+import com.lgcns.global.error.exception.CustomException;
+import com.lgcns.global.error.exception.ErrorCode;
 import java.lang.reflect.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,24 +26,34 @@ public class ServiceLoggingAspect {
     public Object logService(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
-        String methodName = getMethodSignature(method);
-        String traceId = getTraceId();
-        String memberId = getMemberId();
+        String methodName = LoggingUtil.getMethodSignature(method);
 
         long start = System.currentTimeMillis();
 
-        log.info("[SERVICE] TraceId: {}, MemberId: {}, Method: {}", traceId, memberId, methodName);
+        log.info("[SERVICE] Method: {}", methodName);
 
         try {
-            return joinPoint.proceed();
-        } finally {
-
+            Object result = joinPoint.proceed();
+            log.info("[SERVICE] Method: {}, Duration: {}ms", methodName, calculateDuration(start));
+            return result;
+        } catch (CustomException customException) {
+            ErrorCode errorCode = customException.getErrorCode();
             log.info(
-                    "[SERVICE] TraceId: {}, MemberId: {}, Method: {}, Duration: {}ms",
-                    traceId,
-                    memberId,
+                    "[CustomException] Method: {}, Code: {}, Message: {}, Duration: {}ms",
                     methodName,
+                    errorCode,
+                    customException.getMessage(),
                     calculateDuration(start));
+
+            throw customException;
+        } catch (Exception e) {
+            log.error(
+                    "[UnhandledException] Method: {}, Exception: {}, Message: {}, Duration: {}ms",
+                    methodName,
+                    e.getClass().getSimpleName(),
+                    getShortErrorMessage(e.getMessage()),
+                    calculateDuration(start));
+            throw e;
         }
     }
 }

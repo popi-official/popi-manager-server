@@ -1,7 +1,5 @@
 package com.lgcns.global.aop.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -13,8 +11,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class LoggingUtil {
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static final String TRACE_ID = "traceId";
     public static final String MEMBER_ID = "memberId";
@@ -72,15 +68,13 @@ public class LoggingUtil {
         return paramMap;
     }
 
-    public static String toJson(Object obj) {
-        try {
-            return objectMapper.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
-            return "{}";
-        }
-    }
-
     public static long calculateDuration(long startTime) {
         return System.currentTimeMillis() - startTime;
+    }
+
+    public static String getShortErrorMessage(String errorMessage) {
+        return errorMessage != null && errorMessage.contains(":")
+                ? errorMessage.substring(errorMessage.lastIndexOf(":") + 1).trim()
+                : errorMessage;
     }
 }

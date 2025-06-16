@@ -169,7 +169,9 @@ def jacocoExcludePatterns = [
         "**/*Util*",
         "**/*Constants*",
         "**/*Role*",
-        "**/*Scheduler*"
+        "**/*Scheduler*",
+        "**/aop/**",
+        "**/async/**"
 ]
 
 sonar {

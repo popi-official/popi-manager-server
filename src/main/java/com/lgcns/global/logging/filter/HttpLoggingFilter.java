@@ -1,5 +1,7 @@
 package com.lgcns.global.logging.filter;
 
+import static org.springframework.web.multipart.support.MultipartResolutionDelegate.isMultipartRequest;
+
 import com.lgcns.global.logging.dto.HttpRequestLogInfo;
 import com.lgcns.global.logging.dto.HttpResponseLogInfo;
 import com.lgcns.global.logging.filter.wrapper.RequestWrapper;
@@ -26,6 +28,8 @@ public class HttpLoggingFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         MDC.put("traceId", UUID.randomUUID().toString());
         if (isAsyncDispatch(request)) {
+            filterChain.doFilter(request, response);
+        } else if (isMultipartRequest(request)) {
             filterChain.doFilter(request, response);
         } else {
             doFilterWrapped(

@@ -60,7 +60,7 @@ public class WebSecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/managers")
                                 .permitAll()
-                                .requestMatchers("/auth/login")
+                                .requestMatchers("/auth/**")
                                 .permitAll()
                                 .requestMatchers("/entrances")
                                 .permitAll()

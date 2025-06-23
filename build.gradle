@@ -52,6 +52,12 @@ dependencies {
     // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // Prometheus
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // Grafana Loki
+    implementation 'com.github.loki4j:loki-logback-appender:1.5.1'
+
     // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"

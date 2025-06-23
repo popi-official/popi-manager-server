@@ -6,22 +6,20 @@ import com.lgcns.domain.item.client.dto.response.ItemInfoResponse;
 import com.lgcns.domain.item.domain.Item;
 import com.lgcns.domain.item.dto.request.ItemCreateRequest;
 import com.lgcns.domain.item.dto.request.ItemMinStockUpdateRequest;
+import com.lgcns.domain.item.dto.response.ItemBulkCreateResponse;
 import com.lgcns.domain.item.dto.response.ItemDetailResponse;
 import com.lgcns.domain.item.dto.response.ItemPreviewResponse;
 import com.lgcns.domain.item.dto.response.ItemTrendingResponse;
 import com.lgcns.global.common.response.SliceResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ItemService {
 
     void createItem(Long popupId, ItemCreateRequest request);
 
-    void createItemByExcel(Long popupId, MultipartFile itemFile)
-            throws InvalidFormatException, IOException;
+    ItemBulkCreateResponse createItemByExcel(Long popupId, MultipartFile itemFile);
 
     Map<String, List<ItemPreviewResponse>> findAllItems(Long popupId);
 
